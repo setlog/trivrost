@@ -2,6 +2,9 @@
 
 trivrost is a tool which updates some files on a computer and executes a command afterwards; it can also update itself to introduce new features without user intervention. See [reasons.md](docs/reasons.md) for more background information.
 
+## GitHub migration
+We are currently in the process of migrating the project as OpenSource to GitHub. The first official OpenSource release will be v1.3.0 in a few days.
+
 ## When do I need trivrost?
 When you need to deploy a desktop application which always needs to be up to date to many users using all three major OSes and all of them expect your software to *just work*.
 
