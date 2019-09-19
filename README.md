@@ -36,7 +36,18 @@ When trivrost begins to execute [the programs you have configured](docs/deployme
 Because trivrost is designed to be able to install without administrative privileges, it does not attempt to register typical uninstallation routines, such as an entry under `Add or remove programs` in the control panel of Microsoft Windows. Instead, a Start menu shortcut is created which runs the program with an `-uninstall` parameter. On Windows, this shortcut is placed in the start menu. Again, [System mode](docs/glossary.md#System-mode) is different.
 
 ## Where do I start?
-At [content.md](docs/content.md).
+ Content
+
+1. [Background info](docs/reasons.md)
+1. [Glossary](docs/glossary.md)
+1. [Walkthrough](docs/walkthrough.md)
+1. [File locations](docs/file_locations.md)
+1. [Launcher-config specification](docs/launcher-config.md)
+1. [Deployment-config specification](docs/deployment-config.md)
+1. [Bundle info specification](docs/bundleinfo.md)
+1. [Building](docs/building.md)
+1. [Security](docs/security.md)
+1. [Command line reference](docs/cmdline.md)
 
 ## Contribute to development
 See [CONTRIBUTING.md](CONTRIBUTING.md).
