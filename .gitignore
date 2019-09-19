@@ -1,0 +1,55 @@
+# resource files
+*.syso
+packrd
+main-packr.go
+
+# generated binaries in root or target dir
+target/
+out/
+release_files/
+hasher/out/
+bin/
+
+/launcher
+/launcher.app
+/launcher.exe
+/cmd/launcher/launcher
+/cmd/launcher/launcher.app
+/cmd/launcher/launcher.exe
+
+/hasher/hasher
+/hasher/hasher.app
+/hasher/hasher.exe
+/cmd/hasher/hasher
+/cmd/hasher/hasher.app
+/cmd/hasher/hasher.exe
+
+/coverage.out
+/build-launcher.bat
+
+# keep resources folder clean: pipeline moves configs and icons here
+/cmd/launcher/resources/launcher-config.json
+/cmd/launcher/resources/icon.png
+/cmd/launcher/resources/icon.ico
+/cmd/launcher/resources/icon.icns
+/cmd/launcher/resources/*.gen.go
+/cmd/launcher/resources/versioninfo.json
+/cmd/launcher/resources/main.exe.manifest
+/cmd/launcher/resources/Info.plist
+/cmd/launcher/resources/*.pem
+
+
+# misc stuff
+*.kate-swp
+*.swp
+.idea
+.project
+*.orig
+coverage.out
+.DS_Store
+*.app
+/cmd/bundown/bundles
+test.json
+
+# duplicate workspace files for vscode so you can use multi monitor setup
+/ws?.code-workspace

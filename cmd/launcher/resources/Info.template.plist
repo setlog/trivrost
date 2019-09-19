@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleGetInfoString</key>
+  <string>${LAUNCHER_BRANDING_NAME}</string>
+  <key>CFBundleExecutable</key>
+  <string>launcher</string>
+  <key>CFBundleIdentifier</key>
+  <string>${LAUNCHER_REVERSE_DNS_PRODUCT_ID}</string>
+  <key>CFBundleName</key>
+  <string>${LAUNCHER_BRANDING_NAME_SHORT}</string>
+  <key>CFBundleDisplayName</key>
+  <string>${LAUNCHER_BRANDING_NAME}</string>
+  <key>CFBundleIconFile</key>
+  <string>icon.icns</string>
+  <key>CFBundleShortVersionString</key>
+  <string>${LAUNCHER_VERSION_SEMANTIC}</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>IFMajorVersion</key>
+  <integer>${LAUNCHER_VERSION_MAJOR}</integer>
+  <key>IFMinorVersion</key>
+  <integer>${LAUNCHER_VERSION_MINOR}</integer>
+</dict>
+</plist>

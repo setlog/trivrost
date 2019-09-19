@@ -1,0 +1,24 @@
+#!/bin/bash
+
+PLACEHOLDER=$1
+FILES="${@:2}"
+
+function printInputError {
+  echo "Usage: $0 PLACEHOLDER FILE…" >&2
+  exit 1
+}
+
+function timestamp {
+  date -u +"%Y-%m-%d %H:%M:%S"
+}
+
+if [ "$#" -le 1 ]; then
+  printInputError
+fi
+for TARGET in ${FILES}; do
+  if ! [ -f "${TARGET}" ]; then
+    printInputError
+  fi
+done
+
+sed -i "s/${PLACEHOLDER}/$(timestamp)/g" ${FILES}

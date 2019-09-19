@@ -1,0 +1,52 @@
+package system
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+)
+
+var binaryPath string
+var programPath string
+
+func MustFindPaths() {
+	var err error
+	binaryPath, err = os.Executable()
+	if err != nil {
+		panic(fmt.Sprintf("Could not get path to binary: %v", err))
+	}
+	binaryPath, err = filepath.EvalSymlinks(binaryPath)
+	if err != nil {
+		panic(fmt.Sprintf("Could not evaluate path to binary: %v", err))
+	}
+	programPath, err = determineProgramPath()
+	if err != nil {
+		panic(fmt.Sprintf("Could not determine path of application bundle: %v", err))
+	}
+}
+
+// GetProgramPath returns the path where the calling program lies.
+// This will be identical to the result of GetBinaryPath() unless the OS is MacOS,
+// where GetProgramPath() will return the path of the program's application bundle folder.
+func GetProgramPath() string {
+	return programPath
+}
+
+// GetBinaryPath returns the path where the binary of the calling program lies.
+func GetBinaryPath() string {
+	return binaryPath
+}
+
+// UndeployProgram renames the file at undeployProgramPath on operating systems
+// where running binaries cannot be deleted (i.e. Windows) and returns the path to the
+// renamed file. Otherwise, the provided string is returned with a non-nil error.
+func UndeployProgram(undeployProgramPath string) (string, error) {
+	return undeployProgram(undeployProgramPath)
+}
+
+// DeleteProgram immediately deletes the binary or MacOS application bundle at deleteProgramPath,
+// unless the operating system is Windows; in that case the file at deleteProgramPath will be deleted after
+// 3 seconds.
+func DeleteProgram(deleteProgramPath string) error {
+	return deleteProgram(deleteProgramPath)
+}
