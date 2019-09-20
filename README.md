@@ -15,14 +15,14 @@ See [Troubleshooting](docs/troubleshooting.md).
 ![Screenshot of trivrost progress window](docs/res/screenshot.png "Progress window")
 
 ## How does it work?
-You release your own build of a trivrost binary to your users. The users execute it, causing it to [install and run](#Install) your software by downloading required files from a webserver administrated by you.
+You release your own build of a trivrost binary to your users. The users execute it, causing it to [install and run](#Install) your software by downloading required files from a webserver controlled by you.
 
 ### Install
 When trivrost is started, it will check its location in the file system. If it finds that it is not where it wants itself to be, it will copy itself there (all OSs have appropriate folders for this occasion) and create desktop and Start menu shortcuts for quick access. After that, trivrost will [run](#Run). Alternatively, there is [system mode](docs/glossary.md#System-mode) installation.
 
 ### Run
 When trivrost finds that it is installed, it will run through the following 3 phases:
-1. Update itself using files on a webserver which you operate, restarting on success.
+1. Update itself using files on a webserver which you control, restarting on success.
 2. Download [bundles](docs/glossary.md#Bundle) from said webserver into a `bundles` directory, updating outdated and missing files and deleting unwanted ones.
 3. [Execute](#Execute) commands. (e.g.: run Java with the `-jar` argument)
 
@@ -37,8 +37,8 @@ Because trivrost is designed to be able to install without administrative privil
 ## Learn more
 1. [Background info](docs/reasons.md)
 2. [Glossary](docs/glossary.md)
-3. [Walkthrough](docs/walkthrough.md)
-4. [File locations](docs/file_locations.md)
+3. [File locations](docs/file_locations.md)
+4. [Walkthrough](docs/walkthrough.md)
 5. [Launcher-config specification](docs/launcher-config.md)
 6. [Deployment-config specification](docs/deployment-config.md)
 7. [Bundle info specification](docs/bundleinfo.md)

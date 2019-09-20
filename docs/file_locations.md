@@ -1,8 +1,9 @@
 # What files does trivrost create?
 * Its executable file. (On MacOS, actually a `.app`-folder posing as an application, which is canon in the Mac world)
 * All files of all bundles you define, stored in a folder called `bundles`.
-* A lock-file `.launcher-lock` which prevents trivrost from racing with itself.
-* A lock-file `.execution-lock` which prevents trivrost from updating bundles while your application is running.
+* A lock-file `.lock` which is locked using the OS's file system API, to [prevent trivrost from racing with other instances of itself](dev/locking.md).
+* A file `.launcher-lock` which contains information on the currently locking trivrost instance.
+* A file `.execution-lock` which prevents trivrost from updating bundles while your application is running.
 * A `timestamps.json` file used to protect against attacks.
 * `.log`-files in a `log`-folder.
 * A desktop shortcut to its binary.
