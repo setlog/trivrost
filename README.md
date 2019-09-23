@@ -1,5 +1,5 @@
 # trivrost
-trivrost is a reupurposable application-downloader and -launcher: it updates some files on a computer and executes a command afterwards, no questions asked. It can also update itself to introduce new features without the need for user interaction. trivrost is our solution to allow for one-click deployment of an application on a computer, maximizing chances of deployment success while minimizing chances of incoming support tickets. See [reasons.md](docs/reasons.md) for more background information.
+trivrost is a repurposable application-downloader and -launcher: it updates some files on a computer and executes a command afterwards, no questions asked. It can also update itself to introduce new features without the need for user interaction. trivrost is our solution to allow for one-click deployment of an application on a computer, maximizing chances of deployment success while minimizing chances of incoming support tickets. See [reasons.md](docs/reasons.md) for more background information.
 
 ## GitHub migration
 We are currently in the process of migrating the project as OpenSource to GitHub. The first official OpenSource release will be v1.3.0 in a few days.
