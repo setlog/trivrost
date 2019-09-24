@@ -53,8 +53,8 @@ You can run `make bundle` to build an archive of the program for distribution. R
 
 On Windows, you can sign the binary by running `make sign`. For this to work, install `signtool` from the Windows SDK and put a base64-encoded p12 certificate into the environment variable `CERT_FILE` and its password into `CERT_KEY`.
 
-# Building and signing MSIs on Windows (optional)
-It is possible to create an MSI package with bundles which get installed system-wide and cannot be updated. The bundles that should be prebundled need a JSON-array under the key `Tags` containing an element called `"msi"` in the deployment-config. The launcher will no longer be able to update itself and store those bundles under a directory called `systembundles` under the 'Program Files' directory. (Usually: `C:\Program Files\Vendor\Product`). We call this a [system mode](glossary.md#system-mode) installation.
+# MSI
+It is possible to create an MSI package with bundles which get installed system-wide and cannot be updated. The bundles that should be prebundled need a JSON-array under the key `Tags` containing an element called `"msi"` in the deployment-config. The launcher will no longer be able to update itself and store those bundles under a directory called `systembundles` under the 'Program Files' directory. (Usually: `C:\Program Files\Vendor\Product`). We call this a [system mode](lifecycle.md#system-mode) installation.
   - Install WiX installer set.
   - Run `make bundle-msi ARCH=368 DEPLOYMENT_CONFIG=<path to file>` or `make bundle-msi ARCH=amd64 DEPLOYMENT_CONFIG=<path to file>`
   - Note: Creating an MSI package without a package configured to bundle will fail when creating the installer in a 'harvest' phase.

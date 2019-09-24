@@ -9,7 +9,7 @@
 * Added command line argument `-deployment-config` to override the embedded deployment-config URL.
 ### Changes
 * Failure during self-update will now be reported to the user in a less generic, more detailed message.
-* Remove debug symbols from final binaries. This saves up to 30% for the linux binaries and 60% of the windows binaries filesize.
+* Remove debug symbols from final binaries. This saves up to 30% for the Linux binary's and 60% for the Windows binary's filesize.
 * Removed the reinstall dialog. trivrost will now launch installed trivrost binaries which report the same or a more recent [build time](docs/cmdline.md) as itself (effectively acting as a shortcut) and install over those which don't. If launching an installed binary fails, trivrost will fall back to reinstalling.
 * The messages shown when trivrost hashes local files are now distinct from the messages shown when trivrost retrieves remote hashes/bundle info.
 * Building the project using the provided Makefile now allows the `icon.png` resource to be missing for Linux builds.
