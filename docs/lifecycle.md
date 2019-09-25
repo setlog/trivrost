@@ -7,26 +7,26 @@ When trivrost is started, it will try to find out what it should do. First, it w
 Note that whenever trivrost runs, it makes sure that it does not race with itself, in case it is running multiple times; for example when the user wants to launch the application multiple times, which is supported. For more info on this, see [locking.md](dev/locking.md).
 
 ## Install
-When trivrost has decided that it should install itself, it will copy its executable to its desired path, overwriting any previous installation of itself, and create a desktop shortcut as well as two Start Menu entries (MacOS excluded): one for starting and one for uninstallation. After that, it will restart in its new location, upon which it will find that it should [update](#update).
+When trivrost has decided that it should install itself, it will copy [itself](glossary.md#trivrost-deployment-artifact) to its desired path, overwriting any previous installation of itself, and create a desktop shortcut as well as two Start Menu entries (MacOS excluded): one for starting and one for uninstallation. After that, it will restart in its new location, upon which it will find that it should [update](#update).
 
 ## Update
-When trivrost finds that it is installed, it will go through the update-cycle until everything is up to date:
+When trivrost finds that it is installed, it will go through the following update-cycle until everything is up to date:
 1. Download the deployment-config from the URL specified in the embedded launcher-config into memory.
 2. If the deployment-config specifies a launcher update for the current platform...
-   1. Determine the SHA-256 hash(es) of the running executable.
+   1. Determine the SHA-256 hash(es) of the running deployment artifact.
    2. Retrieve the according bundle info specified in the deployment-config.
-   3. Update the executable and restart with it if there is any hash mismatch.
+   3. Update the deployment artifact and restart with it if there is any hash mismatch.
 3. If the deployment-config specifies any bundles for the current platform...
    1. Determine the SHA-256 hash(es) of the existing bundles.
    2. Retrieve the according bundle info files specified in the deployment-config.
    3. If there is any hash mismatch...
-      1. Wait for any running commands depending on the bundles to terminate.
-      2. Update `bundles` to match the state described by bundle info files.
+      1. Wait for any running commands which may depend on the bundles to terminate.
+      2. Update `bundles` to match the state described by the bundle info files.
 
 When this is complete, trivrost will then [launch](#launch) the commands specified in the deployment-config, i.e. your application.
 
 ## Launch
-When trivrost begins to launch [the programs you have configured](docs/deployment-config.md), it will do so on the basis of treating the `bundles` directory as the working directory. This way, any downloaded executables inside `bundles` can be executed by using a relative path, and any relative file paths contained in program arguments are relative to the `bundles` directory as well.
+When trivrost begins to launch [the programs you have configured](docs/deployment-config.md), it will do so on the basis of treating the `bundles` directory as the working directory. This way, any downloaded executables under `bundles` can be executed by using a relative path, and any relative file paths contained in program arguments are relative to the `bundles` directory as well.
 
 ## Uninstall
 Because trivrost is designed to be able to install without administrative privileges, it does not attempt to register typical uninstallation routines, such as an entry under `Add or remove programs` in the control panel of Microsoft Windows. Instead, a Start Menu shortcut is created which runs the program with an `-uninstall` parameter. ([TODO: Figure out where this should go on MacOS](https://github.com/setlog/trivrost/issues/11))
