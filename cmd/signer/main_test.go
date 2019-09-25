@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/rsa"
-	"log"
 	"math/big"
 	"testing"
 
@@ -11,7 +10,6 @@ import (
 )
 
 var testContent = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
-var testSignature = `j6IM9PlV4VABelDIzRfZ5yd8xHTxeRXRJ8SCym+vW8/JY1zAzXEHB8M0oC+3Gbk/i32kOIpR0jDWhU0LZqxysQ7DtWGVAl463aD4skr/nrOK7rPb4uUfFr0FEQ1d6PZd6D4aecPprCTllD6TqDMZaMXf1Ng6D4LCi1N5lO28nfPTtGsnmk4TSzoQEXu6VYrZsxlbY9nSr/m2ko4A8BRtDSckaKjk3jRcCHPzvPFszuCYwiYXheRYRp5oyFrqgwt6V0sNVjaAbzTyeRQxnO1rJllQh2TrLHTxmuAzAIPWvj8wgWmW7wpvrr+23CTMhsw8VTvDnaI8Jk+GnM0hWuvtcw==`
 var testPrivateKey = `-----BEGIN PRIVATE KEY-----
 MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQDoPNEZXNtQSULq
 JSB/MlscSA13J+JefnXfdTNqHrvqKDKiJbcYwIAXy2qTA9jib3+wbjlOHHZCbdUo
@@ -41,6 +39,35 @@ p60bRu7q0C8r5Ameks9AGOhcoYGajADDW7P09jtC5OcC+Kyv18UlkWwzvlw9JR1C
 YaHChpQ7+mdUR0V+Yn4Y0vCSuTs=
 -----END PRIVATE KEY-----
 `
+var testPrivateKey2Fail = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCm1IYb2ZydyNJc
+R73uRvESjyqOlEtSQ3AYvM8dyaykW6kXUohWBNfh/EYE0nhhyPROtwmbaGjfGTEt
+dxtYlfRHeLWod/dCpXxVISrZ9k3MplG22idPZvgxePSrdqWVk/2llOlm5AUYoU7B
+voMveTuGgknyyssD6cu/mP8f4icUzNVTgYVxMug9lsr9x+IfArzvXSsnP5eY1V6c
+pdbAtsb1RTNAbMZsqQzM453DY8rhqarSLtXp2Zxq6vmEvJN+BEF8sHF8yUiAQq6T
+eGpyEb+oxy4wT+iPrlX0+o6Se0cfUvewa7+Ii8MV1f2I2kDvGVPvBJMhPi86FhmI
+M2pxLVOFAgMBAAECggEAbI58GaE3lUB5Cc0xHNySv8XjJlX+0S/KwH4Ts8loiqaO
+V/u/dWG/bHCwyzB9XvvZZWMbYEHHg+yroG8Rn0osY1l7s30kqvxt9CMZ9CyeoV1U
+bMx1qehR9jdD1lLlGnjrIxTL78TOQCGu0sl6KakUf8lF/zPQeOJoT2tqD8AkOBao
+XmOlnsEmCW/PJGM/e/oBsuxNq2uUAVOEiOxGhZqIN7HWfhTinKHX28FJ0pLCkuQ/
+D7Si5icXEfrD1pD81Ft9v35sSQrU3YZk2jR0z/mDBfi/MPp2orTA5ZfHes+hpnEc
+7yLS4wHNa+v760l3L7q1UGPKVycZv484zKmYFIQGHQKBgQDVZg9drlqBIgHXFE4x
+wYXBZfD8t2ll/3lCN6xdBi/u1HP0ZGHICZ2l9lhHwXeeCEblY2Al2xjSdtnLfK5c
+CnSvwu9UV8h4sB4kjn37PL0SohtZJlFZpt6vresoDpQQrMmnjhgr+ot9ODlH1bLF
+yDnCtVXGlGYwPYAn40IxrmB5lwKBgQDIIolqxU7WkZ7nARhR++G3NeVqV8sB7GWX
+LyPrnoKbb556BSM2Ourcu/3uQfWnMwrc5J53tVHZ6LjrB4pSPa546LooWv5vY9QD
+ETwQzUKNfTiGT4qwkUdBs08fU9qmy0TT9y2SKbpe76GAS4oPbpYbk7W78jJRiWAZ
+tZelUcSnQwKBgHJ/BwGRmdetQmV+7JF/rt9cbdd6JR/n2cywiFeFCVTQQsK+1UP5
+/M7eBPHDGQX+lONg1WaaTpAl2qd2ZyrVJVRkd/q9+r7eZ93fYjLZnOyRc7D6gS1j
+/hkubHyajdEAlFXFRKzcCdmOwBUN0JST4IHav4IDf2ykos1D/vEfCX5TAoGBAMYd
+ykKzx3OI+/BZmSWvXqXq6Iv5FLF2vqqGs9xPMaOFPzAzXcQVVuHkB1+QVAmL8bjx
+aB3AlKJOSp/++uKmxMxUNdQ1H6JNBFd0/Cz1xGgkCYyLuRNI/W0Af9bXP5/VoPDj
+w2zpeeD4/rruDGFya44pDsJa44zrnQJWTSQOacnZAoGAM9XjNyoue1g7mrMCFaal
+ff7KnzqzMn9QuzIP/C9ImuUB/z/FG7Rn98oK66RJuPu4/oix7AU8UDI5JrD7Evwr
+WdEI/ZhvdTMMrho9fruTFINBU0LaGEBN/xt4cv9crGcEvenoPE0WRoxhZBb2disg
+agNtVIy2S07B+Eixp/gqPW8=
+-----END PRIVATE KEY-----
+`
 var testPublicKey = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6DzRGVzbUElC6iUgfzJb
 HEgNdyfiXn5133Uzah676igyoiW3GMCAF8tqkwPY4m9/sG45Thx2Qm3VKLirn9Y2
@@ -51,34 +78,20 @@ k0ZlRkD8CzHg8NTBPpJaTJmtyOCC3RYP1G2z6KZQvDXJbjRYP+/trkt6VEmb3y09
 GwIDAQAB
 -----END PUBLIC KEY-----
 `
+var testPublicKey2Fail = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAptSGG9mcncjSXEe97kbx
+Eo8qjpRLUkNwGLzPHcmspFupF1KIVgTX4fxGBNJ4Ycj0TrcJm2ho3xkxLXcbWJX0
+R3i1qHf3QqV8VSEq2fZNzKZRttonT2b4MXj0q3allZP9pZTpZuQFGKFOwb6DL3k7
+hoJJ8srLA+nLv5j/H+InFMzVU4GFcTLoPZbK/cfiHwK8710rJz+XmNVenKXWwLbG
+9UUzQGzGbKkMzOOdw2PK4amq0i7V6dmcaur5hLyTfgRBfLBxfMlIgEKuk3hqchG/
+qMcuME/oj65V9PqOkntHH1L3sGu/iIvDFdX9iNpA7xlT7wSTIT4vOhYZiDNqcS1T
+hQIDAQAB
+-----END PUBLIC KEY-----
+`
 
 const publicKeyExponent = 65537
 
-func TestSignatureFromFile(t *testing.T) {
-	key := readPrivateKey([]byte(testPrivateKey))
-	s, err := createFileSignature(key, []byte(testContent))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	signature := []byte(s)
-
-	if len(testSignature) != len(signature) {
-		log.Println(string(signature))
-		t.Errorf("Different length of signatures detected. Generated signature: %d bytes, expected: %d bytes", len(signature), len(testSignature))
-		return
-	}
-
-	for i := range testSignature {
-		if signature[i] != testSignature[i] {
-			t.Errorf("Checking of signature failed at %d byte", i)
-			return
-		}
-	}
-}
-
-func TestSignatureWithFunction(t *testing.T) {
+func TestSignatureOK(t *testing.T) {
 	publicKeys := resources.ReadPublicRsaKeysAsset(testPublicKey)
 	key := readPrivateKey([]byte(testPrivateKey))
 	s, err := createFileSignature(key, []byte(testContent))
@@ -87,13 +100,62 @@ func TestSignatureWithFunction(t *testing.T) {
 		return
 	}
 
-	log.Println(s)
-
 	signature := []byte(s)
 
 	valid := signatures.IsSignatureValid([]byte(testContent), []byte(signature), publicKeys)
 	if !valid {
 		t.Error("Valid signature not recognized to be valid.")
+	}
+}
+
+func TestSignatureFail(t *testing.T) {
+	publicKeys := resources.ReadPublicRsaKeysAsset(testPublicKey)
+	key := readPrivateKey([]byte(testPrivateKey))
+	s, err := createFileSignature(key, []byte(testContent))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	signature := []byte(s + "@")
+
+	valid := signatures.IsSignatureValid([]byte(testContent), []byte(signature), publicKeys)
+	if valid {
+		t.Error("Signature recognized as valid but it should not.")
+	}
+}
+
+func TestSignatureWithWrongPrivateKey(t *testing.T) {
+	publicKeys := resources.ReadPublicRsaKeysAsset(testPublicKey)
+	key := readPrivateKey([]byte(testPrivateKey2Fail))
+	s, err := createFileSignature(key, []byte(testContent))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	signature := []byte(s)
+
+	valid := signatures.IsSignatureValid([]byte(testContent), []byte(signature), publicKeys)
+	if valid {
+		t.Error("Signature recognized as valid but it was created with wrong private key.")
+	}
+}
+
+func TestSignatureWithWrongPublicKey(t *testing.T) {
+	publicKeys := resources.ReadPublicRsaKeysAsset(testPublicKey2Fail)
+	key := readPrivateKey([]byte(testPrivateKey))
+	s, err := createFileSignature(key, []byte(testContent))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	signature := []byte(s)
+
+	valid := signatures.IsSignatureValid([]byte(testContent), []byte(signature), publicKeys)
+	if valid {
+		t.Error("Signature recognized as valid but it was verified with wrong public key.")
 	}
 }
 
