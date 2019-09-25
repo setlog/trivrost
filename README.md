@@ -5,11 +5,11 @@ trivrost is a repurposable application-downloader and -launcher in the form of a
 We are currently in the process of migrating the project as OpenSource to GitHub. The first official OpenSource release will be v1.3.0 in a few days.
 
 ## When do I need trivrost?
-When you need to deploy an always-online desktop application which always needs to be up to date to many users using all three major OSes and all of them expect your software to *just work*.
+When you need to deploy an always-online desktop application which always needs to be up to date to many users using all three major OSs and all of them expect your software to *just work*.
 
 ## What does it look like?
 
-![Screenshot of trivrost progress window](docs/res/screenshot.png "Progress window")
+![Screenshot of trivrost progress window under Windows](docs/res/screenshot.png "Progress window under Windows")
 
 ## How does it work?
 You release your own build of a trivrost executable to your users. The users start it, causing it to [install and run](docs/lifecycle.md) your software by downloading required files from a webserver administrated by you.
