@@ -11,7 +11,7 @@ When trivrost has decided that it should install itself, it will copy [itself](g
 
 ## Update
 When trivrost finds that it is installed, it will go through the following update-cycle until everything is up to date:
-1. Download the deployment-config from the URL specified in the embedded launcher-config into memory.
+1. Download the [deployment-config](glossary.md#deployment-config) from the URL specified in the embedded [launcher-config](glossary.md#launcher-config) into memory.
 2. If the deployment-config specifies a launcher update for the current platform...
    1. Determine the SHA-256 hash(es) of the running deployment artifact.
    2. Retrieve the according bundle info specified in the deployment-config.

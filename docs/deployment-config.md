@@ -1,5 +1,5 @@
 # deployment-config
-The deployment-config is a JSON-file which is hosted on a webserver operated by you and downloaded by trivrost every time it starts. Its filename typically is `deployment-config.json`.
+The deployment-config is a JSON-file which is supposed to be hosted on a webserver operated by you and downloaded by trivrost every time it starts. Its filename typically is `deployment-config.json`.
 
 ## Fields
 * **`Timestamp`** (string): A timestamp in the form `YYYY-MM-DD HH:mm:SS` which indicates when the deployment-config was last changed. This field protects trivrost against attacks. See [security.md](security.md) for more information.
