@@ -17,10 +17,10 @@ The launcher-config is a JSON-file which is embedded into your build of trivrost
 * **`StatusMessages`** (object): Customize status messages displayed by trivrost during various stages of its execution.
   * **`AcquireLock`** (string): trivrost is waiting for another trivrost instance. (default: `Waiting for other launcher instance to finish...`)
   * **`GetDeploymentConfig`** (string): Deployment-config is being downloaded and parsed. (default: `Retrieving application configuration...`)
-  * **`DetermineLocalLauncherVersion`** (string): SHA-256 hashsum of current trivrost installation is being determined algorithmically. (default: `Checking for launcher updates...`)
+  * **`DetermineLocalLauncherVersion`** (string): SHA-256 hashsum of current trivrost installation is being determined algorithmically. (default: `Determining launcher version...`)
   * **`RetrieveRemoteLauncherVersion`** (string): SHA-256 hash values of remote trivrost artifact are being determined by downloading its bundle info file. (default: `Checking for launcher updates...`)
   * **`SelfUpdate`** (string): New launcher binary or application bundle is being downloaded/applied. (default: `Updating launcher...`)
-  * **`DetermineLocalBundleVersions`** (string): SHA-256 hash values of local bundle files are being determined algorithmically. (default: `Checking for application updates...`)
+  * **`DetermineLocalBundleVersions`** (string): SHA-256 hash values of local bundle files are being determined algorithmically. (default: `Determining application version...`)
   * **`RetrieveRemoteBundleVersions`** (string): SHA-256 hash values of remote bundle files are being determined by downloading bundle info files. (default: `Checking for application updates...`)
   * **`AwaitApplicationsTerminated`** (string): Waiting for all instances of the application to exit so the update can be applied safely. (default: `Please close all instances of the application to apply the update.`)
   * **`DownloadBundleUpdates`** (string): New bundle files are being downloaded. (default: `Retrieving application update...`)
