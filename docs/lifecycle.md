@@ -1,5 +1,5 @@
 # Lifecycle
-This document will explain what trivrost actually does when it runs. Whenever we mention file IO here, you may refer to [file_locations.md](file_locations.md) to find out where a file or folder is actually located.
+This document will explain what trivrost actually does when it runs. Whenever we mention or hint at file system operations here, you may refer to [file_locations.md](file_locations.md) to find out where a file or folder is actually located.
 
 ## Goal determination
 When trivrost is started, it will try to find out what it should do. First, it will check its location in the file system. If it finds that it is not where it wants itself to be, it will check if its desired path is already occupied by another file or folder. If it is not, it will [install](#install). If it is, it will make the educated guess that it is dealing with a previous installation of itself, and try to run the file with the `--build-time` argument. If that fails or it is found that the executable was built at a sooner time than what is currently running, trivrost will also [install](#install). Otherwise, trivrost will act as a shortcut for the installed executable. If trivrost finds that it is in the right location, it will proceed to [update](#update).
