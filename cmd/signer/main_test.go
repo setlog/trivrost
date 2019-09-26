@@ -9,7 +9,10 @@ import (
 	"github.com/setlog/trivrost/pkg/signatures"
 )
 
+// text that will be signed and is going to be used in tests below
 var testContent = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."
+
+// tests that use this private key for signing have to be OK
 var testPrivateKey = `-----BEGIN PRIVATE KEY-----
 MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQDoPNEZXNtQSULq
 JSB/MlscSA13J+JefnXfdTNqHrvqKDKiJbcYwIAXy2qTA9jib3+wbjlOHHZCbdUo
@@ -39,6 +42,20 @@ p60bRu7q0C8r5Ameks9AGOhcoYGajADDW7P09jtC5OcC+Kyv18UlkWwzvlw9JR1C
 YaHChpQ7+mdUR0V+Yn4Y0vCSuTs=
 -----END PRIVATE KEY-----
 `
+
+// pair of testPrivateKey: tests that use this public key for verifying have to be OK
+var testPublicKey = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6DzRGVzbUElC6iUgfzJb
+HEgNdyfiXn5133Uzah676igyoiW3GMCAF8tqkwPY4m9/sG45Thx2Qm3VKLirn9Y2
+h783E5oZOWEhOSMHoleq/xJiRqKIOG1RBuWrkfJwJL5GptygKEX0CTfcSsYI3EEz
+uyFFWkHXpFblTy2kXX2tHuUjdSIqRASG6Cq/Zs97WgAojFl28lFBO1qRJXLay55x
+k0ZlRkD8CzHg8NTBPpJaTJmtyOCC3RYP1G2z6KZQvDXJbjRYP+/trkt6VEmb3y09
++di3Gwn2HV2hEtpGVJzL/j1AoxKa8ks1CivWA9AOcVP+lQEfBk0EiQcatl3sj8AR
+GwIDAQAB
+-----END PUBLIC KEY-----
+`
+
+// tests that use this private key for signing are supposed to fail
 var testPrivateKey2Fail = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCm1IYb2ZydyNJc
 R73uRvESjyqOlEtSQ3AYvM8dyaykW6kXUohWBNfh/EYE0nhhyPROtwmbaGjfGTEt
@@ -68,16 +85,8 @@ WdEI/ZhvdTMMrho9fruTFINBU0LaGEBN/xt4cv9crGcEvenoPE0WRoxhZBb2disg
 agNtVIy2S07B+Eixp/gqPW8=
 -----END PRIVATE KEY-----
 `
-var testPublicKey = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6DzRGVzbUElC6iUgfzJb
-HEgNdyfiXn5133Uzah676igyoiW3GMCAF8tqkwPY4m9/sG45Thx2Qm3VKLirn9Y2
-h783E5oZOWEhOSMHoleq/xJiRqKIOG1RBuWrkfJwJL5GptygKEX0CTfcSsYI3EEz
-uyFFWkHXpFblTy2kXX2tHuUjdSIqRASG6Cq/Zs97WgAojFl28lFBO1qRJXLay55x
-k0ZlRkD8CzHg8NTBPpJaTJmtyOCC3RYP1G2z6KZQvDXJbjRYP+/trkt6VEmb3y09
-+di3Gwn2HV2hEtpGVJzL/j1AoxKa8ks1CivWA9AOcVP+lQEfBk0EiQcatl3sj8AR
-GwIDAQAB
------END PUBLIC KEY-----
-`
+
+// tests that use this public key for verifying will fail
 var testPublicKey2Fail = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAptSGG9mcncjSXEe97kbx
 Eo8qjpRLUkNwGLzPHcmspFupF1KIVgTX4fxGBNJ4Ycj0TrcJm2ho3xkxLXcbWJX0
@@ -94,13 +103,11 @@ const publicKeyExponent = 65537
 func TestSignatureOK(t *testing.T) {
 	publicKeys := resources.ReadPublicRsaKeysAsset(testPublicKey)
 	key := readPrivateKey([]byte(testPrivateKey))
-	s, err := createFileSignature(key, []byte(testContent))
+	signature, err := createFileSignature(key, []byte(testContent))
 	if err != nil {
 		t.Error(err)
 		return
 	}
-
-	signature := []byte(s)
 
 	valid := signatures.IsSignatureValid([]byte(testContent), []byte(signature), publicKeys)
 	if !valid {
@@ -111,13 +118,15 @@ func TestSignatureOK(t *testing.T) {
 func TestSignatureFail(t *testing.T) {
 	publicKeys := resources.ReadPublicRsaKeysAsset(testPublicKey)
 	key := readPrivateKey([]byte(testPrivateKey))
-	s, err := createFileSignature(key, []byte(testContent))
+	signature, err := createFileSignature(key, []byte(testContent))
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	signature := []byte(s + "@")
+	out := []rune(signature)
+	out[3] = out[3] + 1
+	signature = string(out)
 
 	valid := signatures.IsSignatureValid([]byte(testContent), []byte(signature), publicKeys)
 	if valid {

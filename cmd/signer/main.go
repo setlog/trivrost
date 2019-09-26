@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -42,12 +43,10 @@ func createSignatures() {
 }
 
 func createFileSignature(key *rsa.PrivateKey, fileContent []byte) (string, error) {
-	pssh := crypto.SHA256.New()
-	pssh.Write(fileContent)
-	hashed := pssh.Sum(nil)
+	hashed := sha256.Sum256(fileContent)
 	opts := &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthAuto, Hash: crypto.SHA256}
 
-	signed, err := rsa.SignPSS(rand.Reader, key, crypto.SHA256, hashed, opts)
+	signed, err := rsa.SignPSS(rand.Reader, key, crypto.SHA256, hashed[:], opts)
 	if err != nil {
 		return "", err
 	}
