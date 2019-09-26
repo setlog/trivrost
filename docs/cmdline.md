@@ -1,7 +1,6 @@
 # Commandline options
 
 ## trivrost
-
 * `uninstall`: Flag to uninstall the launcher and its bundles on the local machine.
 * `debug`: Enable debug log level.
 * `skipselfupdate`: Never perform a self-update.
@@ -14,12 +13,10 @@
 * `nostreampassing`: Do not relay standard streams to executed commands.
 
 ## hasher
-
 Hasher is a utility which generates [bundle info files](walkthrough.md#Bundle-info) given a directory path as an input. Usage:  
 `hasher unique_bundle_name path/to/bundle/folder`
 
 ## bundown
-
 Bundown is a utility which can download bundles for a desired OS/Arch combination.
 
 * `deployment-config`: Path to a trivrost deployment-config to download bundles for. (default "trivrost/deployment-config.json")
@@ -29,6 +26,10 @@ Bundown is a utility which can download bundles for a desired OS/Arch combinatio
 * `tags`: Only download bundles with one of these comma-separated tags. The special tag `untagged` implicitly exists on all bundles without tags. The special tag `all` will instruct bundown to download all bundles regardless of tags. (default "untagged")
 * `pub`: Path to a custom public key file to verify signatures of downloaded bundle info files. (optional)
 
-## installdown
+## validator
+Validator is a utility which can validate your deployment-config as well as whether required resources are actually available at the URLs it defines.
 
-TODO
+Usage: `validator [-skipurlcheck] [-skipjarcheck] path/to/deployment-config.json`
+
+* `-skipurlcheck`: Disable checking of availability of all URLs in the config.
+* `-skipjarcheck`: When checking URLs, disable checking of availability of `.jar`-files given to a `java`, `java.exe` or `javaw.exe` binary with the `-jar`-argument in defined commands.
