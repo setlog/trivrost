@@ -25,7 +25,7 @@ trivrost needs the following files to generate the required sources automaticall
 * [public-rsa-keys.pem](security.md) → embedded into the binary to verify signed updates with.
 
 ## Hashing and signing bundles
-When executing `make tools`, a binary called `hasher` will be created that takes a directory as an argument and creates the `bundleinfo.json` file. A helper-script called `signer` is also available which takes a private key and a list of files to sign using openssl.
+When executing `make tools`, a binary called `hasher` will be created that takes a directory as an argument and creates the `bundleinfo.json` file. A utility called `signer` is also built which takes a private key and a list of files to sign.
 
 For convenience, a [Docker image](../docker/Dockerfile-tools) is provided that builds the hasher and provides an environment e.g. for CI pipelines where hasher and signer are available in the `$PATH`.
 

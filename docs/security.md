@@ -39,4 +39,4 @@ openssl dgst -sha256 -sigopt rsa_padding_mode:pss -sign private_key.pem -out /tm
 openssl base64 -in /tmp/sign.sha256 -out config.json.signature
 ```
 
-To sign the deployment-config and bundle info files, you can also use the [signer script](../scripts/signer).
+To sign the deployment-config and bundle info files, you can use the signer utility at `out/signer`. (Build with `make tools`)
