@@ -130,8 +130,8 @@ else
 endif
 
 tools:           ## Build helper tools like hasher
-	go build -o "${OUT_DIR}/${HASHER_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_HASHER}
-	go build -o "${OUT_DIR}/${VALIDATOR_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_VALIDATOR}
+	go build -o "${OUT_DIR}/${HASHER_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_HASHER}
+	go build -o "${OUT_DIR}/${VALIDATOR_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_VALIDATOR}
 
 help:            ## Show this help
 	@fgrep -h "##" ${MAKEFILE_LIST} | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'

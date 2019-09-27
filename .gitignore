@@ -13,9 +13,6 @@ bin/
 /launcher
 /launcher.app
 /launcher.exe
-/cmd/launcher/launcher
-/cmd/launcher/launcher.app
-/cmd/launcher/launcher.exe
 
 /hasher/hasher
 /hasher/hasher.app

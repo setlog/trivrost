@@ -1,8 +1,9 @@
-# What files does trivrost create?
-* Its executable file. (On MacOS, actually a `.app`-folder posing as an application, which is canon in the Mac world)
-* All files of all bundles you define, stored in a folder called `bundles`.
-* A lock-file `.launcher-lock` which prevents trivrost from racing with itself.
-* A lock-file `.execution-lock` which prevents trivrost from updating bundles while your application is running.
+# What files and folders does trivrost create?
+* [Itself](glossary.md#trivrost-deployment-artifact).
+* All bundles you define, with their contained files, stored in a folder called `bundles`.
+* A lock-file `.lock` which is locked using the OS's file system API, to [prevent trivrost from racing with other instances of itself](dev/locking.md).
+* A file `.launcher-lock` which contains information on the currently locking trivrost instance.
+* A file `.execution-lock` which prevents trivrost from updating bundles while your application is running.
 * A `timestamps.json` file used to protect against attacks.
 * `.log`-files in a `log`-folder.
 * A desktop shortcut to its binary.
@@ -15,7 +16,7 @@ trivrost uses the following user- and platform-specific folders to store files. 
 
 ## Windows
 ### Default
-Executable:  
+Deployment artifact:  
 `%APPDATA%\<VendorName>\<ProductName>\`
 
 `bundles`-folder, lock-files and `timestamps.json`:  
@@ -34,7 +35,7 @@ Log-files:
 ### System mode
 As **Default**, but with the following changes/additions.
 
-Executable and `systembundles`-folder:  
+Deployment artifact and `systembundles`-folder:  
 `%ProgramFiles%\<VendorName>\<ProductName>\`
 
 Desktop shortcut:  
@@ -45,7 +46,7 @@ Start menu shortcuts:
 (Uninstall shortcut not installed by system mode-`.msi`)
 
 ## MacOS
-Executable, `bundles`-folder, lock-files and `timestamps.json`:  
+Deployment artifact, `bundles`-folder, lock-files and `timestamps.json`:  
 `$HOME/Library/Application Support/<VendorName>/<ProductName>/`
 
 Desktop shortcut:  
@@ -58,7 +59,7 @@ Log-files:
 
 ## Linux
 ### Default
-Executable, `bundles`-folder, icon, lock-files and `timestamps.json`:  
+Deployment artifact, `bundles`-folder, icon, lock-files and `timestamps.json`:  
 `$HOME/.local/share/<VendorName>/<ProductName>/`
 
 Desktop shortcut:  
@@ -72,7 +73,7 @@ Log-files:
 `$HOME/.cache/<VendorName>/<ProductName>/log/`
 
 ### XDG
-If set/possible, the following [XDG](https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html)-related configurations will be used:
+If set/possible, the following [XDG](https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html)-related configurations will supercede the above:
 
 Desktop shortcut:  
 `$(xdg-user-dir DESKTOP)/`
