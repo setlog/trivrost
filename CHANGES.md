@@ -1,6 +1,6 @@
 # Release-Changelog
 
-## 1.3.0 (TBD)
+## 1.3.0 (2019-09-27)
 ## Fixes
 * Fix signing of MSI bundles by no longer setting the SN.
 ### Features
