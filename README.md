@@ -1,3 +1,5 @@
+<div style="text-align:center"><img style="width:128px" src="docs/res/trivrostlogo.png" alt="trivrost" /></div>
+
 # trivrost
 trivrost is a repurposable application-downloader and -launcher in the form of a native executable: it updates some files on a computer and executes a command afterwards, no questions asked. It can also update itself to introduce new features without the need for user interaction. See [reasons.md](docs/reasons.md) for more background information.
 
