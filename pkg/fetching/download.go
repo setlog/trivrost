@@ -26,18 +26,15 @@ func (err DownloadError) Error() string {
 }
 
 type writeCounter struct {
-	counted, expected uint64
-	url               string
-	workerId          int
-	handler           DownloadProgressHandler
+	counted  uint64
+	url      string
+	workerId int
+	handler  DownloadProgressHandler
 }
 
 func (wc *writeCounter) Write(p []byte) (int, error) {
 	delta := len(p)
 	wc.counted += uint64(delta)
-	if wc.counted > wc.expected {
-		wc.expected = wc.counted
-	}
 	if delta > 0 {
 		wc.handler.HandleProgress(wc.url, wc.workerId, wc.counted)
 	}
@@ -165,8 +162,7 @@ func (dl *Download) sendRequest(req *http.Request) *http.Response {
 		dl.handler.HandleHttpGetError(dl.url, err)
 		dl.inscribeCooldown()
 	} else {
-		counter := &writeCounter{counted: uint64(dl.firstByteIndex), url: dl.url, workerId: dl.workerId,
-			expected: uint64(dl.lastByteIndex + 1), handler: dl.handler}
+		counter := &writeCounter{counted: uint64(dl.firstByteIndex), url: dl.url, workerId: dl.workerId, handler: dl.handler}
 		timeoutingBodyReader := &TimeoutingReader{Reader: resp.Body, Timeout: defaultTimeout * 30}
 		dl.responseReader = io.TeeReader(timeoutingBodyReader, counter)
 	}
@@ -177,8 +173,7 @@ func (dl *Download) processResponse() {
 	if !isRangeRequest(dl.request) && dl.response.StatusCode == http.StatusOK {
 		dl.acceptFirstResponseHeader(dl.response.Header)
 	} else if !(isRangeRequest(dl.request) && dl.response.StatusCode == http.StatusPartialContent) {
-		dl.response.Body.Close()
-		dl.cancelRequest()
+		dl.cleanUp()
 		if dl.response.StatusCode == http.StatusRequestedRangeNotSatisfiable {
 			panic(DownloadError("remote file changed during download"))
 		}
@@ -191,16 +186,18 @@ func (dl *Download) processResponse() {
 func (dl *Download) acceptFirstResponseHeader(header http.Header) {
 	contentLength, err := strconv.ParseInt(header.Get("Content-Length"), 10, 64)
 	if err != nil {
-		panic(DownloadError(fmt.Sprintf("could not get Content-Length header from \"%s\": %v", dl.url, err)))
+		log.Printf("Assuming remote file won't change: Could not get Content-Length header from \"%s\": %v.", dl.url, err)
+		dl.lastByteIndex = -1
+	} else {
+		dl.lastByteIndex = contentLength - 1
 	}
-	dl.lastByteIndex = contentLength - 1
 	dl.gotValidFirstResponse = true
 }
 
 func (dl *Download) readFromResponse(p []byte) (n int, err error) {
 	n, err = dl.responseReader.Read(p)
 	dl.firstByteIndex += int64(n)
-	if dl.firstByteIndex > dl.lastByteIndex+1 {
+	if (dl.lastByteIndex >= 0) && (dl.firstByteIndex > dl.lastByteIndex+1) {
 		panic(fmt.Errorf("read more bytes than expected"))
 	}
 	if err != nil {
@@ -211,7 +208,7 @@ func (dl *Download) readFromResponse(p []byte) (n int, err error) {
 			dl.handler.HandleReadError(dl.url, err)
 			return n, nil
 		}
-		if dl.firstByteIndex < dl.lastByteIndex+1 {
+		if (dl.lastByteIndex >= 0) && (dl.firstByteIndex < dl.lastByteIndex+1) {
 			return n, fmt.Errorf("read less bytes than expected")
 		}
 	}
@@ -239,7 +236,7 @@ func setError(panicObject interface{}, errPtr *error) bool {
 }
 
 func (dl *Download) cleanUp() {
-	if dl.response != nil {
+	if dl.response != nil && dl.response.Body != nil {
 		dl.response.Body.Close()
 	}
 	if dl.cancelRequest != nil {

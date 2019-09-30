@@ -7,16 +7,17 @@ import (
 
 func TestParseRange(t *testing.T) {
 	tests := []struct {
-		requestedRange             string
-		expectedStart, expectedEnd int64
-		expectError                bool
+		requestedRange                     string
+		expectedStart, expectedEnd, endMax int64
+		expectError                        bool
 	}{
-		{"bytez=1-5", 0, 0, true},
-		{"bytes=1-5", 1, 5, false},
-		{"bytes=  1   -  5 ", 1, 5, false},
+		{"bytez=1-5", 0, 0, 10, true},
+		{"bytes=1-5", 1, 5, 10, false},
+		{"bytes=1-", 1, 10, 10, false},
+		{"bytes=  1   -  5 ", 1, 5, 10, false},
 	}
 	for i, test := range tests {
-		rangeStart, rangeEnd, err := ParseRange(test.requestedRange)
+		rangeStart, rangeEnd, err := ParseRange(test.requestedRange, test.endMax)
 		if rangeStart != test.expectedStart {
 			t.Errorf("Test %d: rangeStart != expectedStart; %d != %d", i+1, rangeStart, test.expectedStart)
 		}

@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.3.1 (2019-09-30)
+### Changes
+* Missing `Content-Length`-headers will now cause size-checks to be skipped instead of failing. In those cases, bad files will only be detected by SHA-mismatch as soon as they have been downloaded entirely.
+
 ## 1.3.0 (2019-09-27)
 ## Fixes
 * Fix signing of MSI bundles by no longer setting the SN.

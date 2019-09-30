@@ -58,11 +58,15 @@ func newRequestWithCancel(ctx context.Context, fromUrl string) (*http.Request, c
 
 func newRangeRequestWithCancel(ctx context.Context, fromUrl string, firstByte int64, lastByte int64) (*http.Request, context.CancelFunc) {
 	req, cancelFunc := newRequestWithCancel(ctx, fromUrl)
-	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", firstByte, lastByte))
+	if lastByte >= 0 {
+		req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", firstByte, lastByte))
+	} else {
+		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", firstByte))
+	}
 	return req, cancelFunc
 }
 
-func ParseRange(rangeHeader string) (rangeStart, rangeEnd int64, err error) {
+func ParseRange(rangeHeader string, endMax int64) (rangeStart, rangeEnd int64, err error) {
 	if !strings.HasPrefix(rangeHeader, "bytes=") {
 		return 0, 0, fmt.Errorf("Range header does not start with 'bytes='")
 	}
@@ -79,9 +83,14 @@ func ParseRange(rangeHeader string) (rangeStart, rangeEnd int64, err error) {
 		return 0, 0, err
 	}
 	if len(subParts) == 2 {
-		rangeEnd, err = strconv.ParseInt(strings.Trim(subParts[1], " "), 10, 64)
+		rangeEndStr := strings.Trim(subParts[1], " ")
+		if rangeEndStr == "" {
+			rangeEnd = endMax
+		} else {
+			rangeEnd, err = strconv.ParseInt(rangeEndStr, 10, 64)
+		}
 	} else {
-		rangeEnd = -1
+		err = fmt.Errorf("Range header is missing '-' to indicate open-ended range")
 	}
 	return rangeStart, rangeEnd, err
 }
