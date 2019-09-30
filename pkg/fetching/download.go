@@ -158,7 +158,7 @@ func (dl *Download) createRequest() (*http.Request, context.CancelFunc) {
 func (dl *Download) sendRequest(req *http.Request) *http.Response {
 	resp, err := DoForClientFunc(dl.client, req)
 	if err != nil {
-		dl.cancelRequest()
+		dl.cleanUp()
 		dl.handler.HandleHttpGetError(dl.url, err)
 		dl.inscribeCooldown()
 	} else {
@@ -201,8 +201,7 @@ func (dl *Download) readFromResponse(p []byte) (n int, err error) {
 		panic(fmt.Errorf("read more bytes than expected"))
 	}
 	if err != nil {
-		dl.Close() // Note: https://github.com/golang/go/issues/26095#issuecomment-400903313
-		dl.cancelRequest()
+		dl.cleanUp() // Note: https://github.com/golang/go/issues/26095#issuecomment-400903313
 		dl.response = nil
 		if err != io.EOF { // Network failures are temporary. Keep trying until it works.
 			dl.handler.HandleReadError(dl.url, err)
