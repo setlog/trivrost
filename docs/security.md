@@ -40,3 +40,13 @@ openssl base64 -in /tmp/sign.sha256 -out config.json.signature
 ```
 
 We recommend to use the [signer script](../scripts/signer) which allows you to do this in one line for multiple files at once.
+
+# Verify signature with openssl
+If you want to check a given signature by hand, you first have to decode the base64 encoded signature file:
+```
+openssl base64 -d -in config.json.signature -out config.json.signature.decoded
+```
+Now you can verify the decoded signature file:
+```
+openssl dgst -verify public_key.pem -sha256 -sigopt rsa_padding_mode:pss -signature config.json.signature.decoded config.json
+```
