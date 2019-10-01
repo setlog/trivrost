@@ -66,7 +66,10 @@ func mustHashDir(ctx context.Context, readDir readDirFunc, readFile readFileFunc
 		if info.IsDir() {
 			fm.Join(mustHashDir(ctx, readDir, readFile, stat, filepath.Join(hashFilePath, info.Name())))
 		} else {
-			filePath := filepath.Join(hashFilePath, info.Name())
+		filePath := filepath.Join(hashFilePath, info.Name())
+		if isDir(filePath) {
+			fm.Join(mustHashDir(readDir, readFile, stat, filePath))
+		} else {
 			sha, size, err := calculateSha256(ctx, filePath, readFile)
 			if err != nil {
 				panic(fmt.Errorf("failed hashing file \"%s\": %w", hashFilePath, err))
@@ -77,8 +80,24 @@ func mustHashDir(ctx context.Context, readDir readDirFunc, readFile readFileFunc
 	return fm
 }
 
+func evaluateSoftLink(filePath string) string {
+	evaluatedName, err := filepath.EvalSymlinks(filePath)
+	if err != nil {
+		panic(err)
+	}
+	return evaluatedName
+}
+
+func isDir(filePath string) bool {
+	fi, err := os.Stat(filePath)
+	if err != nil {
+		panic(err)
+	}
+	return fi.IsDir()
+}
+
 func mustReadDir(readDir readDirFunc, directoryPath string) []os.FileInfo {
-	infos, err := readDir(directoryPath)
+	infos, err := readDir(evaluateSoftLink(directoryPath))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
