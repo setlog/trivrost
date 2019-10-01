@@ -19,6 +19,7 @@
 * Building the project using the provided Makefile now allows the `icon.png` resource to be missing for Linux builds.
 * Project now uses GoLang 1.13.
 * Renamed project to "trivrost" for open source release.
+* `scripts/signer` has been reimplemented in Go (under `cmd/signer`) and will be built when running `make tools`. `scripts/signer` has been removed.
 ### Fixes
 * Fixed download progress of previous stages adding to the displayed progress of later stages.
 * Fixed regression issue which would cause Kubuntu's UI to become unresponsive while trivrost is running because apparently it cannot deal with 10 window title text changes per second.

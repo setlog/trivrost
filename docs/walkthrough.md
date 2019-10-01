@@ -22,8 +22,8 @@ trivrost needs the following files to generate the required sources automaticall
 * [icon.icns](glossary.md#icon) → embedded into the application bundle as the application icon for MacOS.
 * [public-rsa-keys.pem](security.md) → embedded into the binary to verify signed updates with.
 
-## Hashing bundles
-Run `make tools` to create a binary called `hasher`. It will be created under `out/` and takes a unique bundle name and a path as an argument to create a `bundleinfo.json` file for and in the directory at given path. Example call: `out\hasher myapp D:\bundles\myapp` will generate a `bundleinfo.json` for `D:\bundles\myapp` at `D:\bundles\myapp\bundleinfo.json`. The unique bundle name is a [security feature](security.md#timestamps).
+## Hashing and signing bundles
+When executing `make tools`, a binary called `hasher` will be created that takes a directory as an argument and creates the `bundleinfo.json` file. A utility called `signer` is also built which takes a private key and a list of files to sign.
 
 ## Signing files
 All `bundleinfo.json` files as well as the `deployment-config.json` file require a `.signature`-counterpart to verify the validity of their contents. A helper-script `scripts/signer` is provided which takes a private key and a list of files to sign using `openssl`. On Windows, you need to run the script via Cygwin. Here is an example for how to generate a key pair and sign a `bundleinfo.json`:

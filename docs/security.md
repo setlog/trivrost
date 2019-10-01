@@ -38,8 +38,7 @@ To sign a file called `config.json` and `base64`-encode it, you can use the foll
 openssl dgst -sha256 -sigopt rsa_padding_mode:pss -sign private_key.pem -out /tmp/sign.sha256 config.json
 openssl base64 -in /tmp/sign.sha256 -out config.json.signature
 ```
-
-We recommend to use the [signer script](../scripts/signer) which allows you to do this in one line for multiple files at once.
+To sign the deployment-config and bundle info files, you can use the signer utility at `out/signer`. (Build with `make tools`)
 
 # Verify signature with openssl
 If you want to check a given signature by hand, you first have to decode the base64 encoded signature file:
