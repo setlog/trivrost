@@ -44,8 +44,9 @@ func (handler *ErrorRecordingHandler) HandleReadError(fromURL string, err error)
 }
 
 type DummyEnvironment struct {
-	DoForClientFunc func(client *http.Client, req *http.Request) (*http.Response, error)
-	Data            []byte
+	DoForClientFunc   func(client *http.Client, req *http.Request) (*http.Response, error)
+	Data              []byte
+	OmitContentLength bool
 }
 
 type RiggedReader struct {
@@ -128,7 +129,7 @@ func CreateDummyEnvironment(t *testing.T, dataLength, failEvery int) *DummyEnvir
 		var rangeStart, rangeEnd int64 = 0, int64(dataLength - 1)
 		requestedRange := req.Header.Get("Range")
 		if requestedRange != "" {
-			rangeStart, rangeEnd, err = ParseRange(requestedRange)
+			rangeStart, rangeEnd, err = ParseRange(requestedRange, rangeEnd)
 			if err != nil {
 				response.StatusCode = http.StatusBadRequest
 				return response, nil
@@ -136,7 +137,9 @@ func CreateDummyEnvironment(t *testing.T, dataLength, failEvery int) *DummyEnvir
 			response.StatusCode = http.StatusPartialContent
 			response.Header.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", rangeStart, rangeEnd, dataLength))
 		}
-		response.Header.Set("Content-Length", fmt.Sprintf("%d", rangeEnd-rangeStart+1))
+		if !de.OmitContentLength {
+			response.Header.Set("Content-Length", fmt.Sprintf("%d", rangeEnd-rangeStart+1))
+		}
 		response.Header.Set("ETag", hex.EncodeToString(de.Data))
 		response.Body = &RiggedReader{Reader: bytes.NewReader(de.Data[rangeStart : rangeEnd+1]), failEvery: failEvery, ctx: req.Context()}
 		return response, nil
