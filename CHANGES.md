@@ -5,7 +5,7 @@
 * Missing `Content-Length`-headers will now cause size-checks to be skipped instead of failing. In those cases, bad files will only be detected by SHA-mismatch as soon as they have been downloaded entirely.
 
 ## 1.3.0 (2019-09-27)
-## Fixes
+### Fixes
 * Fix signing of MSI bundles by no longer setting the SN.
 ### Features
 * trivrost will now hint the final size of bundle files to the operating system, eliminating file fragmentation.
