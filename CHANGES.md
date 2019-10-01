@@ -1,7 +1,11 @@
 # Release-Changelog
 
-## 1.3.0 (TBD)
-## Fixes
+## 1.3.1 (2019-10-01)
+### Changes
+* Missing `Content-Length`-headers will now cause size-checks to be skipped instead of failing. In those cases, bad files will only be detected by SHA-mismatch as soon as they have been downloaded entirely.
+
+## 1.3.0 (2019-09-27)
+### Fixes
 * Fix signing of MSI bundles by no longer setting the SN.
 ### Features
 * trivrost will now hint the final size of bundle files to the operating system, eliminating file fragmentation.
@@ -9,7 +13,7 @@
 * Added command line argument `-deployment-config` to override the embedded deployment-config URL.
 ### Changes
 * Failure during self-update will now be reported to the user in a less generic, more detailed message.
-* Remove debug symbols from final binaries. This saves up to 30% for the linux binaries and 60% of the windows binaries filesize.
+* Remove debug symbols from final binaries. This saves up to 30% for the Linux binary's and 60% for the Windows binary's filesize.
 * Removed the reinstall dialog. trivrost will now launch installed trivrost binaries which report the same or a more recent [build time](docs/cmdline.md) as itself (effectively acting as a shortcut) and install over those which don't. If launching an installed binary fails, trivrost will fall back to reinstalling.
 * The messages shown when trivrost hashes local files are now distinct from the messages shown when trivrost retrieves remote hashes/bundle info.
 * Building the project using the provided Makefile now allows the `icon.png` resource to be missing for Linux builds.
@@ -119,8 +123,8 @@
 * Added new flag `--nostreampassing` which disables passing of standard streams (stdout, stderr and stdin) to programs started through trivrost execution.
 * New helper-tool `bundown`, provided a deployment-config, can download bundles for a desired OS and Arch into a desired folder.
 * `Bundles` in deployment-config can now have `Tags`, which is an array of strings which can be used to limit what `bundown` downloads.
-* Added support for preinstalled bundles in write-protected folders: if trivrost finds a folder called `systembundles` next to its binary, it will consider itself installed and interpret the contained folders as bundles. These bundles will still be validated, but not attempted to be updated if changes are required. The `bundles` folder in the user files will then only keep bundles not already contained in `systembundles`. For execution, trivrost will then first look for executable files relative to `systembundles`. The working directory will however always be the `bundles` folder. This mechanism allows trivrost to, e.g., be installed under `C:\Program Files (x86)` on Windows.
-* Two new jobs called `bundle-msi` and `sign-msi` for handling msi building of trivrost. `bundle-msi` can be given `DEPLOYMENT_CONFIG=foo` and `arch=amd64/368`. Calling this job after `bundle` will create a 32bit or 64bit MSI Windows installer file. It will install the binary plus all bundled with the tag `msi` from the deployment config. A desktop shortcut and start menu shortcut will be created. Requires WIX Toolkit to be installed. 
+* Added support for preinstalled bundles in write-protected folders: if trivrost finds a folder called `systembundles` next to [itself](docs/glossary.md#trivrost-deployment-artifact), it will consider itself installed and interpret the contained folders as bundles. These bundles will still be validated, but not attempted to be updated if changes are required. The `bundles` folder in the user files will then only keep bundles not already contained in `systembundles`. For execution, trivrost will then first look for executable files relative to `systembundles`. The working directory will however always be the `bundles` folder. This mechanism allows trivrost to, e.g., be installed under `C:\Program Files (x86)` on Windows.
+* Two new jobs called `bundle-msi` and `sign-msi` for handling msi building of trivrost. `bundle-msi` can be given `DEPLOYMENT_CONFIG=foo` and `arch=amd64/368`. Calling this job after `bundle` will create a 32bit or 64bit MSI Windows installer file. It will install the binary plus all bundles with the tag `msi` from the deployment config. A desktop shortcut and start menu shortcut will be created. Requires WIX Toolkit to be installed.
 ### Fixes
 * The `signer` script can be run in parallel now.
 * Fixed path to the downloaded binary file (during update) being relative to the working directory.

@@ -117,10 +117,10 @@ func installShortcuts(targetPath string) {
 }
 
 func getTargetProgramPath() string {
-	return filepath.Join(places.GetLauncherTargetDirectoryPath(), getTargetApplicationName())
+	return filepath.Join(places.GetLauncherTargetDirectoryPath(), getTargetProgramName())
 }
 
-func getTargetApplicationName() string {
+func getTargetProgramName() string {
 	if runtime.GOOS == system.OsWindows {
 		return resources.LauncherConfig.BinaryName + ".exe"
 	} else if runtime.GOOS == system.OsMac {

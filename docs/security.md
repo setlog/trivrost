@@ -17,7 +17,7 @@ Please note that you have to set the timestamp in the deployment-config before s
 # Signing
 To sign the deployment-config and bundle info files we use `RSA` with the padding algorithm `PSS`. We use `sha256` as the hashing algorithm for signing. The signatures of the deployment-config have to be stored `base64` encoded. The signatures are saved in separate files with the same url as the original files, but with a `.signature` extension. So the signature for the bundle info file `https://example.com/linux/launcher/bundleinfo.json` has the url `https://example.com/linux/launcher/bundleinfo.json.signature.`
 
-The public keys used to validate the signatures are compiled into the trivrost binary. Therefore you have to create the file `resources/public-rsa-keys.pem`. It contains all public keys in the `PEM` format (see [example file](../examples/public-rsa-keys.pem.example)). The public keys are separate by a line break. trivrost always checks if a signature is valid against any of the public keys. Note that signed resources accessed using the `file://`-scheme are not validated. It should only be used for testing.
+The public keys used to validate the signatures are compiled into the trivrost binary. Therefore you have to create the file `cmd/launcher/resources/public-rsa-keys.pem`. It contains all public keys in the `PEM` format (see [example file](../examples/public-rsa-keys.pem.example)). The public keys are separated by additional line breaks. trivrost checks if a signature is valid against at least one of the public keys. Note that signed resources accessed using the `file://`-scheme are not validated. It should only be used for testing.
 
 # Sign with openssl
 You can create the keys and sign using `openssl`. To generate a private key with a size of 4096 bit you can use one of the following two commands:
@@ -38,5 +38,14 @@ To sign a file called `config.json` and `base64`-encode it, you can use the foll
 openssl dgst -sha256 -sigopt rsa_padding_mode:pss -sign private_key.pem -out /tmp/sign.sha256 config.json
 openssl base64 -in /tmp/sign.sha256 -out config.json.signature
 ```
-
 To sign the deployment-config and bundle info files, you can use the signer utility at `out/signer`. (Build with `make tools`)
+
+# Verify signature with openssl
+If you want to check a given signature by hand, you first have to decode the base64 encoded signature file:
+```
+openssl base64 -d -in config.json.signature -out config.json.signature.decoded
+```
+Now you can verify the decoded signature file:
+```
+openssl dgst -verify public_key.pem -sha256 -sigopt rsa_padding_mode:pss -signature config.json.signature.decoded config.json
+```
