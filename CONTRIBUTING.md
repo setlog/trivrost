@@ -43,15 +43,26 @@ To create a release for the latest version:
 ```
 git checkout develop
 git pull
+# check with git log that the branch is in the state which you want to release
 git checkout master
 git pull
-git merge develop --ff-only
+git merge develop
 git push
 # check if pipeline succeeds - should always be the case!
+```
+Finally, make a release through [the release-overview of the project's GitHub page](https://github.com/setlog/trivrost/releases), creating a new tag against `master`. Tag should be `vX.Y.Z`, title should be `vX.Y.Z (YYYY-MM-DD)` and message should be the markdown-formatted list of fixes, features and changes from `CHANGES.md`.
+
+Alternatively:
+```
 git tag "vX.Y.Z"
 git push origin "vX.Y.Z"
 # you can also push all tags with 'git push --tags' if you made sure not to have pointless tags locally
+```
+
+Finally, make sure that you do not accidentally continue work on master:
+```
 git checkout develop
 ```
 
-To create a release for a maintaince version, do not merge it into master and instead tag the release on the maintainance branch.
+
+To create a release for a maintenance version, do not merge it into `master`. Instead, tag the release on the maintenance branch.
