@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/setlog/trivrost/pkg/launcher/config"
+	log "github.com/sirupsen/logrus"
 )
 
 func fopen(filePath string) (io.ReadCloser, error) {
@@ -84,6 +84,10 @@ func mustReadDir(readDir readDirFunc, directoryPath string) []os.FileInfo {
 		panic(fmt.Sprintf("Could not list directory \"%s\": %v", directoryPath, err))
 	}
 	return infos
+}
+
+func CalculateSha256(filePath string) (sha string, n int64, err error) {
+	return calculateSha256(filePath, fopen)
 }
 
 func calculateSha256(filePath string, readFile readFileFunc) (sha string, n int64, err error) {
