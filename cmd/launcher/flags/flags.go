@@ -5,6 +5,7 @@ package flags
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strconv"
 )
 
@@ -42,39 +43,45 @@ const (
 	LogInstanceCounterFlag = "log-instance"
 )
 
-func Setup() {
-	flag.BoolVar(Uninstall, UninstallFlag, false, "Flag to uninstall the launcher and its bundles on the local machine.")
-	flag.BoolVar(Debug, DebugFlag, false, "Enable debug log level.")
-	flag.BoolVar(SkipSelfUpdate, SkipSelfUpdateFlag, false, "Never perform a self-update.")
-	flag.BoolVar(NoStreamPassing, NoStreamPassingFlag, false, "Do not relay standard streams to executed commands.")
-	flag.BoolVar(Roaming, RoamingFlag, false, "Put all files which would go under %LOCALAPPDATA% on Windows to %APPDATA% instead.")
-	flag.BoolVar(PrintBuildTime, PrintBuildTimeFlag, false, "Print the output of 'date -u \"+%Y-%m-%d %H:%M:%S UTC\"' from the time the binary "+
+func Setup() error {
+	flagSet := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+	flagSet.BoolVar(Uninstall, UninstallFlag, false, "Flag to uninstall the launcher and its bundles on the local machine.")
+	flagSet.BoolVar(Debug, DebugFlag, false, "Enable debug log level.")
+	flagSet.BoolVar(SkipSelfUpdate, SkipSelfUpdateFlag, false, "Never perform a self-update.")
+	flagSet.BoolVar(NoStreamPassing, NoStreamPassingFlag, false, "Do not relay standard streams to executed commands.")
+	flagSet.BoolVar(Roaming, RoamingFlag, false, "Put all files which would go under %LOCALAPPDATA% on Windows to %APPDATA% instead.")
+	flagSet.BoolVar(PrintBuildTime, PrintBuildTimeFlag, false, "Print the output of 'date -u \"+%Y-%m-%d %H:%M:%S UTC\"' from the time the binary "+
 		"was built to standard out and exit immediately.")
-	flag.StringVar(DeploymentConfig, DeploymentConfigFlag, "", "Override the embedded URL of the deployment-config.")
+	flagSet.StringVar(DeploymentConfig, DeploymentConfigFlag, "", "Override the embedded URL of the deployment-config.")
 
-	flag.BoolVar(AcceptInstall, AcceptInstallFlag, false, fmt.Sprintf("Accept install prompt when it is dismissed. Use with -%s.", DismissGuiPromptsFlag))
-	flag.BoolVar(AcceptUninstall, AcceptUninstallFlag, false, fmt.Sprintf("Accept uninstall prompt when it is dismissed. Use with -%s.", DismissGuiPromptsFlag))
-	flag.BoolVar(DismissGuiPrompts, DismissGuiPromptsFlag, false, "Automatically dismiss GUI prompts.")
-	flag.IntVar(LogIndexCounter, LogIndexCounterFlag, -1, "Number to increment when restarting.")
-	flag.IntVar(LogInstanceCounter, LogInstanceCounterFlag, 0, "Number to increment when started by user.")
+	flagSet.BoolVar(AcceptInstall, AcceptInstallFlag, false, fmt.Sprintf("Accept install prompt when it is dismissed. Use with -%s.", DismissGuiPromptsFlag))
+	flagSet.BoolVar(AcceptUninstall, AcceptUninstallFlag, false, fmt.Sprintf("Accept uninstall prompt when it is dismissed. Use with -%s.", DismissGuiPromptsFlag))
+	flagSet.BoolVar(DismissGuiPrompts, DismissGuiPromptsFlag, false, "Automatically dismiss GUI prompts.")
+	flagSet.IntVar(LogIndexCounter, LogIndexCounterFlag, -1, "Number to increment when restarting.")
+	flagSet.IntVar(LogInstanceCounter, LogInstanceCounterFlag, 0, "Number to increment when started by user.")
 
-	setDeprecatedFlags()
+	setDeprecatedFlags(flagSet)
 
-	flag.Parse()
+	err := flagSet.Parse(os.Args[1:])
+	if err != nil {
+		return err
+	}
 
 	if !*DismissGuiPrompts && *AcceptInstall {
-		*AcceptInstall = false
-		panic(fmt.Sprintf("-%s was set when -%s was not.", AcceptInstallFlag, DismissGuiPromptsFlag))
+		return fmt.Errorf("-%s was set when -%s was not.", AcceptInstallFlag, DismissGuiPromptsFlag)
 	}
 
 	if !*DismissGuiPrompts && *AcceptUninstall {
-		*AcceptUninstall = false
-		panic(fmt.Sprintf("-%s was set when -%s was not.", AcceptUninstallFlag, DismissGuiPromptsFlag))
+		return fmt.Errorf("-%s was set when -%s was not.", AcceptUninstallFlag, DismissGuiPromptsFlag)
 	}
+
+	return nil
 }
 
 // GetTransmittingFlags returns those flags which the launcher should hand to itself when restarting.
 func GetTransmittingFlags() (transmittingFlags []string) {
+	transmittingFlags = append(transmittingFlags, "-"+LogIndexCounterFlag, strconv.Itoa(nextLogIndex))
+	transmittingFlags = append(transmittingFlags, "-"+LogInstanceCounterFlag, strconv.Itoa(*LogInstanceCounter+1))
 	if *Uninstall {
 		transmittingFlags = append(transmittingFlags, "-"+UninstallFlag)
 	}
@@ -102,8 +109,6 @@ func GetTransmittingFlags() (transmittingFlags []string) {
 	if *NoStreamPassing {
 		transmittingFlags = append(transmittingFlags, "-"+NoStreamPassingFlag)
 	}
-	transmittingFlags = append(transmittingFlags, "-"+LogIndexCounterFlag, strconv.Itoa(nextLogIndex))
-	transmittingFlags = append(transmittingFlags, "-"+LogInstanceCounterFlag, strconv.Itoa(*LogInstanceCounter+1))
 
 	return transmittingFlags
 }
@@ -112,6 +117,6 @@ func SetNextLogIndex(index int) {
 	nextLogIndex = index
 }
 
-func setDeprecatedFlags() {
-	flag.String("remove", "", "DEPRECATED: Name of binary to remove upon launch.")
+func setDeprecatedFlags(flagSet *flag.FlagSet) {
+	flagSet.String("remove", "", "DEPRECATED: Name of binary to remove upon launch.")
 }

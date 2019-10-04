@@ -52,7 +52,7 @@ func init() {
 
 	system.MustFindPaths()
 
-	flags.Setup()
+	flagError := flags.Setup()
 	if *flags.PrintBuildTime {
 		fmt.Print(launcher.BuildTime())
 		os.Exit(0)
@@ -66,7 +66,7 @@ func init() {
 	places.DetectPlaces(*flags.Roaming)
 
 	flags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName, *flags.LogIndexCounter, *flags.LogInstanceCounter))
-	logInitialInfo()
+	logState(flagError)
 	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
 
 	printProxySettings()
@@ -78,8 +78,7 @@ func main() {
 	go runLauncher(ctx)
 	err := gui.Main(ctx, cancelFunc, resources.LauncherConfig.BrandingName, !*flags.Uninstall)
 	if err != nil {
-		log.Errorf("gui.Main() failed: %v\n", err)
-		log.Exit(1)
+		log.Fatalf("gui.Main() failed: %v\n", err)
 	}
 
 	log.Info("End of main().")
@@ -198,7 +197,7 @@ func setGuiStatusMessage(s gui.Stage, text string) {
 	}
 }
 
-func logInitialInfo() {
+func logState(flagError error) {
 	log.Infof("Git commit of this build: Tag: %s; Hash: %s; Branch: %s", gitDescription, gitHash, gitBranch)
 
 	if filepath.Base(system.GetProgramPath()) != resources.LauncherConfig.BinaryName {
@@ -207,4 +206,8 @@ func logInitialInfo() {
 	}
 
 	places.ReportResults()
+
+	if flagError != nil {
+		log.Fatalf("Parsing flags failed: %v", flagError)
+	}
 }
