@@ -46,7 +46,7 @@ git pull
 # check with git log that the branch is in the state which you want to release
 git checkout master
 git pull
-git merge develop
+git merge develop --ff-only
 git push
 # check if pipeline succeeds - should always be the case!
 ```
