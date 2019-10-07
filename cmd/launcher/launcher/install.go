@@ -71,7 +71,7 @@ func IsInstallationOutdated() bool {
 	return isInstallationOutdated
 }
 
-func Install() {
+func Install(launcherFlags *flags.LauncherFlags) {
 	deletePlainFiles()
 
 	programPath, targetProgramPath := system.GetProgramPath(), getTargetProgramPath()
@@ -92,20 +92,20 @@ func Install() {
 	})
 	waitGroup.Wait()
 
-	MustRestartWithInstalledBinary()
+	MustRestartWithInstalledBinary(launcherFlags)
 }
 
-func MustRestartWithInstalledBinary() {
-	locking.RestartWithBinary(true, getTargetBinaryPath())
+func MustRestartWithInstalledBinary(launcherFlags *flags.LauncherFlags) {
+	locking.RestartWithBinary(true, getTargetBinaryPath(), launcherFlags)
 }
 
-func RestartWithInstalledBinary() bool {
+func RestartWithInstalledBinary(launcherFlags *flags.LauncherFlags) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Errorf("Restarting with binary \"%s\" failed: %v", getTargetBinaryPath(), r)
 		}
 	}()
-	MustRestartWithInstalledBinary()
+	MustRestartWithInstalledBinary(launcherFlags)
 	return true
 }
 

@@ -7,6 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/gui"
 	"github.com/setlog/trivrost/cmd/launcher/places"
 	"github.com/setlog/trivrost/pkg/misc"
@@ -24,7 +25,7 @@ const (
 )
 
 // Blocks until the lock is available, claims it and restarts.
-func AcquireLock(ctx context.Context) {
+func AcquireLock(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	gui.SetStage(gui.StageAcquireLock, 0)
 	for {
 		switch result := setSignature(system.GetCurrentProcessSignature()); result {
@@ -32,7 +33,7 @@ func AcquireLock(ctx context.Context) {
 			log.Info("Owning the Launcher Lock.")
 			return
 		case LockClaimed:
-			Restart(true)
+			Restart(true, launcherFlags)
 		case LockUnavailable:
 			misc.MustWaitForContext(ctx, time.Millisecond*300)
 		}

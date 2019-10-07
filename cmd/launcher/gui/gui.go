@@ -8,7 +8,6 @@ import (
 	"github.com/andlabs/ui"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/pkg/misc"
 )
 
@@ -60,7 +59,7 @@ func WaitUntilReady() {
 	guiInitWaitGroup.Wait()
 }
 
-func BlockingDialog(title, message string, options []string, defaultOption int) int {
+func BlockingDialog(title, message string, options []string, defaultOption int, dismissGuiPrompts bool) int {
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(1)
 	chosenOption := defaultOption
@@ -114,7 +113,7 @@ func BlockingDialog(title, message string, options []string, defaultOption int) 
 		dialogWindow.Show()
 		centerWindow(dialogWindow.Handle())
 
-		if *flags.DismissGuiPrompts {
+		if dismissGuiPrompts {
 			log.Infof("Automatically dismissing dialog \"%s\" with default option %d.", title, defaultOption)
 			chosenOption = defaultOption
 			waitGroup.Done()
@@ -160,6 +159,7 @@ func HideWaitDialog() {
 	})
 }
 
+// Main hands control over to ui.Main() to initialize and manage the GUI. It blocks until gui.Quit() is called.
 func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow bool) error {
 	log.WithFields(log.Fields{"title": title, "showMainWindow": showMainWindow}).Info("Initializing GUI.")
 	// Note: ui.Main() calls any functions queued with ui.QueueMain() before the one we provide via parameter.

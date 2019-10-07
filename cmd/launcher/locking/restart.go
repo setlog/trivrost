@@ -10,17 +10,17 @@ import (
 	"github.com/setlog/trivrost/pkg/system"
 )
 
-func Restart(forwardLauncherLockOwnership bool) {
-	RestartWithBinary(forwardLauncherLockOwnership, system.GetBinaryPath())
+func Restart(forwardLauncherLockOwnership bool, launcherFlags *flags.LauncherFlags) {
+	RestartWithBinary(forwardLauncherLockOwnership, system.GetBinaryPath(), launcherFlags)
 }
 
 // Starts a new instance of the calling executable, writes the new process signature into the launcher signature file and quits the current instance.
-func RestartWithBinary(forwardLauncherLockOwnership bool, binaryPath string) {
+func RestartWithBinary(forwardLauncherLockOwnership bool, binaryPath string, launcherFlags *flags.LauncherFlags) {
 	hash, _, hashErr := hashing.CalculateSha256(binaryPath)
 	log.WithFields(log.Fields{"forwardLauncherLockOwnership": forwardLauncherLockOwnership, "binaryPath": binaryPath, "hash": hash, "hashErr": hashErr}).Info("Restarting.")
 	absoluteBinaryPath := system.MustGetAbsolutePath(binaryPath)
 	workingDirectory := filepath.Dir(absoluteBinaryPath)
-	_, procSig := system.MustStartProcess(absoluteBinaryPath, workingDirectory, flags.GetTransmittingFlags(), nil, true)
+	_, procSig := system.MustStartProcess(absoluteBinaryPath, workingDirectory, launcherFlags.GetTransmittingFlags(), nil, true)
 	if forwardLauncherLockOwnership {
 		mustWriteProcessSignatureListFile(launcherSignatureFilePath(), []system.ProcessSignature{*procSig})
 	}

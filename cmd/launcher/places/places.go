@@ -24,8 +24,8 @@ func MakePlaces() {
 	}
 }
 
-func DetectPlaces(useRoamingOnly bool) {
-	detectPlaces(useRoamingOnly)
+func DetectPlaces(useRoamingOnly bool) error {
+	return detectPlaces(useRoamingOnly)
 }
 
 func ReportResults() {
