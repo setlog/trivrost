@@ -14,8 +14,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime"
+	"runtime/pprof"
+	"syscall"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/misc"
@@ -65,8 +68,18 @@ func main() {
 	log.Exit(0)
 }
 
-func initializeEnvironment() (launcherFlags *flags.LauncherFlags, firstFatalError error) {
-	var argumentError, flagError, pathError, placesError error
+func initializeEnvironment() (*flags.LauncherFlags, error) {
+	launcherFlags, argumentError, flagError, pathError, placesError := parseEnvironment()
+	launcherFlags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName,
+		launcherFlags.LogIndexCounter, launcherFlags.LogInstanceCounter))
+	logState(argumentError, flagError, pathError)
+	printProxySettings()
+	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
+	registerSignalOverrides()
+	return launcherFlags, misc.NewNestedErrorFromFirstCause(argumentError, flagError, pathError, placesError)
+}
+
+func parseEnvironment() (launcherFlags *flags.LauncherFlags, argumentError, flagError, pathError, placesError error) {
 	launcherFlags = &flags.LauncherFlags{}
 	const minArgCount = 1
 	if len(os.Args) < minArgCount {
@@ -78,21 +91,27 @@ func initializeEnvironment() (launcherFlags *flags.LauncherFlags, firstFatalErro
 			placesError = places.DetectPlaces(launcherFlags.Roaming)
 		}
 	}
+	return launcherFlags, argumentError, flagError, pathError, placesError
+}
 
-	if argumentError == nil && pathError == nil && placesError == nil {
-		launcherFlags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName,
-			launcherFlags.LogIndexCounter, launcherFlags.LogInstanceCounter))
-	} else {
-		launcherFlags.SetNextLogIndex(logging.Initialize("", resources.LauncherConfig.ProductName,
-			launcherFlags.LogIndexCounter, launcherFlags.LogInstanceCounter))
+func registerSignalOverrides() {
+	sigChan := make(chan os.Signal, 10)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT, syscall.SIGTERM, syscall.SIGHUP)
+	go handleSignals(sigChan)
+}
+
+func handleSignals(sigChan chan os.Signal) {
+	for {
+		s, ok := <-sigChan
+		if ok {
+			log.Errorf("Received signal \"%v\". Printing stacks and quitting.", s)
+		} else {
+			log.Errorf("Signal channel has been closed unexpectedly. Printing stacks and quitting.")
+		}
+		log.Info("\n")
+		pprof.Lookup("goroutine").WriteTo(log.StandardLogger().Out, 2)
+		log.Exit(1)
 	}
-	firstFatalError = misc.NewNestedErrorFromFirstCause(argumentError, flagError, pathError, placesError)
-	logState(argumentError, flagError, pathError)
-	printProxySettings()
-
-	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
-
-	return launcherFlags, firstFatalError
 }
 
 func processFlags(args []string) (launcherFlags *flags.LauncherFlags, err error) {
@@ -145,8 +164,6 @@ func logState(argumentError, flagError, pathError error) {
 			filepath.Base(system.GetProgramPath()), resources.LauncherConfig.BinaryName)
 	}
 
-	places.ReportResults()
-
 	if argumentError != nil {
 		log.Errorf("Fatal: Parsing arguments failed: %v", argumentError)
 	}
@@ -156,6 +173,8 @@ func logState(argumentError, flagError, pathError error) {
 	}
 
 	if pathError != nil {
-		log.Fatalf("Fatal: Determining binary path failed: %v", pathError)
+		log.Errorf("Fatal: Determining binary path failed: %v", pathError)
 	}
+
+	places.ReportResults()
 }

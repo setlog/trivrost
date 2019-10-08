@@ -88,6 +88,23 @@ func StripTrailingLineBreak(s string) string {
 	return s
 }
 
+func SplitTrailing(s string, trailSet string) (lead, trail string) {
+	splitIndex := -1
+	for i, r := range s {
+		if strings.ContainsRune(trailSet, r) {
+			if splitIndex == -1 {
+				splitIndex = i
+			}
+		} else {
+			splitIndex = -1
+		}
+	}
+	if splitIndex >= 0 {
+		return s[:splitIndex], s[splitIndex:]
+	}
+	return s, ""
+}
+
 func JoinNonEmpty(stringList []string, sep string) string {
 	candidates := make([]string, 0, len(stringList))
 	for _, s := range stringList {
