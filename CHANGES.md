@@ -1,5 +1,11 @@
 # Release-Changelog
 
+## 1.3.2 (TBD)
+### Features
+* trivrost will now handle the following signals, logging the stack trace of all goroutines before terminating: `SIGINT`, `SIGQUIT`, `SIGABRT`, `SIGTERM`, `SIGHUP`.
+### Changes
+* trivrost will now inform about bad command line arguments via GUI.
+
 ## 1.3.1 (2019-10-01)
 ### Changes
 * Missing `Content-Length`-headers will now cause size-checks to be skipped instead of failing. In those cases, bad files will only be detected by SHA-mismatch as soon as they have been downloaded entirely.
