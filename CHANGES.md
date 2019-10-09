@@ -3,6 +3,8 @@
 ## 1.3.2 (TBD)
 ### Features
 * trivrost will now handle the following signals, logging the stack trace of all goroutines before terminating: `SIGINT`, `SIGQUIT`, `SIGABRT`, `SIGTERM`, `SIGHUP`.
+### Fixes
+* `cmd/signer` can now parse PKCS1-formatted private keys in the same way that `scripts/signer` could.
 ### Changes
 * trivrost will now inform about bad command line arguments via GUI.
 
