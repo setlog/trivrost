@@ -1,5 +1,8 @@
 # Release-Changelog
 
+### Fixes
+* `cmd/signer` can now parse PKCS1-formatted private keys in the same way that `scripts/signer` could.
+
 ## 1.3.1 (2019-10-01)
 ### Changes
 * Missing `Content-Length`-headers will now cause size-checks to be skipped instead of failing. In those cases, bad files will only be detected by SHA-mismatch as soon as they have been downloaded entirely.
