@@ -78,3 +78,37 @@ func TestShortString(t *testing.T) {
 		}
 	}
 }
+
+func TestSplitTrailing(t *testing.T) {
+	tests := []struct {
+		text, trailSet              string
+		expectedLead, expectedTrail string
+	}{
+		{"Heeey\n\n\n", "\n", "Heeey", "\n\n\n"},
+		{"Heeey\n\n\n", "", "Heeey\n\n\n", ""},
+		{"Heeey", "\n", "Heeey", ""},
+		{"Heeey", "", "Heeey", ""},
+		{"\n\n\n", "\n", "", "\n\n\n"},
+		{"\n\n\n", "", "\n\n\n", ""},
+		{"", "\n", "", ""},
+		{"", "", "", ""},
+		{"THEQUICKBROWNFOX", "OWXFBRN", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "XBFRWNO", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "WXRONBF", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "OWNRFXB", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "OWXOFBRN", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "XBFORWNO", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "WXROONBF", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "OWNORFXB", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "OWXOFOBRN", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "XBFOROWNO", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "WXROOONBF", "THEQUICK", "BROWNFOX"},
+		{"THEQUICKBROWNFOX", "OWNOROFXB", "THEQUICK", "BROWNFOX"},
+	}
+	for i, test := range tests {
+		lead, trail := misc.SplitTrailing(test.text, test.trailSet)
+		if lead != test.expectedLead || trail != test.expectedTrail {
+			t.Errorf("Test #%d: misc.SplitTrailing(%v, %v) return %v, %v. Expected: %v, %v", i+1, test.text, test.trailSet, lead, trail, test.expectedLead, test.expectedTrail)
+		}
+	}
+}

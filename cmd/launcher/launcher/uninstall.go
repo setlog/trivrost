@@ -19,20 +19,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func UninstallPrompt() {
+func UninstallPrompt(launcherFlags *flags.LauncherFlags) {
 	brandingName := resources.LauncherConfig.BrandingName
 	if locking.MinimizeApplicationSignaturesList() {
 		title, message := "Uninstall "+brandingName, "You are about to uninstall "+brandingName+". Do you want to continue?"
-		if gui.BlockingDialog(title, message, []string{"Yes", "No"}, 1) == 0 || *flags.AcceptUninstall {
-			uninstall()
+		if gui.BlockingDialog(title, message, []string{"Yes", "No"}, 1, launcherFlags.DismissGuiPrompts) == 0 || launcherFlags.AcceptUninstall {
+			uninstall(launcherFlags)
 		}
 	} else {
 		title, message := "Uninstall "+brandingName, "Cannot uninstall "+brandingName+" while it is still running.\nPlease close all instances and try again."
-		gui.BlockingDialog(title, message, []string{"Close"}, 0)
+		gui.BlockingDialog(title, message, []string{"Close"}, 0, launcherFlags.DismissGuiPrompts)
 	}
 }
 
-func uninstall() {
+func uninstall(launcherFlags *flags.LauncherFlags) {
 	log.Info("Uninstall the launcher now.")
 	brandingName := resources.LauncherConfig.BrandingName
 	gui.ShowWaitDialog("Uninstalling "+brandingName, "Please wait as "+brandingName+" is uninstalling.")
@@ -40,7 +40,7 @@ func uninstall() {
 	deleteBundles()
 	defer prepareProgramDeletionWithFinalizerFunc()()
 	gui.HideWaitDialog()
-	gui.BlockingDialog("Uninstallation complete", brandingName+" has been uninstalled.", []string{"Close"}, 0)
+	gui.BlockingDialog("Uninstallation complete", brandingName+" has been uninstalled.", []string{"Close"}, 0, launcherFlags.DismissGuiPrompts)
 }
 
 func deletePlainFiles() {

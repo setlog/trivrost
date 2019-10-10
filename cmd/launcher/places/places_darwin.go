@@ -1,17 +1,25 @@
 package places
 
-import "os"
-import "path/filepath"
-import "github.com/setlog/trivrost/cmd/launcher/resources"
+import (
+	"os"
+	"path/filepath"
+
+	"github.com/setlog/trivrost/cmd/launcher/resources"
+	log "github.com/sirupsen/logrus"
+)
 
 var globalSettingFolder = os.Getenv("HOME") + "/Library/Application Support"
 var localSettingFolder = globalSettingFolder
 var localCacheFolder = os.Getenv("HOME") + "/Library/Caches"
 
-func detectPlaces(useRoamingOnly bool) {
+func detectPlaces(useRoamingOnly bool) error {
+	return nil
 }
 
 func reportResults() {
+	log.Infof("globalSettingFolder: %v", globalSettingFolder)
+	log.Infof("localSettingFolder: %v", localSettingFolder)
+	log.Infof("localCacheFolder: %v", localCacheFolder)
 }
 
 func getLaunchDesktopShortcutPath() string {

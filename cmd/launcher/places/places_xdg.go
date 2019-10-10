@@ -19,7 +19,7 @@ var localCacheFolder string
 var desktopFolder string
 var warning error
 
-func detectPlaces(useRoamingOnly bool) {
+func detectPlaces(useRoamingOnly bool) error {
 	globalSettingFolder = filepath.Join(os.Getenv("HOME"), ".local", "share")
 	localSettingFolder = globalSettingFolder
 	if os.Getenv("XDG_CACHE_HOME") != "" {
@@ -36,12 +36,17 @@ func detectPlaces(useRoamingOnly bool) {
 	} else {
 		desktopFolder = strings.Trim(string(output), "\n\"")
 	}
+	return nil
 }
 
 func reportResults() {
 	if warning != nil {
 		log.Warn(warning)
 	}
+	log.Infof("globalSettingFolder: %v", globalSettingFolder)
+	log.Infof("localSettingFolder: %v", localSettingFolder)
+	log.Infof("localCacheFolder: %v", localCacheFolder)
+	log.Infof("desktopFolder: %v", desktopFolder)
 }
 
 func getLaunchDesktopShortcutPath() string {
