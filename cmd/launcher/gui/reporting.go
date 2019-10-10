@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"runtime/debug"
 	"strings"
 
 	"github.com/setlog/trivrost/pkg/misc"
@@ -38,8 +37,7 @@ func HandlePanic(launcherFlags *flags.LauncherFlags) {
 
 func PanicInformatively(r interface{}, launcherFlags *flags.LauncherFlags) {
 	defer presentError(getPanicMessage(r), launcherFlags.DismissGuiPrompts)
-	// The stack printed when panic() is not recover()ed bypasses our file-logging, so log it explicitly here.
-	log.Panicf("Exiting due to unrecoverable state: %v\n%v", r, misc.TryRemoveLines(string(debug.Stack()), 1, 3))
+	misc.LogRecoveredValue(r)
 }
 
 func getPanicMessage(r interface{}) string {
