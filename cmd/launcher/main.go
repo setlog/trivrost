@@ -70,10 +70,12 @@ func main() {
 
 func initializeEnvironment() (*flags.LauncherFlags, error) {
 	registerSignalOverrides()
+
 	launcherFlags, argumentError, flagError, pathError, placesError := parseEnvironment()
 	launcherFlags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName,
 		launcherFlags.LogIndexCounter, launcherFlags.LogInstanceCounter))
 	logState(argumentError, flagError, pathError)
+
 	printProxySettings()
 	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
 	return launcherFlags, misc.NewNestedErrorFromFirstCause(argumentError, flagError, pathError, placesError)
@@ -81,15 +83,12 @@ func initializeEnvironment() (*flags.LauncherFlags, error) {
 
 func parseEnvironment() (launcherFlags *flags.LauncherFlags, argumentError, flagError, pathError, placesError error) {
 	launcherFlags = &flags.LauncherFlags{}
-	const minArgCount = 1
-	if len(os.Args) < minArgCount {
-		argumentError = fmt.Errorf("Your system launched the application with %d arguments, but there must be at least %d", len(os.Args), minArgCount)
+	if len(os.Args) < 1 {
+		argumentError = fmt.Errorf("Your system launched the application with %d arguments, but there must be at least 1", len(os.Args))
 	} else {
 		launcherFlags, flagError = processFlags(os.Args)
 		pathError = system.FindPaths()
-		if pathError == nil {
-			placesError = places.DetectPlaces(launcherFlags.Roaming)
-		}
+		placesError = places.DetectPlaces(launcherFlags.Roaming)
 	}
 	return launcherFlags, argumentError, flagError, pathError, placesError
 }
@@ -129,6 +128,29 @@ func processFlags(args []string) (launcherFlags *flags.LauncherFlags, err error)
 	return launcherFlags, err
 }
 
+func logState(argumentError, flagError, pathError error) {
+	log.Infof("Git commit of this build: Tag: %s; Hash: %s; Branch: %s", gitDescription, gitHash, gitBranch)
+
+	if filepath.Base(system.GetProgramPath()) != resources.LauncherConfig.BinaryName {
+		log.Warnf("Program name on disk (\"%s\") has diverged from configured program name (\"%s\").",
+			filepath.Base(system.GetProgramPath()), resources.LauncherConfig.BinaryName)
+	}
+
+	if argumentError != nil {
+		log.Errorf("Fatal: Parsing arguments failed: %v", argumentError)
+	}
+
+	if flagError != nil {
+		log.Errorf("Fatal: Parsing flags failed: %v", flagError)
+	}
+
+	if pathError != nil {
+		log.Errorf("Fatal: Determining binary path failed: %v", pathError)
+	}
+
+	places.ReportResults()
+}
+
 func printProxySettings() {
 	envcfg := httpproxy.FromEnvironment()
 	log.Infof("Environment proxy: HTTPProxy: \"%s\"; HTTPSProxy: \"%s\".", envcfg.HTTPProxy, envcfg.HTTPSProxy)
@@ -154,27 +176,4 @@ func setGuiStatusMessage(s gui.Stage, text string) {
 	if text != "" {
 		gui.SetStageText(s, text)
 	}
-}
-
-func logState(argumentError, flagError, pathError error) {
-	log.Infof("Git commit of this build: Tag: %s; Hash: %s; Branch: %s", gitDescription, gitHash, gitBranch)
-
-	if filepath.Base(system.GetProgramPath()) != resources.LauncherConfig.BinaryName {
-		log.Warnf("Program name on disk (\"%s\") has diverged from configured program name (\"%s\").",
-			filepath.Base(system.GetProgramPath()), resources.LauncherConfig.BinaryName)
-	}
-
-	if argumentError != nil {
-		log.Errorf("Fatal: Parsing arguments failed: %v", argumentError)
-	}
-
-	if flagError != nil {
-		log.Errorf("Fatal: Parsing flags failed: %v", flagError)
-	}
-
-	if pathError != nil {
-		log.Errorf("Fatal: Determining binary path failed: %v", pathError)
-	}
-
-	places.ReportResults()
 }

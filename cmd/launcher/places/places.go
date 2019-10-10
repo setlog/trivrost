@@ -45,6 +45,9 @@ func GetAppLocalDataFolderPath() string {
 }
 
 func GetAppLogFolderPath() string {
+	if localCacheFolder == "" {
+		return "" // If DetectPlaces() was not called or failed, our best bet is to write logs in the working directory.
+	}
 	return filepath.Join(GetAppCacheFolderPath(), "log")
 }
 
