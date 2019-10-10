@@ -69,13 +69,13 @@ func main() {
 }
 
 func initializeEnvironment() (*flags.LauncherFlags, error) {
+	registerSignalOverrides()
 	launcherFlags, argumentError, flagError, pathError, placesError := parseEnvironment()
 	launcherFlags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName,
 		launcherFlags.LogIndexCounter, launcherFlags.LogInstanceCounter))
 	logState(argumentError, flagError, pathError)
 	printProxySettings()
 	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
-	registerSignalOverrides()
 	return launcherFlags, misc.NewNestedErrorFromFirstCause(argumentError, flagError, pathError, placesError)
 }
 
@@ -95,7 +95,7 @@ func parseEnvironment() (launcherFlags *flags.LauncherFlags, argumentError, flag
 }
 
 func registerSignalOverrides() {
-	sigChan := make(chan os.Signal, 10)
+	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT, syscall.SIGTERM, syscall.SIGHUP)
 	go handleSignals(sigChan)
 }
