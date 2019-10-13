@@ -1,7 +1,7 @@
 <p align="center"><img width="128px" height="128px" style="width:128px;height:128px" src="docs/res/trivrostlogo.png" alt="trivrost" /></p>
 
 # trivrost
-trivrost is a repurposable application-downloader and -launcher in the form of a native executable: it updates some files on a computer and executes a command afterwards, no questions asked. It can also update itself to introduce new features without the need for user interaction. See [reasons.md](docs/reasons.md) for more background information.
+trivrost is a repurposable application-downloader and -launcher written in go, in the form of a native executable: it updates some files on a computer and executes a command afterwards, no questions asked. It can also update itself to introduce new features without the need for user interaction. See [reasons.md](docs/reasons.md) for more background information.
 
 ## When do I need trivrost?
 When you need to deploy an always-online desktop application which always needs to be up to date to many users using all three major OSs and all of them expect your software to *just work*.
