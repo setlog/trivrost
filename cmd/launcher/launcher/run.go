@@ -48,7 +48,7 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 		updater.InstallBundleUpdates()
 	}
 
-	launch(&updater.GetDeploymentConfig().Execution, launcherFlags)
+	launch(ctx, &updater.GetDeploymentConfig().Execution, launcherFlags)
 }
 
 func handleStatusChange(status bundle.UpdaterStatus, expectedProgressUnits uint64) {
@@ -74,7 +74,7 @@ func doHousekeeping() {
 	deleteLeftoverBinaries()
 }
 
-func launch(execution *config.ExecutionConfig, launcherFlags *flags.LauncherFlags) {
-	executeCommands(execution.Commands, launcherFlags)
+func launch(ctx context.Context, execution *config.ExecutionConfig, launcherFlags *flags.LauncherFlags) {
+	executeCommands(ctx, execution.Commands, launcherFlags)
 	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
 }

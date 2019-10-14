@@ -88,18 +88,24 @@ func updateProgressPeriodically(ctx context.Context) {
 	}
 }
 
-func NotifyProblem(problemMessage string) {
+func NotifyProblem(problemMessage string, requiresUserAction bool) {
 	uiShutdownMutex.Lock()
 	defer uiShutdownMutex.Unlock()
 	if !didQuit {
 		ui.QueueMain(func() {
-			panelDownloadStatus.currentProblemMessage = problemMessage
+			if problemMessage == "" {
+				panelDownloadStatus.currentProblemMessage = ""
+			} else if requiresUserAction {
+				panelDownloadStatus.currentProblemMessage = "Cannot continue: " + problemMessage
+			} else {
+				panelDownloadStatus.currentProblemMessage = "Taking longer than usual: " + problemMessage
+			}
 		})
 	}
 }
 
 func ClearProblem() {
-	NotifyProblem("")
+	NotifyProblem("", false)
 }
 
 func updateProgressBar() {
@@ -127,7 +133,7 @@ func updateProgressLabel() {
 				message = fmt.Sprintf("Downloading at %s. ", rateString(delta))
 			}
 			if panelDownloadStatus.currentProblemMessage != "" {
-				message += fmt.Sprintf("(Taking longer than usual: %s)", panelDownloadStatus.currentProblemMessage)
+				message += fmt.Sprintf("(%s)", panelDownloadStatus.currentProblemMessage)
 			}
 			panelDownloadStatus.labelStatus.SetText(message)
 		})
