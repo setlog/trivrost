@@ -1,16 +1,26 @@
 # Release-Changelog
 
+## 1.3.2 (2019-10-14)
+### Features
+* trivrost will now handle the following signals, logging the stack trace of all goroutines before terminating: `SIGINT`, `SIGQUIT`, `SIGABRT`, `SIGTERM`, `SIGHUP`.
+### Fixes
+* `cmd/signer` can now parse PKCS1-formatted private keys in the same way that `scripts/signer` could.
+### Changes
+* trivrost will now inform about bad command line arguments via GUI.
+
 ## 1.3.1 (2019-10-01)
 ### Changes
 * Missing `Content-Length`-headers will now cause size-checks to be skipped instead of failing. In those cases, bad files will only be detected by SHA-mismatch as soon as they have been downloaded entirely.
 
 ## 1.3.0 (2019-09-27)
-### Fixes
-* Fix signing of MSI bundles by no longer setting the SN.
 ### Features
 * trivrost will now hint the final size of bundle files to the operating system, eliminating file fragmentation.
 * Added field `IgnoreLauncherBundleInfoHashes` to launcher-config, where you can specify the SHA-256 hash values of bundleinfo files to be ignored by trivrost when it checks for a self-update. This behaviour can be used to hand out specialized builds to specific users for hotfixing purposes without having to worry about the need to add (and later remove) the `-skipselfupdate` argument.
 * Added command line argument `-deployment-config` to override the embedded deployment-config URL.
+### Fixes
+* Fix signing of MSI bundles by no longer setting the SN.
+* Fixed download progress of previous stages adding to the displayed progress of later stages.
+* Fixed regression issue which would cause Kubuntu's UI to become unresponsive while trivrost is running because apparently it cannot deal with 10 window title text changes per second.
 ### Changes
 * Failure during self-update will now be reported to the user in a less generic, more detailed message.
 * Remove debug symbols from final binaries. This saves up to 30% for the Linux binary's and 60% for the Windows binary's filesize.
@@ -19,9 +29,7 @@
 * Building the project using the provided Makefile now allows the `icon.png` resource to be missing for Linux builds.
 * Project now uses GoLang 1.13.
 * Renamed project to "trivrost" for open source release.
-### Fixes
-* Fixed download progress of previous stages adding to the displayed progress of later stages.
-* Fixed regression issue which would cause Kubuntu's UI to become unresponsive while trivrost is running because apparently it cannot deal with 10 window title text changes per second.
+* `scripts/signer` has been reimplemented in Go (under `cmd/signer`) and will be built when running `make tools`. `scripts/signer` has been removed.
 
 ## 1.2.2 (2019-09-12)
 ### Changes

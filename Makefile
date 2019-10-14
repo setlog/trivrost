@@ -4,11 +4,13 @@
 MODULE_PATH_LAUNCHER    := github.com/setlog/trivrost/cmd/launcher
 MODULE_PATH_HASHER      := github.com/setlog/trivrost/cmd/hasher
 MODULE_PATH_VALIDATOR   := github.com/setlog/trivrost/cmd/validator
+MODULE_PATH_SIGNER      := github.com/setlog/trivrost/cmd/signer
 OUT_DIR                 := out
 RELEASE_FILES_DIR       := ${OUT_DIR}/release_files
 UPDATE_FILES_DIR        := ${OUT_DIR}/update_files
 HASHER_BINARY           := hasher
 VALIDATOR_BINARY        := validator
+SIGNER_BINARY           := signer
 
 # allow custom program name
 LAUNCHER_PROGRAM_NAME   := $(shell GO111MODULE=on go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BinaryName)
@@ -132,6 +134,7 @@ endif
 tools:           ## Build helper tools like hasher
 	go build -o "${OUT_DIR}/${HASHER_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_HASHER}
 	go build -o "${OUT_DIR}/${VALIDATOR_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_VALIDATOR}
+	go build -o "${OUT_DIR}/${SIGNER_BIANRY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_SIGNER}
 
 help:            ## Show this help
 	@fgrep -h "##" ${MAKEFILE_LIST} | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'

@@ -71,7 +71,7 @@ func IsInstallationOutdated() bool {
 	return isInstallationOutdated
 }
 
-func Install() {
+func Install(launcherFlags *flags.LauncherFlags) {
 	deletePlainFiles()
 
 	programPath, targetProgramPath := system.GetProgramPath(), getTargetProgramPath()
@@ -87,33 +87,33 @@ func Install() {
 	waitGroup.Add(1)
 	prepareShortcutInstallation()
 	ui.QueueMain(func() { // Not UI functionality, but required to run on the main thread to be reliable on all OSes.
-		installShortcuts(targetProgramPath)
+		installShortcuts(targetProgramPath, launcherFlags)
 		waitGroup.Done()
 	})
 	waitGroup.Wait()
 
-	MustRestartWithInstalledBinary()
+	MustRestartWithInstalledBinary(launcherFlags)
 }
 
-func MustRestartWithInstalledBinary() {
-	locking.RestartWithBinary(true, getTargetBinaryPath())
+func MustRestartWithInstalledBinary(launcherFlags *flags.LauncherFlags) {
+	locking.RestartWithBinary(true, getTargetBinaryPath(), launcherFlags)
 }
 
-func RestartWithInstalledBinary() bool {
+func RestartWithInstalledBinary(launcherFlags *flags.LauncherFlags) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Errorf("Restarting with binary \"%s\" failed: %v", getTargetBinaryPath(), r)
 		}
 	}()
-	MustRestartWithInstalledBinary()
+	MustRestartWithInstalledBinary(launcherFlags)
 	return true
 }
 
-func installShortcuts(targetPath string) {
+func installShortcuts(targetPath string, launcherFlags *flags.LauncherFlags) {
 	log.Info("Installing launcher shortcuts.")
-	createLaunchDesktopShortcut(targetPath)
-	createLaunchStartMenuShortcut(targetPath)
-	createUninstallStartMenuShortcut(targetPath)
+	createLaunchDesktopShortcut(targetPath, launcherFlags)
+	createLaunchStartMenuShortcut(targetPath, launcherFlags)
+	createUninstallStartMenuShortcut(targetPath, launcherFlags)
 }
 
 func getTargetProgramPath() string {

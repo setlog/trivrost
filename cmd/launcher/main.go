@@ -12,13 +12,13 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime"
-	"runtime/debug"
-	"strings"
+	"runtime/pprof"
+	"syscall"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/misc"
@@ -33,7 +33,6 @@ import (
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/gui"
 	"github.com/setlog/trivrost/cmd/launcher/launcher"
-	"github.com/setlog/trivrost/cmd/launcher/locking"
 	"github.com/setlog/trivrost/cmd/launcher/resources"
 
 	"github.com/mattn/go-ieproxy"
@@ -45,130 +44,111 @@ var gitDescription string
 var gitHash string
 var gitBranch string
 
-func init() {
+func main() {
+	defer misc.LogPanic()
+	launcherFlags, fatalError := initializeEnvironment()
+	ctx, cancelFunc := context.WithCancel(context.Background())
+
+	if fatalError == nil {
+		go launcher.LauncherMain(ctx, launcherFlags)
+	} else {
+		go gui.ReportFatalError(fatalError, launcherFlags)
+	}
+
 	// On MacOS, only the first thread created by the OS is allowed to be the main GUI thread.
 	// Also, on Windows, OLE code needs to run on the main thread, which we rely on when creating shortcuts.
 	runtime.LockOSThread()
 
-	system.MustFindPaths()
-
-	flags.Setup()
-	if *flags.PrintBuildTime {
-		fmt.Print(launcher.BuildTime())
-		os.Exit(0)
-	}
-	if *flags.Debug {
-		log.SetLevel(log.TraceLevel)
-	}
-	if *flags.DeploymentConfig != "" {
-		resources.LauncherConfig.DeploymentConfigURL = *flags.DeploymentConfig
-	}
-	places.DetectPlaces(*flags.Roaming)
-
-	flags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName, *flags.LogIndexCounter, *flags.LogInstanceCounter))
-	logInitialInfo()
-	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
-
-	printProxySettings()
-}
-
-func main() {
-	defer misc.LogPanic()
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	go runLauncher(ctx)
-	err := gui.Main(ctx, cancelFunc, resources.LauncherConfig.BrandingName, !*flags.Uninstall)
+	err := gui.Main(ctx, cancelFunc, resources.LauncherConfig.BrandingName, !launcherFlags.Uninstall && fatalError == nil)
 	if err != nil {
-		log.Errorf("gui.Main() failed: %v\n", err)
-		log.Exit(1)
+		log.Fatalf("gui.Main() failed: %v\n", err)
 	}
 
 	log.Info("End of main().")
 	log.Exit(0)
 }
 
-func runLauncher(ctx context.Context) {
-	gui.WaitUntilReady()
-	defer gui.Quit()
-	defer handlePanic()
+func initializeEnvironment() (*flags.LauncherFlags, error) {
+	registerSignalOverrides()
 
-	places.MakePlaces()
-	defer launcher.Linger()
-	locking.AcquireLock(ctx)
-	defer locking.ReleaseLock()
+	launcherFlags, argumentError, flagError, pathError, placesError := parseEnvironment()
+	launcherFlags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName,
+		launcherFlags.LogIndexCounter, launcherFlags.LogInstanceCounter))
+	logState(argumentError, flagError, pathError)
 
-	if *flags.Uninstall {
-		log.Info("Goal of this launcher instance: Uninstall.")
-		launcher.UninstallPrompt()
-	} else if !launcher.IsInstanceInstalled() {
-		if launcher.HasInstallation() {
-			if launcher.IsInstallationOutdated() {
-				log.Info("Goal of this launcher instance: Reinstall.")
-				launcher.Install()
-			} else {
-				log.Info("Goal of this launcher instance: Act as shortcut.")
-				if !launcher.RestartWithInstalledBinary() {
-					log.Info("Trying to reinstall instead.")
-					launcher.Install()
-				}
-			}
-		} else {
-			log.Info("Goal of this launcher instance: Install.")
-			launcher.Install()
-		}
+	printProxySettings()
+	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
+	return launcherFlags, misc.NewNestedErrorFromFirstCause(argumentError, flagError, pathError, placesError)
+}
+
+func parseEnvironment() (launcherFlags *flags.LauncherFlags, argumentError, flagError, pathError, placesError error) {
+	launcherFlags = &flags.LauncherFlags{}
+	if len(os.Args) < 1 {
+		argumentError = fmt.Errorf("Your system launched the application with %d arguments, but there must be at least 1", len(os.Args))
 	} else {
-		log.Info("Goal of this launcher instance: Run.")
-		launcher.Run(ctx)
+		launcherFlags, flagError = processFlags(os.Args)
+		pathError = system.FindPaths()
+		placesError = places.DetectPlaces(launcherFlags.Roaming)
 	}
-
-	log.Info("End of runLauncher().")
+	return launcherFlags, argumentError, flagError, pathError, placesError
 }
 
-func handlePanic() {
-	if r := recover(); r != nil {
-		if err, ok := r.(error); ok && errors.Is(err, context.Canceled) {
-			log.Infof("Quitting: %v", err)
+func registerSignalOverrides() {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT, syscall.SIGTERM, syscall.SIGHUP)
+	go handleSignals(sigChan)
+}
+
+func handleSignals(sigChan chan os.Signal) {
+	for {
+		s, ok := <-sigChan
+		if ok {
+			log.Errorf("Received signal \"%v\". Printing stacks and quitting.", s)
 		} else {
-			defer presentError(getPanicMessage(r))
-			// The stack printed when panic() is not recover()ed bypasses our file-logging, so log it explicitly here.
-			log.Panicf("Exiting due to unrecoverable panic: %v\n%v", r, misc.TryRemoveLines(string(debug.Stack()), 1, 3))
+			log.Errorf("Signal channel has been closed unexpectedly. Printing stacks and quitting.")
 		}
+		log.Info("\n")
+		pprof.Lookup("goroutine").WriteTo(log.StandardLogger().Out, 2)
+		log.Exit(1)
 	}
 }
 
-func getPanicMessage(r interface{}) string {
-	message := "Something went wrong. The program will now close."
-
-	userError, ok := r.(misc.IUserError)
-	if ok && !misc.IsNil(userError) {
-		return userError.UserError()
+func processFlags(args []string) (launcherFlags *flags.LauncherFlags, err error) {
+	launcherFlags, err = flags.Setup(args)
+	if launcherFlags.PrintBuildTime {
+		fmt.Print(launcher.BuildTime())
+		os.Exit(0)
 	}
-
-	fileSystemError, ok := r.(*system.FileSystemError)
-	if ok && fileSystemError != nil {
-		if os.IsPermission(fileSystemError.CausingError) {
-			return "Error: Insufficient permissions to write files in your own user directory. " +
-				"Please contact your system administrator and verify that you have full access to your user directory."
-		} else {
-			return "Error: Your machine's file system denied a required operation. The error received was: " + fileSystemError.CausingError.Error()
-		}
+	if launcherFlags.Debug {
+		log.SetLevel(log.TraceLevel)
 	}
-
-	if !strings.HasSuffix(message, ".") && !strings.HasSuffix(message, "!") && !strings.HasSuffix(message, "?") {
-		message += "."
+	if launcherFlags.DeploymentConfig != "" {
+		resources.LauncherConfig.DeploymentConfigURL = launcherFlags.DeploymentConfig
 	}
-
-	return message
+	return launcherFlags, err
 }
 
-func presentError(message string) {
-	if gui.BlockingDialog("Error", fmt.Sprintf("%s\n\nYou can find technical information in the log files under\n%s\n",
-		message, places.GetAppLogFolderPath()), []string{"Open log folder and close", "Close"}, 1) == 0 {
-		log.Infof("Showing file \"%s\" in file manager.", logging.GetLogFilePath())
-		err := system.ShowLocalFileInFileManager(logging.GetLogFilePath())
-		if err != nil {
-			log.Errorf("Error showing file \"%s\" in file manager: %v", logging.GetLogFilePath(), err)
-		}
+func logState(argumentError, flagError, pathError error) {
+	log.Infof("Git commit of this build: Tag: %s; Hash: %s; Branch: %s", gitDescription, gitHash, gitBranch)
+
+	if filepath.Base(system.GetProgramPath()) != resources.LauncherConfig.BinaryName {
+		log.Warnf("Program name on disk (\"%s\") has diverged from configured program name (\"%s\").",
+			filepath.Base(system.GetProgramPath()), resources.LauncherConfig.BinaryName)
 	}
+
+	if argumentError != nil {
+		log.Errorf("Fatal: Parsing arguments failed: %v", argumentError)
+	}
+
+	if flagError != nil {
+		log.Errorf("Fatal: Parsing flags failed: %v", flagError)
+	}
+
+	if pathError != nil {
+		log.Errorf("Fatal: Determining binary path failed: %v", pathError)
+	}
+
+	places.ReportResults()
 }
 
 func printProxySettings() {
@@ -196,15 +176,4 @@ func setGuiStatusMessage(s gui.Stage, text string) {
 	if text != "" {
 		gui.SetStageText(s, text)
 	}
-}
-
-func logInitialInfo() {
-	log.Infof("Git commit of this build: Tag: %s; Hash: %s; Branch: %s", gitDescription, gitHash, gitBranch)
-
-	if filepath.Base(system.GetProgramPath()) != resources.LauncherConfig.BinaryName {
-		log.Warnf("Program name on disk (\"%s\") has diverged from configured program name (\"%s\").",
-			filepath.Base(system.GetProgramPath()), resources.LauncherConfig.BinaryName)
-	}
-
-	places.ReportResults()
 }

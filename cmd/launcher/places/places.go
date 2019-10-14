@@ -24,8 +24,8 @@ func MakePlaces() {
 	}
 }
 
-func DetectPlaces(useRoamingOnly bool) {
-	detectPlaces(useRoamingOnly)
+func DetectPlaces(useRoamingOnly bool) error {
+	return detectPlaces(useRoamingOnly)
 }
 
 func ReportResults() {
@@ -45,6 +45,9 @@ func GetAppLocalDataFolderPath() string {
 }
 
 func GetAppLogFolderPath() string {
+	if localCacheFolder == "" {
+		return "" // If DetectPlaces() was not called or failed, our best bet is to write logs in the working directory.
+	}
 	return filepath.Join(GetAppCacheFolderPath(), "log")
 }
 

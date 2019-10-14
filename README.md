@@ -1,6 +1,10 @@
 <p align="center"><img width="128px" height="128px" style="width:128px;height:128px" src="docs/res/trivrostlogo.png" alt="trivrost" /></p>
 
 # trivrost
+
+[![forthebadge](https://forthebadge.com/images/badges/made-with-go.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/built-with-science.svg)](https://forthebadge.com)
+
 trivrost is a repurposable application-downloader and -launcher in the form of a native executable: it updates some files on a computer and executes a command afterwards, no questions asked. It can also update itself to introduce new features without the need for user interaction. See [reasons.md](docs/reasons.md) for more background information.
 
 ## When do I need trivrost?

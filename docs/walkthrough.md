@@ -7,7 +7,7 @@
 4. Determine what bundles your project needs and put them in a folder.
 5. Generate `bundleinfo.json` files, e.g. using the `hasher` tool.
 6. Create an RSA key pair for signing and validation of files.
-7. Using the private key, create signatures of `bundleinfo.json` files as well as of `deployment-config.json` using `scripts/signer`.
+7. Using the private key, create signatures of `bundleinfo.json` files as well as of `deployment-config.json` using `out/signer`.
 8. Copy the public key to `cmd/launcher/resources/public-rsa-keys.pem`.
 9. Run `make` and `make bundle`.
 10. Set up a webserver.
@@ -22,15 +22,15 @@ trivrost needs the following files to generate the required sources automaticall
 * [icon.icns](glossary.md#icon) → embedded into the application bundle as the application icon for MacOS.
 * [public-rsa-keys.pem](security.md) → embedded into the binary to verify signed updates with.
 
-## Hashing bundles
-Run `make tools` to create a binary called `hasher`. It will be created under `out/` and takes a unique bundle name and a path as an argument to create a `bundleinfo.json` file for and in the directory at given path. Example call: `out\hasher myapp D:\bundles\myapp` will generate a `bundleinfo.json` for `D:\bundles\myapp` at `D:\bundles\myapp\bundleinfo.json`. The unique bundle name is a [security feature](security.md#timestamps).
+## Hashing and signing bundles
+When executing `make tools`, a binary called `hasher` will be created that takes a directory as an argument and creates the `bundleinfo.json` file. A utility called `signer` is also built which takes a private key and a list of files to sign.
 
 ## Signing files
-All `bundleinfo.json` files as well as the `deployment-config.json` file require a `.signature`-counterpart to verify the validity of their contents. A helper-script `scripts/signer` is provided which takes a private key and a list of files to sign using `openssl`. On Windows, you need to run the script via Cygwin. Here is an example for how to generate a key pair and sign a `bundleinfo.json`:
+All `bundleinfo.json` files as well as the `deployment-config.json` file require a `.signature`-counterpart to verify the validity of their contents. To generate these files, you can use the utility `out/signer` which takes a private key and a list of files to sign using `openssl`. Here is an example for how to generate a key pair and sign a `bundleinfo.json`:
 ```sh
 openssl genrsa -out private-rsa-key.pem 4096 # Generate private key
 openssl rsa -in private-rsa-key.pem -pubout -out public-rsa-keys.pem # Extract public key
-scripts\signer private-rsa-key.pem D:\bundles\myapp\bundleinfo.json
+out\signer private-rsa-key.pem D:\bundles\myapp\bundleinfo.json
 ```
 Make sure that noone but you has access to `private-rsa-key.pem`. Copy `public-rsa-keys.pem` to `cmd/launcher/resources/`. See [security.md](security.md#Signing) for more info.
 

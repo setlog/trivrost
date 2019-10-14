@@ -21,6 +21,9 @@ type LogFormatter struct {
 }
 
 func (lf *LogFormatter) Format(entry *log.Entry) ([]byte, error) {
+	if (entry.Message == "" || entry.Message == "\n") && isLevelUncritical(entry.Level) && len(entry.Data) == 0 {
+		return []byte("\n"), nil
+	}
 	messageTypeShort := getMessageTypeShort(entry.Level)
 	time := colorize(getTimeString(), color.FgHiBlack, true)
 	logMessage := misc.StripTrailingLineBreak(entry.Message)
@@ -29,9 +32,10 @@ func (lf *LogFormatter) Format(entry *log.Entry) ([]byte, error) {
 		codeLocationHint = getCodeLocationHint(entry)
 	}
 	fields := getSortedFields(entry)
+	logMessage, extraBreaks := misc.SplitTrailing(logMessage, "\n")
 	printMessage := misc.JoinNonEmpty([]string{messageTypeShort, time, logMessage, codeLocationHint, fields}, " ")
 	stackTrace := getStackTrace(entry)
-	return []byte(printMessage + "\n" + stackTrace), nil
+	return []byte(printMessage + "\n" + extraBreaks + stackTrace), nil
 }
 
 func getTimeString() string {
@@ -123,6 +127,10 @@ func getMessageTypeShort(level log.Level) string {
 	default:
 		return colorize("?", color.FgRed, true)
 	}
+}
+
+func isLevelUncritical(level log.Level) bool {
+	return level == log.TraceLevel || level == log.DebugLevel || level == log.InfoLevel
 }
 
 func getStackTrace(entry *log.Entry) string {

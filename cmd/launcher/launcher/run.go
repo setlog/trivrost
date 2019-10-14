@@ -16,7 +16,7 @@ import (
 	"github.com/setlog/trivrost/pkg/launcher/config"
 )
 
-func Run(ctx context.Context) {
+func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	doHousekeeping()
 
 	handler := gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)
@@ -38,9 +38,9 @@ func Run(ctx context.Context) {
 	updater.RetrieveDeploymentConfig(resources.LauncherConfig.DeploymentConfigURL)
 
 	updater.SetIgnoredSelfUpdateBundleInfoSHAs(resources.LauncherConfig.IgnoreLauncherBundleInfoHashes)
-	if !(*flags.SkipSelfUpdate || IsInstanceInstalledSystemWide()) {
+	if !(launcherFlags.SkipSelfUpdate || IsInstanceInstalledSystemWide()) {
 		if updater.UpdateSelf() {
-			locking.Restart(true)
+			locking.Restart(true, launcherFlags)
 		}
 	}
 	if updater.DetermineBundleUpdateRequired(places.GetBundleFolderPath(), places.GetSystemWideBundleFolderPath()) {
@@ -48,7 +48,7 @@ func Run(ctx context.Context) {
 		updater.InstallBundleUpdates()
 	}
 
-	launch(&updater.GetDeploymentConfig().Execution)
+	launch(&updater.GetDeploymentConfig().Execution, launcherFlags)
 }
 
 func handleStatusChange(status bundle.UpdaterStatus, expectedProgressUnits uint64) {
@@ -74,7 +74,7 @@ func doHousekeeping() {
 	deleteLeftoverBinaries()
 }
 
-func launch(execution *config.ExecutionConfig) {
-	executeCommands(execution.Commands)
+func launch(execution *config.ExecutionConfig, launcherFlags *flags.LauncherFlags) {
+	executeCommands(execution.Commands, launcherFlags)
 	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
 }
