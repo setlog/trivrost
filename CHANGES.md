@@ -1,6 +1,6 @@
 # Release-Changelog
 
-## 1.3.2 (TBD)
+## 1.3.2 (2019-10-14)
 ### Features
 * trivrost will now handle the following signals, logging the stack trace of all goroutines before terminating: `SIGINT`, `SIGQUIT`, `SIGABRT`, `SIGTERM`, `SIGHUP`.
 ### Fixes
