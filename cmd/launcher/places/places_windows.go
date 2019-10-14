@@ -1,6 +1,7 @@
 package places
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"

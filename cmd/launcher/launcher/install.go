@@ -87,7 +87,7 @@ func Install(launcherFlags *flags.LauncherFlags) {
 	waitGroup.Add(1)
 	prepareShortcutInstallation()
 	ui.QueueMain(func() { // Not UI functionality, but required to run on the main thread to be reliable on all OSes.
-		installShortcuts(targetProgramPath)
+		installShortcuts(targetProgramPath, launcherFlags)
 		waitGroup.Done()
 	})
 	waitGroup.Wait()
@@ -109,11 +109,11 @@ func RestartWithInstalledBinary(launcherFlags *flags.LauncherFlags) bool {
 	return true
 }
 
-func installShortcuts(targetPath string) {
+func installShortcuts(targetPath string, launcherFlags *flags.LauncherFlags) {
 	log.Info("Installing launcher shortcuts.")
-	createLaunchDesktopShortcut(targetPath)
-	createLaunchStartMenuShortcut(targetPath)
-	createUninstallStartMenuShortcut(targetPath)
+	createLaunchDesktopShortcut(targetPath, launcherFlags)
+	createLaunchStartMenuShortcut(targetPath, launcherFlags)
+	createUninstallStartMenuShortcut(targetPath, launcherFlags)
 }
 
 func getTargetProgramPath() string {

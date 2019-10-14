@@ -65,19 +65,19 @@ func installLauncherIcon() {
 	resources.LauncherIcon = nil // Icon can be pretty large. No reason to keep it around.
 }
 
-func createLaunchDesktopShortcut(destination string) {
+func createLaunchDesktopShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	shortcutLocation := places.GetLaunchDesktopShortcutPath()
 	desktopFileData := getDesktopFileData(misc.ExtensionlessFileName(shortcutLocation), destination)
 	createFreeDesktopStandardShortcut(shortcutLocation, desktopFileData)
 }
 
-func createLaunchStartMenuShortcut(destination string) {
+func createLaunchStartMenuShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	shortcutLocation := places.GetLaunchStartMenuShortcutPath()
 	desktopFileData := getDesktopFileData(misc.ExtensionlessFileName(shortcutLocation), destination)
 	createFreeDesktopStandardShortcut(shortcutLocation, desktopFileData)
 }
 
-func createUninstallStartMenuShortcut(destination string) {
+func createUninstallStartMenuShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	shortcutLocation := places.GetUninstallStartMenuShortcutPath()
 	desktopFileData := getDesktopFileData(misc.ExtensionlessFileName(shortcutLocation), destination+" -"+flags.UninstallFlag)
 	createFreeDesktopStandardShortcut(shortcutLocation, desktopFileData)

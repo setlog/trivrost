@@ -3,23 +3,24 @@ package launcher
 import (
 	"os/exec"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/places"
+	log "github.com/sirupsen/logrus"
 )
 
 func prepareShortcutInstallation() {
 }
 
-func createLaunchDesktopShortcut(destination string) {
+func createLaunchDesktopShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	shortcutLocation := places.GetLaunchDesktopShortcutPath()
 	createShortcutOSX(shortcutLocation, destination)
 }
 
-func createLaunchStartMenuShortcut(destination string) {
+func createLaunchStartMenuShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	// Not on OSX
 }
 
-func createUninstallStartMenuShortcut(destination string) {
+func createUninstallStartMenuShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	// Not on OSX
 }
 
