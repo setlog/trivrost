@@ -17,23 +17,23 @@ import (
 func prepareShortcutInstallation() {
 }
 
-func createLaunchDesktopShortcut(destination string) {
+func createLaunchDesktopShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	shortcutLocation := places.GetLaunchDesktopShortcutPath()
-	createShortcutWindows(shortcutLocation, destination, getArgs(nil))
+	createShortcutWindows(shortcutLocation, destination, getArgs(nil, launcherFlags))
 }
 
-func createLaunchStartMenuShortcut(destination string) {
+func createLaunchStartMenuShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	shortcutLocation := places.GetLaunchStartMenuShortcutPath()
-	createShortcutWindows(shortcutLocation, destination, getArgs(nil))
+	createShortcutWindows(shortcutLocation, destination, getArgs(nil, launcherFlags))
 }
 
-func createUninstallStartMenuShortcut(destination string) {
+func createUninstallStartMenuShortcut(destination string, launcherFlags *flags.LauncherFlags) {
 	shortcutLocation := places.GetUninstallStartMenuShortcutPath()
-	createShortcutWindows(shortcutLocation, destination, getArgs([]string{"-" + flags.UninstallFlag}))
+	createShortcutWindows(shortcutLocation, destination, getArgs([]string{"-" + flags.UninstallFlag}, launcherFlags))
 }
 
-func getArgs(baseArgs []string) string {
-	if *flags.Roaming {
+func getArgs(baseArgs []string, launcherFlags *flags.LauncherFlags) string {
+	if launcherFlags.Roaming {
 		baseArgs = append(baseArgs, "-"+flags.RoamingFlag)
 	}
 	return strings.Join(baseArgs, " ")
