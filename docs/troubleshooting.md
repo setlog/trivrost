@@ -1,4 +1,7 @@
 # Troubleshooting
+
+[![forthebadge](https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg)](https://forthebadge.com)
+
 Here is a list of challenges to expect and how we were able to manage them.
 
 - trivrost does not start, the system shows an error message saying the launcher cannot be run or is not a valid W32 application.
