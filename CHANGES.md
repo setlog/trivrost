@@ -1,5 +1,11 @@
 # Release-Changelog
 
+## 1.3.3 (TBD)
+### Features
+* Users can now always open the log folder through a `Show logs...`-link in the lower-right corner of trivrost's progress window.
+### Changes
+* trivrost will now retry the launch of programs in the execution phase every three seconds on error.
+
 ## 1.3.2 (2019-10-14)
 ### Features
 * trivrost will now handle the following signals, logging the stack trace of all goroutines before terminating: `SIGINT`, `SIGQUIT`, `SIGABRT`, `SIGTERM`, `SIGHUP`.

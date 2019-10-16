@@ -175,7 +175,7 @@ func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow b
 			return false
 		})
 
-		makeContent()
+		panelDownloadStatus = makeContent()
 		window.SetChild(panelDownloadStatus)
 		window.SetMargined(true)
 
@@ -197,16 +197,22 @@ func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow b
 	})
 }
 
-func makeContent() {
-	panelDownloadStatus = &DownloadStatusPanel{Box: ui.NewVerticalBox()}
-	panelDownloadStatus.SetPadded(true)
+func makeContent() *DownloadStatusPanel {
+	panel := &DownloadStatusPanel{Box: ui.NewVerticalBox()}
+	panel.SetPadded(true)
 
-	panelDownloadStatus.labelStage = ui.NewLabel("Initializing...")
-	panelDownloadStatus.barTotalProgress = ui.NewProgressBar()
-	panelDownloadStatus.barTotalProgress.SetValue(-1)
-	panelDownloadStatus.labelStatus = ui.NewLabel("")
+	panel.labelStage = ui.NewLabel("Initializing...")
+	panel.barTotalProgress = ui.NewProgressBar()
+	panel.barTotalProgress.SetValue(-1)
+	panel.labelStatus = ui.NewLabel("")
 
-	panelDownloadStatus.Box.Append(panelDownloadStatus.labelStage, false)
-	panelDownloadStatus.Box.Append(panelDownloadStatus.barTotalProgress, false)
-	panelDownloadStatus.Box.Append(panelDownloadStatus.labelStatus, false)
+	panel.Box.Append(panel.labelStage, false)
+	panel.Box.Append(panel.barTotalProgress, false)
+
+	hBox := ui.NewHorizontalBox()
+	hBox.Append(panel.labelStatus, false)
+	hBox.Append(newLinkLabel("Show logs...", showLogFolder), true)
+	panel.Box.Append(hBox, false)
+
+	return panel
 }

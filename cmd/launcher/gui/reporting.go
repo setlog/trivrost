@@ -68,10 +68,14 @@ func getPanicMessage(r interface{}) string {
 func presentError(message string, dismissGuiPrompts bool) {
 	if BlockingDialog("Error", fmt.Sprintf("%s\n\nYou can find technical information in the log files under\n%s\n",
 		message, places.GetAppLogFolderPath()), []string{"Open log folder and close", "Close"}, 1, dismissGuiPrompts) == 0 {
-		log.Infof("Showing file \"%s\" in file manager.", logging.GetLogFilePath())
-		err := system.ShowLocalFileInFileManager(logging.GetLogFilePath())
-		if err != nil {
-			log.Errorf("Error showing file \"%s\" in file manager: %v", logging.GetLogFilePath(), err)
-		}
+		showLogFolder()
+	}
+}
+
+func showLogFolder() {
+	log.Infof("Showing file \"%s\" in file manager.", logging.GetLogFilePath())
+	err := system.ShowLocalFileInFileManager(logging.GetLogFilePath())
+	if err != nil {
+		log.Errorf("Error showing file \"%s\" in file manager: %v", logging.GetLogFilePath(), err)
 	}
 }
