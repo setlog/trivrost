@@ -1,6 +1,7 @@
 package hashing
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -22,7 +23,7 @@ var infoForContent = config.FileInfoMap{
 }
 
 func TestMustHashRelatively(t *testing.T) {
-	fileMap := mustHashRelatively(dummyListDirectory, dummyReadFile, dummyStatFile, "x")
+	fileMap := mustHashRelatively(context.Background(), dummyListDirectory, dummyReadFile, dummyStatFile, "x")
 	expected := config.FileInfoMap{"foo": infoForContent["abc"], filepath.FromSlash("foo/bar"): infoForContent["def"], filepath.FromSlash("fuu/baaar"): infoForContent["ghi"], filepath.FromSlash("fuu/moo/meow/bla"): infoForContent["jkl"]}
 	if !reflect.DeepEqual(fileMap, expected) {
 		t.Errorf("Mismatch!\nGot:\n%v\nExpected:\n%v\n", fileMap, expected)
