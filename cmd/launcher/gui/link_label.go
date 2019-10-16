@@ -18,6 +18,7 @@ type linkAreaHandler struct {
 	attributedString *ui.AttributedString
 	defaultFont      *ui.FontDescriptor
 	onClickFunc      func()
+	isInHoverEffect  bool
 }
 
 func getDefaultFont() *ui.FontDescriptor {
@@ -48,13 +49,16 @@ func (ah *linkAreaHandler) MouseEvent(a *ui.Area, me *ui.AreaMouseEvent) {
 	}
 }
 
-func (ah *linkAreaHandler) MouseCrossed(a *ui.Area, left bool) {
-	if left {
-		ah.attributedString.SetAttribute(linkColor, 0, len(ah.attributedString.String()))
-	} else {
-		ah.attributedString.SetAttribute(linkColorHover, 0, len(ah.attributedString.String()))
+func (ah *linkAreaHandler) MouseCrossed(a *ui.Area, didCursorLeaveArea bool) {
+	if didCursorLeaveArea == ah.isInHoverEffect {
+		if didCursorLeaveArea {
+			ah.attributedString.SetAttribute(linkColor, 0, len(ah.attributedString.String()))
+		} else {
+			ah.attributedString.SetAttribute(linkColorHover, 0, len(ah.attributedString.String()))
+		}
+		ah.isInHoverEffect = !didCursorLeaveArea
+		a.QueueRedrawAll()
 	}
-	a.QueueRedrawAll()
 }
 
 func (ah *linkAreaHandler) DragBroken(a *ui.Area) {}
