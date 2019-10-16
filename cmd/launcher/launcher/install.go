@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/resources"
@@ -62,7 +63,20 @@ func IsInstallationOutdated() bool {
 		return true
 	}
 	installationBuildTime := strings.Trim(string(output), " \n\t\r")
-	isInstallationOutdated := strings.Compare(BuildTime(), installationBuildTime) > 0
+
+	const buildTimeFormat = "2006-01-02 15:04:05 MST"
+	timeOfRunning, err := time.Parse(buildTimeFormat, BuildTime())
+	if err != nil {
+		log.Errorf("Parsing build time of running binary failed: %v", err)
+		return false
+	}
+	timeOfInstalled, err := time.Parse(buildTimeFormat, installationBuildTime)
+	if err != nil {
+		log.Errorf("Parsing build time of installed binary failed: %v", err)
+		return true
+	}
+
+	isInstallationOutdated := timeOfInstalled.Before(timeOfRunning)
 	if isInstallationOutdated {
 		log.Infof("Installation Build Time \"%s\" predates Instance Build Time \"%s\".", installationBuildTime, BuildTime())
 	} else {
