@@ -98,7 +98,7 @@ func MatchesPlatform(platform string, os string, arch string) bool {
 	return (platform == os) || (platform == os+"-"+arch) || (platform == arch)
 }
 
-func MustStartProcess(binaryPath string, workingDirectoryPath string, args []string, extraEnvironmentVariables map[string]*string, passStreams bool) (*exec.Cmd, *ProcessSignature) {
+func StartProcess(binaryPath string, workingDirectoryPath string, args []string, extraEnvironmentVariables map[string]*string, passStreams bool) (*exec.Cmd, *ProcessSignature, error) {
 	command := exec.Command(binaryPath, args...)
 	command.Dir = MustGetAbsolutePath(workingDirectoryPath)
 	command.Env = buildEnvironmentVariables(extraEnvironmentVariables)
@@ -110,7 +110,7 @@ func MustStartProcess(binaryPath string, workingDirectoryPath string, args []str
 
 	err := command.Start()
 	if err != nil {
-		panic(fmt.Sprintf("Could not start process \"%s\" with working directory \"%s\": %v", binaryPath, workingDirectoryPath, err))
+		return command, nil, fmt.Errorf("Could not start process \"%s\" with working directory \"%s\": %w", binaryPath, workingDirectoryPath, err)
 	}
 
 	procSig := &ProcessSignature{Pid: command.Process.Pid}
@@ -119,7 +119,7 @@ func MustStartProcess(binaryPath string, workingDirectoryPath string, args []str
 		log.WithFields(log.Fields{"pid": procSig.Pid}).Warnf("Could not get creation time of created process: %v", err)
 	}
 
-	return command, procSig
+	return command, procSig, nil
 }
 
 func buildEnvironmentVariables(extraEnvs map[string]*string) []string {

@@ -64,7 +64,7 @@ func (handler *GuiDownloadProgressHandler) HandleFailDownload(fromURL string, wo
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
-	NotifyProblem("Security error")
+	NotifyProblem("Security error", false)
 }
 
 func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, err error) {
@@ -72,7 +72,7 @@ func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, er
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
-	NotifyProblem("Cannot reach server")
+	NotifyProblem("Cannot reach server", false)
 }
 
 func (handler *GuiDownloadProgressHandler) HandleBadHttpResponse(fromURL string, code int) {
@@ -80,7 +80,7 @@ func (handler *GuiDownloadProgressHandler) HandleBadHttpResponse(fromURL string,
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
-	NotifyProblem(fmt.Sprintf("HTTP Status %d", code))
+	NotifyProblem(fmt.Sprintf("HTTP Status %d", code), false)
 }
 
 func (handler *GuiDownloadProgressHandler) HandleReadError(fromURL string, err error) {
@@ -88,5 +88,5 @@ func (handler *GuiDownloadProgressHandler) HandleReadError(fromURL string, err e
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
-	NotifyProblem("Connection unstable")
+	NotifyProblem("Connection unstable", false)
 }
