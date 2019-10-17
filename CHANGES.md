@@ -5,6 +5,7 @@
 * Users can now always open the log folder through a `Show logs...`-link in the lower-right corner of trivrost's progress window.
 ### Changes
 * trivrost will now retry the launch of programs in the execution phase every three seconds on error.
+* When informing about bad command line arguments via GUI, display the most common arguments as a hint.
 
 ## 1.3.2 (2019-10-14)
 ### Features
