@@ -1,6 +1,7 @@
 package locking
 
 import (
+	"context"
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
@@ -16,7 +17,7 @@ func Restart(forwardLauncherLockOwnership bool, launcherFlags *flags.LauncherFla
 
 // Starts a new instance of the calling executable, writes the new process signature into the launcher signature file and quits the current instance.
 func RestartWithBinary(forwardLauncherLockOwnership bool, binaryPath string, launcherFlags *flags.LauncherFlags) {
-	hash, _, hashErr := hashing.CalculateSha256(binaryPath)
+	hash, _, hashErr := hashing.CalculateSha256(context.TODO(), binaryPath)
 	log.WithFields(log.Fields{"forwardLauncherLockOwnership": forwardLauncherLockOwnership, "binaryPath": binaryPath, "hash": hash, "hashErr": hashErr}).Info("Restarting.")
 	absoluteBinaryPath := system.MustGetAbsolutePath(binaryPath)
 	workingDirectory := filepath.Dir(absoluteBinaryPath)

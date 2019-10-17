@@ -3,6 +3,7 @@
 ## 1.3.3 (TBD)
 ### Features
 * Users can now always open the log folder through a `Show logs...`-link in the lower-right corner of trivrost's progress window.
+* trivrost can now be closed by the user during the `DetermineLocalLauncherVersion` and `DetermineLocalBundleVersions` stages, where it would previously block until the stage completed.
 ### Changes
 * trivrost will now retry the launch of programs in the execution phase every three seconds on error.
 * When informing about bad command line arguments via GUI, display the most common arguments as a hint.
