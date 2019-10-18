@@ -29,7 +29,7 @@ func (u *Updater) UpdateSelf() (needsRestart bool) {
 func (u *Updater) updateProgram(programPath string) (needsRestart bool) {
 	log.Infof("Calculating local hashes.")
 	u.announceStatus(DetermineLocalLauncherVersion, 0)
-	presentState := hashing.MustHash(programPath)
+	presentState := hashing.MustHash(u.ctx, programPath)
 
 	log.Infof("Checking against latest version.")
 	u.announceStatus(RetrieveRemoteLauncherVersion, 0)

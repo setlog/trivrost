@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -39,7 +40,7 @@ func main() {
 func mustHashDirectory(uniqueBundleName, pathToHash, hashesFile string) {
 	log.WithFields(log.Fields{"uniqueBundleName": uniqueBundleName, "pathToHash": pathToHash, "hashesFile": hashesFile}).Info("Hashing directory.")
 	bundleInfo := &config.BundleInfo{
-		BundleFiles:      hashing.MustHash(pathToHash),
+		BundleFiles:      hashing.MustHash(context.Background(), pathToHash),
 		Timestamp:        time.Now().UTC().Format(timeFormat),
 		UniqueBundleName: uniqueBundleName,
 	}

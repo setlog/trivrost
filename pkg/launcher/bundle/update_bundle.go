@@ -56,7 +56,7 @@ func (u *Updater) determineLocalBundleVersions() {
 func (u *Updater) makeBundleUpdateConfigFromBundle(bundleConfig config.BundleConfig, bundleFolderPath string) *BundleUpdateInfo {
 	bundleUpdateConfig := BundleUpdateInfo{BundleConfig: bundleConfig}
 	sw := chronometry.NewStartedStopwatch()
-	bundleUpdateConfig.PresentState = hashing.MustHash(filepath.Join(bundleFolderPath, bundleConfig.LocalDirectory))
+	bundleUpdateConfig.PresentState = hashing.MustHash(u.ctx, filepath.Join(bundleFolderPath, bundleConfig.LocalDirectory))
 	log.Infof("Hashing directory of bundle \"%s\" took %v.", bundleConfig.LocalDirectory, sw.TakeLapTime())
 	return &bundleUpdateConfig
 }

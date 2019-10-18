@@ -19,11 +19,20 @@ func TestWordWrapIgnoreNewLine(t *testing.T) {
 		{"hello world", 6, "hello\nworld"},
 		{"hello world", 5, "hello\nworld"},
 		{"hello world", 4, "hello\nworld"},
+
+		{"\xc2\xa0\xc2\xa0what\xc2\xa0gives\xc2\xa0\xc2\xa0", 1, "\xc2\xa0\xc2\xa0what\xc2\xa0gives\xc2\xa0\xc2\xa0"},
+
 		{"日 本 語 日 本 語", 6, "日 本 語\n日 本 語"},
 		{"日 本 語 日 本 語", 5, "日 本 語\n日 本 語"},
 		{"日 本 語 日 本 語", 4, "日 本\n語 日\n本 語"},
 		{"日 本 語 日 本 語", 3, "日 本\n語 日\n本 語"},
 		{"日\n本 語\n日 本 語", 5, "日 本 語\n日 本 語"},
+
+		{"   日   本 語   日 本 語", 6, "日 本 語\n日 本 語"},
+		{"   日   本 語   日 本 語", 5, "日 本 語\n日 本 語"},
+		{"   日   本 語   日 本 語", 4, "日 本\n語 日\n本 語"},
+		{"   日   本 語   日 本 語", 3, "日 本\n語 日\n本 語"},
+		{"   日  \n 本 語   \n日 本 語", 5, "日 本 語\n日 本 語"},
 	}
 	for i, test := range tests {
 		result := misc.WordWrapIgnoreNewLine(test.text, test.lineWidth)

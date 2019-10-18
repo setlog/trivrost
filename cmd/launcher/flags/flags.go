@@ -45,9 +45,9 @@ const (
 func Setup(args []string) (*LauncherFlags, error) {
 	launcherFlags := LauncherFlags{nextLogIndex: -1}
 	flagSet := flag.NewFlagSet(args[0], flag.ContinueOnError)
-	flagSet.BoolVar(&launcherFlags.Uninstall, UninstallFlag, false, "Flag to uninstall the launcher and its bundles on the local machine.")
-	flagSet.BoolVar(&launcherFlags.Debug, DebugFlag, false, "Enable debug log level.")
-	flagSet.BoolVar(&launcherFlags.SkipSelfUpdate, SkipSelfUpdateFlag, false, "Never perform a self-update.")
+	flagSet.BoolVar(&launcherFlags.Uninstall, UninstallFlag, false, "Remove the launcher and its bundles from the local machine.")
+	flagSet.BoolVar(&launcherFlags.Debug, DebugFlag, false, "Write verbose information to the log files.")
+	flagSet.BoolVar(&launcherFlags.SkipSelfUpdate, SkipSelfUpdateFlag, false, "Skip any updates to this launcher.")
 	flagSet.BoolVar(&launcherFlags.NoStreamPassing, NoStreamPassingFlag, false, "Do not relay standard streams to executed commands.")
 	flagSet.BoolVar(&launcherFlags.Roaming, RoamingFlag, false, "Put all files which would go under %LOCALAPPDATA% on Windows to %APPDATA% instead.")
 	flagSet.BoolVar(&launcherFlags.PrintBuildTime, PrintBuildTimeFlag, false, "Print the output of 'date -u \"+%Y-%m-%d %H:%M:%S UTC\"' from the time the binary "+
@@ -59,12 +59,11 @@ func Setup(args []string) (*LauncherFlags, error) {
 	flagSet.BoolVar(&launcherFlags.DismissGuiPrompts, DismissGuiPromptsFlag, false, "Automatically dismiss GUI prompts.")
 	flagSet.IntVar(&launcherFlags.LogIndexCounter, LogIndexCounterFlag, -1, "Number to increment when restarting.")
 	flagSet.IntVar(&launcherFlags.LogInstanceCounter, LogInstanceCounterFlag, 0, "Number to increment when started by user.")
-
 	setDeprecatedFlags(flagSet)
 
 	err := flagSet.Parse(args[1:])
 	if err != nil {
-		return &launcherFlags, err
+		return &launcherFlags, withSuggestions(err, flagSet, []string{DebugFlag, RoamingFlag, SkipSelfUpdateFlag, UninstallFlag})
 	}
 
 	if !launcherFlags.DismissGuiPrompts && launcherFlags.AcceptInstall {
@@ -76,6 +75,21 @@ func Setup(args []string) (*LauncherFlags, error) {
 	}
 
 	return &launcherFlags, nil
+}
+
+func withSuggestions(err error, flagSet *flag.FlagSet, suggestFlags []string) error {
+	if len(suggestFlags) == 0 {
+		return err
+	}
+	suggestionText := ". Maybe you meant one of these:"
+	for _, suggestFlag := range suggestFlags {
+		if f := flagSet.Lookup(suggestFlag); f != nil {
+			suggestionText += "\n" + "\xc2\xa0\xc2\xa0\xc2\xa0\xc2\xa0-" + f.Name + ": " + f.Usage
+		} else {
+			suggestionText += "\n" + "\xc2\xa0\xc2\xa0\xc2\xa0\xc2\xa0-" + f.Name
+		}
+	}
+	return fmt.Errorf("%w%s", err, suggestionText)
 }
 
 // GetTransmittingFlags returns those flags which the launcher should hand to itself when restarting.

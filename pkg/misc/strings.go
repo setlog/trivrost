@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"log"
@@ -29,7 +30,7 @@ func WordWrap(text string, lineWidth int) string {
 // newline characters are treated as spaces themselves. Any words which exceed lineWidth in
 // length will move to a new line, but words themself will never be split.
 func WordWrapIgnoreNewLine(text string, lineWidth int) string {
-	words := strings.Fields(strings.TrimSpace(text))
+	words := strings.FieldsFunc(text, isBreakingSpace)
 	if len(words) == 0 {
 		return text
 	}
@@ -47,6 +48,10 @@ func WordWrapIgnoreNewLine(text string, lineWidth int) string {
 	}
 
 	return wrapped
+}
+
+func isBreakingSpace(r rune) bool {
+	return unicode.IsSpace(r) && r != 0xA0
 }
 
 func ShortString(s string, leadingCount int, trailingCount int) string {
