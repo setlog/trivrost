@@ -1,6 +1,6 @@
 # Release-Changelog
 
-## 1.3.3 (TBD)
+## 1.3.3 (2019-10-18)
 ### Features
 * Users can now always open the log folder through a `Show logs...`-link in the lower-right corner of trivrost's progress window.
 * trivrost can now be closed by the user during the `DetermineLocalLauncherVersion` and `DetermineLocalBundleVersions` stages, where it would previously block until the stage completed.
