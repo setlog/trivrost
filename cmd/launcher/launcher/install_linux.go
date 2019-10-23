@@ -48,7 +48,7 @@ func init() {
 	var err error
 	tmpl, err = template.New("freedesktop").Parse(desktopFileTemplate)
 	if err != nil {
-		panic(fmt.Sprintf("Could not pase template: %v", err))
+		panic(fmt.Sprintf("Could not parse template: %v", err))
 	}
 }
 
