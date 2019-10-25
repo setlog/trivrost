@@ -4,7 +4,7 @@ To secure trivrost, you should only use it via https. However, to increase the s
 # Timestamps
 To prevent that an attacker can make the client to install an old (and potentially vulnerable) version of a bundle or trivrost itself, the deployment-config and the bundle info files must contain timestamps. The bundle info files must also contain the `UniqueBundleName`, so the timestamps can be assigned to the correct bundle. Thus you have to make sure that the `UniqueBundleName` really is unique.
 
-If trivrost runs for the first time, it will accept any timestamp. After that, trivrost will only accept timestamps that are not older than the last accepted timestamp for the deployment-config or each of the bundle info files. To do so, trivrost will save the last accepted timestamp in a json file called `timestamps.json`. See [Where does trivrost save files?](../file_locations.md) to find out where that file is saved.
+If trivrost runs for the first time, it will accept any timestamp. After that, trivrost will only accept timestamps that are not older than the last accepted timestamp for the deployment-config or each of the bundle info files. To do so, trivrost will save the last accepted timestamp in a json file called `timestamps.json`. See [Where does trivrost save files?](file_locations.md) to find out where that file is saved.
 
 The launcher will not check the timestamp against the clock of the client or any time server. It will accept a timestamp, if it is the same as the last seen timestamp, even if the deployment-config changed. It is the responsibility of the creator of the deployment-config, to update the timestamp to enhance the security, even if staying at some fixed arbitrary value would not stop trivrost from working.
 
