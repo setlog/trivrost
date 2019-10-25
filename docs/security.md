@@ -12,7 +12,7 @@ The timestamp must have the form of `2006-01-02 15:04:05`. You can generate it o
 
 To set the timestamp automatically, the shell script [insert_timestamp](../scripts/insert_timestamp) is provided by this project. It will substitute a given string (e.g. `<TIMESTMAP>`) with a correctly formed timestamp in UTC. You should call this script in your CI/CD-pipeline before signing the deployment-config.
 
-Please note that you have to set the timestamp in the deployment-config before signing the deployment-config. For the bundle info files, the [hasher](bildung.md#Hashing-and-signing-bundles) will automatically set the timestamp in UTC.
+Please note that you have to set the timestamp in the deployment-config before signing the deployment-config. For the bundle info files, the hasher will automatically set the timestamp in UTC.
 
 # Signing
 To sign the deployment-config and bundle info files we use `RSA` with the padding algorithm `PSS`. We use `sha256` as the hashing algorithm for signing. The signatures of the deployment-config have to be stored `base64` encoded. The signatures are saved in separate files with the same url as the original files, but with a `.signature` extension. So the signature for the bundle info file `https://example.com/linux/launcher/bundleinfo.json` has the url `https://example.com/linux/launcher/bundleinfo.json.signature.`
