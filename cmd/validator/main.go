@@ -69,13 +69,18 @@ func main() {
 	}
 
 	if !skipurlcheck {
-		checkURLs(data, filePath, skipJarCheck)
+		urlMap, err := collectURLs(data, skipJarCheck)
+		if err != nil {
+			fatalf(err.Error())
+		}
+		err = checkURLs(urlMap, filePath, skipJarCheck)
+		if err != nil {
+			fatalf(err.Error())
+		}
 	}
 }
 
-func checkURLs(data []byte, filePath string, skipJarCheck bool) {
-	urlMap, success := collectURLs(data, skipJarCheck)
-
+func checkURLs(urlMap map[string]platformChecks, filePath string, skipJarCheck bool) error {
 	waitgroup := sync.WaitGroup{}
 	waitgroup.Add(len(urlMap))
 	var gotCertError bool
@@ -104,17 +109,14 @@ func checkURLs(data []byte, filePath string, skipJarCheck bool) {
 		if gotCertError {
 			fmt.Printf("\033[0;91mThere was at least one certificate-related error. The system's certificate pool may be out of date.\033[0m\n")
 		}
-		fatalf("%d out of %d tested URLs from \"%s\" do not point to valid resources.", errorCount, len(urlMap), filePath)
-		success = false
+		return fmt.Errorf("%d out of %d tested URLs from \"%s\" do not point to valid resources", errorCount, len(urlMap), filePath)
 	}
-	if !success {
-		os.Exit(1)
-	}
+	return nil
 }
 
-func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]platformChecks, success bool) {
+func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]platformChecks, err error) {
 	urlMap = make(map[string]platformChecks)
-	success = true
+	failCount := 0
 	for _, os := range []string{"windows", "darwin", "linux"} {
 		for _, arch := range []string{"386", "amd64"} {
 			deploymentConfig := config.ParseDeploymentConfig(strings.NewReader(string(data)), os, arch)
@@ -125,11 +127,16 @@ func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]platformChec
 				addUrlWithDetails(urlMap, update.BundleInfoURL, platformCheck{reasonBundle, config.Platform{OS: os, Arch: arch}})
 			}
 			for _, command := range deploymentConfig.Execution.Commands {
-				success = success && collectCommandURLs(urlMap, deploymentConfig, os, arch, command, skipJarCheck)
+				if !collectCommandURLs(urlMap, deploymentConfig, os, arch, command, skipJarCheck) {
+					failCount++
+				}
 			}
 		}
 	}
-	return urlMap, success
+	if failCount > 0 {
+		err = fmt.Errorf("%d commands were malformed", failCount)
+	}
+	return urlMap, err
 }
 
 func addUrlWithDetails(urlMap map[string]platformChecks, url string, pCheck platformCheck) {
@@ -141,15 +148,27 @@ func addUrlWithDetails(urlMap map[string]platformChecks, url string, pCheck plat
 	}
 }
 
+func isAbsForOS(filePath string, os string) bool {
+	if os == system.OsWindows {
+		return filePath != "" && ((filePath[0] >= 'A' && filePath[0] <= 'Z') || (filePath[0] >= 'a' && filePath[0] <= 'z')) &&
+			(len(filePath) == 1 || (filePath[1] == ':' && (len(filePath) == 2 || filePath[2] == '\\' || filePath[2] == '/')))
+	}
+	return path.IsAbs(filePath)
+}
+
 func collectCommandURLs(urlMap map[string]platformChecks, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) (success bool) {
 	commandNameUnix := strings.ReplaceAll(command.Name, `\`, "/")
-	if path.IsAbs(commandNameUnix) || !strings.Contains(commandNameUnix, "/") {
-		return
-	}
 	bundleName := misc.FirstElementOfPath(commandNameUnix)
+	if isAbsForOS(command.Name, os) {
+		fmt.Printf("\033[0;96mNote: cannot validate absolute command path for bundle \"%s\". (Command \"%s\" for platform %s-%s is absolute path).\033[0m\n", bundleName, command.Name, os, arch)
+		return true
+	} else if !strings.Contains(commandNameUnix, "/") {
+		fmt.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\": relative command \"%s\" for platform %s-%s does not descend into a bundle directory.\033[0m\n", bundleName, command.Name, os, arch)
+		return false
+	}
 	bundleURL := getBundleURL(bundleName, deploymentConfig)
 	if bundleURL == "" {
-		fmt.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\". (Required for command \"%s\" on platform %s-%s).\033[0m\n", bundleName, command.Name, os, arch)
+		fmt.Printf("\033[0;91mNo BaseURL configured or inferable for bundle \"%s\": not set. (Required for command \"%s\" on platform %s-%s).\033[0m\n", bundleName, command.Name, os, arch)
 		return false
 	}
 	binaryURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(commandNameUnix))
