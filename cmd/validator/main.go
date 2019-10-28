@@ -69,18 +69,50 @@ func main() {
 	}
 
 	if !skipurlcheck {
-		urlMap, err := collectURLs(data, skipJarCheck)
-		if err != nil {
-			fatalf(err.Error())
+		urlMap, collectErr := collectURLs(data, skipJarCheck)
+		urlErr := checkURLs(urlMap, skipJarCheck)
+		cmdErr := checkCommands(data)
+		if collectErr != nil {
+			printError(collectErr)
 		}
-		err = checkURLs(urlMap, filePath, skipJarCheck)
-		if err != nil {
-			fatalf(err.Error())
+		if urlErr != nil {
+			printError(urlErr)
+		}
+		if cmdErr != nil {
+			printError(cmdErr)
+		}
+		if collectErr != nil || urlErr != nil || cmdErr != nil {
+			fatalf("There were errors which need to be fixed.")
 		}
 	}
 }
 
-func checkURLs(urlMap map[string]platformChecks, filePath string, skipJarCheck bool) error {
+func checkCommands(data []byte) error {
+	failCount := 0
+	for _, os := range []string{"windows", "darwin", "linux"} {
+		for _, arch := range []string{"386", "amd64"} {
+			deploymentConfig := config.ParseDeploymentConfig(strings.NewReader(string(data)), os, arch)
+			for _, command := range deploymentConfig.Execution.Commands {
+				if !isAbsForOS(command.Name, os) && !willDownloadCommandFile(command, deploymentConfig) {
+					printError(fmt.Errorf("Command \"%s\" would not be available on platform %s-%s: missing bundle entry", command.Name, os, arch))
+					failCount++
+				}
+			}
+		}
+	}
+	if failCount > 0 {
+		return fmt.Errorf("%d cases of commands' bundles not being configured to be downloaded", failCount)
+	}
+	return nil
+}
+
+func willDownloadCommandFile(command config.Command, deploymentConfig *config.DeploymentConfig) bool {
+	commandNameUnix := strings.ReplaceAll(command.Name, `\`, "/")
+	bundleName := misc.FirstElementOfPath(commandNameUnix)
+	return getBundleURL(bundleName, deploymentConfig) != ""
+}
+
+func checkURLs(urlMap map[string]platformChecks, skipJarCheck bool) error {
 	waitgroup := sync.WaitGroup{}
 	waitgroup.Add(len(urlMap))
 	var gotCertError bool
@@ -109,7 +141,7 @@ func checkURLs(urlMap map[string]platformChecks, filePath string, skipJarCheck b
 		if gotCertError {
 			fmt.Printf("\033[0;91mThere was at least one certificate-related error. The system's certificate pool may be out of date.\033[0m\n")
 		}
-		return fmt.Errorf("%d out of %d tested URLs from \"%s\" do not point to valid resources", errorCount, len(urlMap), filePath)
+		return fmt.Errorf("%d out of %d tested URLs from the deployment-config do not point to valid resources", errorCount, len(urlMap))
 	}
 	return nil
 }
@@ -127,8 +159,9 @@ func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]platformChec
 				addUrlWithDetails(urlMap, update.BundleInfoURL, platformCheck{reasonBundle, config.Platform{OS: os, Arch: arch}})
 			}
 			for _, command := range deploymentConfig.Execution.Commands {
-				if !collectCommandURLs(urlMap, deploymentConfig, os, arch, command, skipJarCheck) {
+				if err := collectCommandURLs(urlMap, deploymentConfig, os, arch, command, skipJarCheck); err != nil {
 					failCount++
+					printError(err)
 				}
 			}
 		}
@@ -156,25 +189,35 @@ func isAbsForOS(filePath string, os string) bool {
 	return path.IsAbs(filePath)
 }
 
-func collectCommandURLs(urlMap map[string]platformChecks, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) (success bool) {
+func collectCommandURLs(urlMap map[string]platformChecks, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) error {
+	checks, err := getCommandURLs(deploymentConfig, os, arch, command, skipJarCheck)
+	if err != nil {
+		return err
+	}
+	for k, v := range checks {
+		urlMap[k] = v
+	}
+	return nil
+}
+
+func getCommandURLs(deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) (map[string]platformChecks, error) {
 	commandNameUnix := strings.ReplaceAll(command.Name, `\`, "/")
 	bundleName := misc.FirstElementOfPath(commandNameUnix)
 	if isAbsForOS(command.Name, os) {
 		fmt.Printf("\033[0;96mNote: cannot validate absolute command path for bundle \"%s\". (Command \"%s\" for platform %s-%s is absolute path).\033[0m\n", bundleName, command.Name, os, arch)
-		return true
+		return nil, nil
 	} else if !strings.Contains(commandNameUnix, "/") {
-		fmt.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\": relative command \"%s\" for platform %s-%s does not descend into a bundle directory.\033[0m\n", bundleName, command.Name, os, arch)
-		return false
+		return nil, fmt.Errorf("Could not get bundle URL for bundle \"%s\": relative command \"%s\" for platform %s-%s does not descend into a bundle directory", bundleName, command.Name, os, arch)
 	}
 	bundleURL := getBundleURL(bundleName, deploymentConfig)
 	if bundleURL == "" {
-		fmt.Printf("\033[0;91mNo BaseURL configured or inferable for bundle \"%s\": not set. (Required for command \"%s\" on platform %s-%s).\033[0m\n", bundleName, command.Name, os, arch)
-		return false
+		return nil, fmt.Errorf("No BaseURL configured or inferable for bundle \"%s\": not set. (Required for command \"%s\" on platform %s-%s)", bundleName, command.Name, os, arch)
 	}
 	binaryURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(commandNameUnix))
 	if os == system.OsWindows && !strings.HasSuffix(binaryURL, ".exe") {
 		binaryURL += ".exe"
 	}
+	urlMap := make(map[string]platformChecks)
 	addUrlWithDetails(urlMap, binaryURL, platformCheck{reasonCommand, config.Platform{OS: os, Arch: arch}})
 	if !skipJarCheck {
 		if strings.HasSuffix(binaryURL, "/java.exe") || strings.HasSuffix(binaryURL, "/javaw.exe") ||
@@ -182,7 +225,7 @@ func collectCommandURLs(urlMap map[string]platformChecks, deploymentConfig *conf
 			collectJarURL(urlMap, deploymentConfig, command, os, arch)
 		}
 	}
-	return true
+	return urlMap, nil
 }
 
 func stripFirstPathElement(s string) string {
@@ -248,7 +291,16 @@ func parseFlags() (string, bool, bool) {
 	return deploymentConfigPath, *skipurlcheck, *skipJarCheck
 }
 
-func fatalf(formatMessage string, args ...interface{}) {
-	fmt.Printf("\033[0;91mFatal: "+formatMessage+"\033[0m\n", args...)
+func fatalf(msg string, args ...interface{}) {
+	fmt.Printf("\033[0;91mFatal: "+msg+".\033[0m\n", args...)
 	os.Exit(1)
+}
+
+func fatalErr(err error) {
+	fmt.Printf("\033[0;91mFatal: %v.\033[0m\n")
+	os.Exit(1)
+}
+
+func printError(err error) {
+	fmt.Printf("\033[0;91m%v.\033[0m\n")
 }
