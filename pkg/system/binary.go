@@ -9,20 +9,22 @@ import (
 var binaryPath string
 var programPath string
 
-func FindPaths() (err error) {
+func FindPaths() (err error, evalErr error) {
 	binaryPath, err = os.Executable()
 	if err != nil {
-		return fmt.Errorf("Could not get path to binary: %v", err)
+		return fmt.Errorf("Could not get path to binary: %v", err), nil
 	}
-	binaryPath, err = filepath.EvalSymlinks(binaryPath)
+	evaluatedBinaryPath, err := filepath.EvalSymlinks(binaryPath)
 	if err != nil {
-		return fmt.Errorf("Could not evaluate path to binary: %v", err)
+		evalErr = err
+	} else {
+		binaryPath = evaluatedBinaryPath
 	}
 	programPath, err = determineProgramPath()
 	if err != nil {
-		return fmt.Errorf("Could not determine path of application bundle: %v", err)
+		return fmt.Errorf("Could not determine path of application bundle for binary path \"%s\": %v", binaryPath, err), evalErr
 	}
-	return nil
+	return nil, evalErr
 }
 
 // GetProgramPath returns the path where the calling program lies.

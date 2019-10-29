@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.3.4 (2019-10-29)
+### Fixes
+* Fix failure to launch on Windows if trivrost binary is located on a mounted volume for which no unique path exists because it has no drive letter assigned. See [this Go issue](https://github.com/golang/go/issues/20506#issuecomment-318514515) for details.
+
 ## 1.3.3 (2019-10-18)
 ### Features
 * Users can now always open the log folder through a `Show logs...`-link in the lower-right corner of trivrost's progress window.
