@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -14,13 +15,15 @@ func FindPaths() (err error) {
 	if err != nil {
 		return fmt.Errorf("Could not get path to binary: %v", err)
 	}
-	binaryPath, err = filepath.EvalSymlinks(binaryPath)
+	evaluatedBinaryPath, err := filepath.EvalSymlinks(binaryPath)
 	if err != nil {
-		return fmt.Errorf("Could not evaluate path to binary: %v", err)
+		log.Printf("Could not evaluate path to binary \"%s\": %v", binaryPath, err)
+	} else {
+		binaryPath = evaluatedBinaryPath
 	}
 	programPath, err = determineProgramPath()
 	if err != nil {
-		return fmt.Errorf("Could not determine path of application bundle: %v", err)
+		return fmt.Errorf("Could not determine path of application bundle for binary path \"%s\": %v", binaryPath, err)
 	}
 	return nil
 }
