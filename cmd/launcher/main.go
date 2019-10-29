@@ -71,26 +71,26 @@ func main() {
 func initializeEnvironment() (*flags.LauncherFlags, error) {
 	registerSignalOverrides()
 
-	launcherFlags, argumentError, flagError, pathError, placesError := parseEnvironment()
+	launcherFlags, argumentError, flagError, pathError, evalError, placesError := parseEnvironment()
 	launcherFlags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName,
 		launcherFlags.LogIndexCounter, launcherFlags.LogInstanceCounter))
-	logState(argumentError, flagError, pathError)
+	logState(argumentError, flagError, pathError, evalError)
 
 	printProxySettings()
 	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
 	return launcherFlags, misc.NewNestedErrorFromFirstCause(argumentError, flagError, pathError, placesError)
 }
 
-func parseEnvironment() (launcherFlags *flags.LauncherFlags, argumentError, flagError, pathError, placesError error) {
+func parseEnvironment() (launcherFlags *flags.LauncherFlags, argumentError, flagError, pathError, evalError, placesError error) {
 	launcherFlags = &flags.LauncherFlags{}
 	if len(os.Args) < 1 {
 		argumentError = fmt.Errorf("Your system launched the application with %d arguments, but there must be at least 1", len(os.Args))
 	} else {
 		launcherFlags, flagError = processFlags(os.Args)
-		pathError = system.FindPaths()
+		pathError, evalError = system.FindPaths()
 		placesError = places.DetectPlaces(launcherFlags.Roaming)
 	}
-	return launcherFlags, argumentError, flagError, pathError, placesError
+	return launcherFlags, argumentError, flagError, pathError, evalError, placesError
 }
 
 func registerSignalOverrides() {
@@ -128,7 +128,7 @@ func processFlags(args []string) (launcherFlags *flags.LauncherFlags, err error)
 	return launcherFlags, err
 }
 
-func logState(argumentError, flagError, pathError error) {
+func logState(argumentError, flagError, pathError, evalError error) {
 	log.Infof("Git commit of this build: Tag: %s; Hash: %s; Branch: %s", gitDescription, gitHash, gitBranch)
 
 	if filepath.Base(system.GetProgramPath()) != resources.LauncherConfig.BinaryName {
@@ -146,6 +146,10 @@ func logState(argumentError, flagError, pathError error) {
 
 	if pathError != nil {
 		log.Errorf("Fatal: Determining binary path failed: %v", pathError)
+	}
+
+	if evalError != nil {
+		log.Warnf("Evaluating binary path failed: %v", evalError)
 	}
 
 	places.ReportResults()
