@@ -93,9 +93,13 @@ func checkCommands(data []byte) error {
 		for _, arch := range []string{"386", "amd64"} {
 			deploymentConfig := config.ParseDeploymentConfig(strings.NewReader(string(data)), os, arch)
 			for _, command := range deploymentConfig.Execution.Commands {
-				if !isAbsForOS(command.Name, os) && !willDownloadCommandFile(command, deploymentConfig) {
-					printError(fmt.Errorf("Command \"%s\" would not be available on platform %s-%s: missing bundle entry", command.Name, os, arch))
-					failCount++
+				if !isAbsForOS(command.Name, os) {
+					if !willDownloadCommandFile(command, deploymentConfig) {
+						printError(fmt.Errorf("Command \"%s\" would not be available on platform %s-%s: missing bundle entry", command.Name, os, arch))
+						failCount++
+					} else {
+						fmt.Printf("OK: Binary for command \"%s\" would be downloaded on platform %s-%s (which requires it).\n", command.Name, os, arch)
+					}
 				}
 			}
 		}
