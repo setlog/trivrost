@@ -129,7 +129,7 @@ func processFlags(args []string) (launcherFlags *flags.LauncherFlags, err error)
 }
 
 func logState(argumentError, flagError, pathError, evalError error) {
-	log.Infof("Git commit of this build: Tag: %s; Hash: %s; Branch: %s", gitDescription, gitHash, gitBranch)
+	log.Infof("Git description of this build: %s; Commit hash: %s; Branch: %s; Built with %v", gitDescription, gitHash, gitBranch, runtime.Version())
 
 	if filepath.Base(system.GetProgramPath()) != resources.LauncherConfig.BinaryName {
 		log.Warnf("Program name on disk (\"%s\") has diverged from configured program name (\"%s\").",
