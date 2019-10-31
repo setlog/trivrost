@@ -27,9 +27,14 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 		handleStatusChange(status, expectedProgressUnits)
 	})
 
+	hashLauncherProgress, hashBundlesProgress := newProgressFaker(10), newProgressFaker(10)
 	gui.ProgressFunc = func(s gui.Stage) uint64 {
 		if s.IsDownloadStage() {
 			return handler.GetProgress()
+		} else if s == gui.StageDetermineLocalLauncherVersion {
+			return hashLauncherProgress.getProgress()
+		} else if s == gui.StageDetermineLocalBundleVersions {
+			return hashBundlesProgress.getProgress()
 		}
 		return 0
 	}
