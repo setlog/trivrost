@@ -51,6 +51,7 @@ func Setup(args []string) (*LauncherFlags, error) {
 	for i, arg := range args {
 		if (ignoredArgsExp.MatchString(arg)) {
 			args = append(args[:i], args[i+1:]...)
+			break
 		}
 	}
 	flagSet := flag.NewFlagSet(args[0], flag.ContinueOnError)
