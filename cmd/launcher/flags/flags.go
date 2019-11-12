@@ -47,13 +47,14 @@ func Setup(args []string) (*LauncherFlags, error) {
 	launcherFlags := LauncherFlags{nextLogIndex: -1}
 
 	// MacOS might append program serial number which we have to ignore/remove from args
-	ignoredArgsExp, _ := regexp.Compile("-+psn.*")
+	ignoredArgsExp := regexp.MustCompile("-+psn.*")
 	for i, arg := range args {
-		if (ignoredArgsExp.MatchString(arg)) {
+		if ignoredArgsExp.MatchString(arg) {
 			args = append(args[:i], args[i+1:]...)
 			break
 		}
 	}
+
 	flagSet := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	flagSet.BoolVar(&launcherFlags.Uninstall, UninstallFlag, false, "Remove the launcher and its bundles from the local machine.")
 	flagSet.BoolVar(&launcherFlags.Debug, DebugFlag, false, "Write verbose information to the log files.")
