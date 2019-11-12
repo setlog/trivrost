@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.3.5 (2019-11-11)
+### Fixes
+* Ignore `--psn_X_YYYYY` arugment which is appended by MacOS to the command line arguments when the programm was launched through a Gatekeeper context. Regression found in v1.3.2, v1.3.3, v1.3.4.
+
 ## 1.3.4 (2019-10-29)
 ### Fixes
 * Fix failure to launch on Windows if trivrost binary is located on a mounted volume for which no unique path exists because it has no drive letter assigned. See [this Go issue](https://github.com/golang/go/issues/20506#issuecomment-318514515) for details.

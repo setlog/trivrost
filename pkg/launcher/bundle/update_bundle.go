@@ -38,7 +38,7 @@ func (u *Updater) InstallBundleUpdates() {
 }
 
 func (u *Updater) determineLocalBundleVersions() {
-	u.announceStatus(DetermineLocalBundleVersions, 0)
+	u.announceStatus(DetermineLocalBundleVersions, 200)
 	for _, bundleConfig := range u.deploymentConfig.Bundles {
 		var bundleUpdateInfo *BundleUpdateInfo
 		if u.haveSystemBundleWithName(bundleConfig.LocalDirectory) {
