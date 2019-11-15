@@ -45,6 +45,7 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	updater.SetIgnoredSelfUpdateBundleInfoSHAs(resources.LauncherConfig.IgnoreLauncherBundleInfoHashes)
 	if !(launcherFlags.SkipSelfUpdate || IsInstanceInstalledSystemWide()) {
 		if updater.UpdateSelf() {
+			runPostBinaryUpdateProvisioning()
 			locking.Restart(true, launcherFlags)
 		}
 	}

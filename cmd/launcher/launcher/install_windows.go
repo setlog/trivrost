@@ -14,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func prepareShortcutInstallation() {
+func runPostBinaryUpdateProvisioning() {
 }
 
 func createLaunchDesktopShortcut(destination string, launcherFlags *flags.LauncherFlags) {

@@ -3,6 +3,8 @@
 ## 1.3.6 (TBD)
 ### Features
 * `cmd/validator` will now check that command binary's *will be* downloaded per platform, where previously it would only check if they are available under their respective bundle URL.
+### Fixes
+* Fixed changes to the launcher icon not being applied after a self-update on Linux.
 
 ## 1.3.5 (2019-11-11)
 ### Fixes
