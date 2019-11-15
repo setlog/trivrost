@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <Commctrl.h>
 
 int centerWindow(ULONG_PTR ulpWindowHandle) {
     HANDLE windowHandle = (HANDLE)ulpWindowHandle;
@@ -48,4 +49,9 @@ void applyIconToWindow(ULONG_PTR ulpWindowHandle) {
 void applyWindowStyle(ULONG_PTR ulpWindowHandle) {
     HANDLE windowHandle = (HANDLE)ulpWindowHandle;
     SetWindowLong(windowHandle, GWL_STYLE, GetWindowLong(windowHandle, GWL_STYLE)&~(WS_SIZEBOX|WS_MAXIMIZEBOX));
+}
+
+void setProgressBarState(ULONG_PTR ulpBarHandle, int progressState) {
+    HWND barHWND = (HWND)ulpBarHandle;
+    SendMessage(barHWND, 1040, (WPARAM)progressState, 0);
 }

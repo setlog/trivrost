@@ -11,6 +11,14 @@ import (
 	"github.com/setlog/trivrost/pkg/misc"
 )
 
+type progressState int
+
+const (
+	stateInfo   progressState = 1
+	stateError  progressState = 2
+	statePaused progressState = 3
+)
+
 type DownloadStatusPanel struct {
 	*ui.Box
 

@@ -8,3 +8,6 @@ func applyIconToWindow(handle uintptr) {
 
 func applyWindowStyle(handle uintptr) {
 }
+
+func setFailState() {
+}

@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"github.com/andlabs/ui"
 	"unicode/utf16"
 	"unsafe"
 
@@ -63,4 +64,10 @@ func goStringToConstantUTF16WinApiString(s string) C.LPCWSTR {
 		currentCharPointer = (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(currentCharPointer)) + unsafe.Sizeof(uint16(0))))
 	}
 	return (C.LPCWSTR)(unsafe.Pointer(utf16StringPointer))
+}
+
+func setProgressState(s progressState) {
+	ui.QueueMain(func() {
+		C.setProgressBarState(C.ULONG_PTR(panelDownloadStatus.barTotalProgress.Handle()), C.int(s))
+	})
 }
