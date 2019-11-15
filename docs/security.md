@@ -4,7 +4,7 @@ To secure trivrost, you should only use it via https. However, to increase the s
 # Timestamps
 To prevent that an attacker can make the client to install an old (and potentially vulnerable) version of a bundle or trivrost itself, the deployment-config and the bundle info files must contain timestamps. The bundle info files must also contain the `UniqueBundleName`, so the timestamps can be assigned to the correct bundle. Thus you have to make sure that the `UniqueBundleName` really is unique.
 
-If trivrost runs for the first time, it will accept any timestamp. After that, trivrost will only accept timestamps that are not older than the last accepted timestamp for the deployment-config or each of the bundle info files. To do so, trivrost will save the last accepted timestamp in a json file called `timestamps.json`. See [Where does trivrost save files?](../file_locations.md) to find out where that file is saved.
+If trivrost runs for the first time, it will accept any timestamp. After that, trivrost will only accept timestamps that are not older than the last accepted timestamp for the deployment-config or each of the bundle info files. To do so, trivrost will save the last accepted timestamp in a json file called `timestamps.json`. See [Where does trivrost save files?](file_locations.md) to find out where that file is saved.
 
 The launcher will not check the timestamp against the clock of the client or any time server. It will accept a timestamp, if it is the same as the last seen timestamp, even if the deployment-config changed. It is the responsibility of the creator of the deployment-config, to update the timestamp to enhance the security, even if staying at some fixed arbitrary value would not stop trivrost from working.
 
@@ -12,7 +12,7 @@ The timestamp must have the form of `2006-01-02 15:04:05`. You can generate it o
 
 To set the timestamp automatically, the shell script [insert_timestamp](../scripts/insert_timestamp) is provided by this project. It will substitute a given string (e.g. `<TIMESTMAP>`) with a correctly formed timestamp in UTC. You should call this script in your CI/CD-pipeline before signing the deployment-config.
 
-Please note that you have to set the timestamp in the deployment-config before signing the deployment-config. For the bundle info files, the [hasher](bildung.md#Hashing-and-signing-bundles) will automatically set the timestamp in UTC.
+Please note that you have to set the timestamp in the deployment-config before signing the deployment-config. For the bundle info files, the hasher will automatically set the timestamp in UTC.
 
 # Signing
 To sign the deployment-config and bundle info files we use `RSA` with the padding algorithm `PSS`. We use `sha256` as the hashing algorithm for signing. The signatures of the deployment-config have to be stored `base64` encoded. The signatures are saved in separate files with the same url as the original files, but with a `.signature` extension. So the signature for the bundle info file `https://example.com/linux/launcher/bundleinfo.json` has the url `https://example.com/linux/launcher/bundleinfo.json.signature.`
