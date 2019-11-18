@@ -82,7 +82,7 @@ func (u *Updater) swapBinary(localBinaryPath string, remoteURL string, newFileIn
 
 	if runtime.GOOS == system.OsWindows { // On Windows, you cannot delete a running binary, but you can rename it.
 		if err := os.Rename(localBinaryPath, oldBinaryNewPath); err != nil {
-			panic(&system.FileSystemError{Message: fmt.Sprintf("Could not rename old binary \"%s\" to \"%s\"", localBinaryPath, oldBinaryNewPath), CausingError: err})
+			panic(system.NewFileSystemError(fmt.Sprintf("Could not rename old binary \"%s\" to \"%s\"", localBinaryPath, oldBinaryNewPath), err))
 		}
 	}
 
@@ -93,7 +93,7 @@ func (u *Updater) swapBinary(localBinaryPath string, remoteURL string, newFileIn
 					Error("Could not revert rename. Installation will be broken.")
 			}
 		}
-		panic(&system.FileSystemError{Message: fmt.Sprintf("Could not rename new binary \"%s\" to \"%s\"", newBinaryTempPath, localBinaryPath), CausingError: err})
+		panic(system.NewFileSystemError(fmt.Sprintf("Could not rename new binary \"%s\" to \"%s\"", newBinaryTempPath, localBinaryPath), err))
 	}
 }
 

@@ -13,21 +13,29 @@ import (
 )
 
 type FileSystemError struct {
-	Message      string
-	CausingError error
+	message      string
+	causingError error
 }
 
 func (fse *FileSystemError) Error() string {
 	var causingErrorMessage string
-	if fse.CausingError == nil {
+	if fse.causingError == nil {
 		causingErrorMessage = "<nil>"
 	} else {
-		causingErrorMessage = fse.CausingError.Error()
+		causingErrorMessage = fse.causingError.Error()
 	}
 	if fse == nil {
 		return "<nil>: " + causingErrorMessage
 	}
-	return fse.Message + ": " + causingErrorMessage
+	return fse.message + ": " + causingErrorMessage
+}
+
+func (fse *FileSystemError) Unwrap() error {
+	return fse.causingError
+}
+
+func NewFileSystemError(message string, cause error) *FileSystemError {
+	return &FileSystemError{message: message, causingError: cause}
 }
 
 func MustMakeTempDirectory(forFolderAtPath string) string {
