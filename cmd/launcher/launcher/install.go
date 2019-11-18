@@ -97,16 +97,21 @@ func Install(launcherFlags *flags.LauncherFlags) {
 		system.MustCopyAll(programPath, targetProgramPath)
 	}
 
+	runPostBinaryUpdateProvisioning()
+
+	InstallShortcuts(targetProgramPath, launcherFlags)
+
+	MustRestartWithInstalledBinary(launcherFlags)
+}
+
+func InstallShortcuts(targetProgramPath string, launcherFlags *flags.LauncherFlags) {
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(1)
-	prepareShortcutInstallation()
 	ui.QueueMain(func() { // Not UI functionality, but required to run on the main thread to be reliable on all OSes.
 		installShortcuts(targetProgramPath, launcherFlags)
 		waitGroup.Done()
 	})
 	waitGroup.Wait()
-
-	MustRestartWithInstalledBinary(launcherFlags)
 }
 
 func MustRestartWithInstalledBinary(launcherFlags *flags.LauncherFlags) {
