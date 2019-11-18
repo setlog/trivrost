@@ -1,5 +1,9 @@
 package system
 
+import "errors"
+
+import "os"
+
 type FileSystemError struct {
 	message      string
 	causingError error
@@ -24,4 +28,14 @@ func (fse *FileSystemError) Unwrap() error {
 
 func NewFileSystemError(message string, cause error) *FileSystemError {
 	return &FileSystemError{message: message, causingError: cause}
+}
+
+// IsPermission returns true if err or any of its nested errors return true for os.IsPermission().
+func IsPermission(err error) bool {
+	for ; err != nil; err = errors.Unwrap(err) {
+		if os.IsPermission(err) {
+			return true
+		}
+	}
+	return false
 }
