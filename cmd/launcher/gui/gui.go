@@ -18,6 +18,8 @@ const (
 	statePaused progressState = 3
 )
 
+const maxLineWidth = 110
+
 var (
 	window                                        *ui.Window
 	windowCalculatedWidth, windowCalculatedHeight int
@@ -70,7 +72,7 @@ func BlockingDialog(title, message string, options []string, defaultOption int, 
 
 		mainBox := ui.NewVerticalBox()
 		mainBox.SetPadded(true)
-		labelBox, _ := textBox(ui.NewVerticalBox(), message, 120)
+		labelBox, _ := textBox(ui.NewVerticalBox(), message, maxLineWidth)
 		mainBox.Append(labelBox, true)
 
 		if len(options) > 0 {
@@ -148,7 +150,7 @@ func Pause(ctx context.Context, message string) {
 	var hBox *ui.Box
 	c := make(chan struct{}, 1)
 	ui.QueueMain(func() {
-		_, n = textBox(panelDownloadStatus.pauseStatusBox, message, 120)
+		_, n = textBox(panelDownloadStatus.pauseStatusBox, message, maxLineWidth)
 		hBox = ui.NewHorizontalBox()
 		hBox.Append(newLinkLabel("Continue", ui.DrawTextAlignLeft, misc.WriteAttempter(c)), true)
 		hBox.Append(ui.NewLabel(""), false) // Needed or else the box has no minimum dimensions.
