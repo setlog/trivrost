@@ -19,14 +19,19 @@ import (
 func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	doHousekeeping()
 
-	handler := gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)
-	updater := bundle.NewUpdater(ctx, handler, resources.PublicRsaKeys)
-	updater.EnableTimestampVerification(places.GetTimestampsFilePath())
-	updater.SetStatusCallback(func(status bundle.UpdaterStatus, expectedProgressUnits uint64) {
-		handler.ResetProgress()
-		handleStatusChange(status, expectedProgressUnits)
-	})
+	handler := wireHandler(gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads))
+	updater := wireUpdater(bundle.NewUpdater(ctx, handler, resources.PublicRsaKeys), handler)
 
+	gui.SetStage(gui.StageGetDeploymentConfig, 0)
+	updater.RetrieveDeploymentConfig(resources.LauncherConfig.DeploymentConfigURL)
+
+	updateSelf(updater, launcherFlags)
+	updateBundles(ctx, updater)
+
+	launch(ctx, updater, launcherFlags)
+}
+
+func wireHandler(handler *gui.GuiDownloadProgressHandler) *gui.GuiDownloadProgressHandler {
 	hashLauncherProgress, hashBundlesProgress := newProgressFaker(10), newProgressFaker(10)
 	gui.ProgressFunc = func(s gui.Stage) uint64 {
 		if s.IsDownloadStage() {
@@ -38,10 +43,19 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 		}
 		return 0
 	}
-	gui.SetStage(gui.StageGetDeploymentConfig, 0)
+	return handler
+}
 
-	updater.RetrieveDeploymentConfig(resources.LauncherConfig.DeploymentConfigURL)
+func wireUpdater(updater *bundle.Updater, handler *gui.GuiDownloadProgressHandler) *bundle.Updater {
+	updater.EnableTimestampVerification(places.GetTimestampsFilePath())
+	updater.SetStatusCallback(func(status bundle.UpdaterStatus, expectedProgressUnits uint64) {
+		handler.ResetProgress()
+		handleStatusChange(status, expectedProgressUnits)
+	})
+	return updater
+}
 
+func updateSelf(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
 	updater.SetIgnoredSelfUpdateBundleInfoSHAs(resources.LauncherConfig.IgnoreLauncherBundleInfoHashes)
 	if !(launcherFlags.SkipSelfUpdate || IsInstanceInstalledSystemWide()) {
 		if updater.UpdateSelf() {
@@ -49,14 +63,14 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 			locking.Restart(true, launcherFlags)
 		}
 	}
+}
 
+func updateBundles(ctx context.Context, updater *bundle.Updater) {
 	updater.DetermineBundleRequirements(places.GetBundleFolderPath(), places.GetSystemWideBundleFolderPath())
 	if updater.HasChangesToUserBundles() {
 		locking.AwaitApplicationsTerminated(ctx)
 		updater.InstallBundleUpdates()
 	}
-
-	launch(ctx, updater, launcherFlags)
 }
 
 func handleSystemBundleChanges(ctx context.Context, updater *bundle.Updater) {
