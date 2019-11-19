@@ -37,3 +37,12 @@ func WaitCancelable(ctx context.Context, c <-chan struct{}) {
 	case <-c:
 	}
 }
+
+func WriteAttempter(c chan<- struct{}) func() {
+	return func() {
+		select {
+		case c <- struct{}{}:
+		default:
+		}
+	}
+}

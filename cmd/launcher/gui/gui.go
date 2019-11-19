@@ -150,7 +150,7 @@ func Pause(ctx context.Context, message string) {
 	ui.QueueMain(func() {
 		_, n = textBox(panelDownloadStatus.pauseStatusBox, message, 120)
 		hBox = ui.NewHorizontalBox()
-		hBox.Append(newLinkLabel("Continue", ui.DrawTextAlignLeft, func() { c <- struct{}{} }), true)
+		hBox.Append(newLinkLabel("Continue", ui.DrawTextAlignLeft, misc.WriteAttempter(c)), true)
 		hBox.Append(ui.NewLabel(""), false) // Needed or else the box has no minimum dimensions.
 		hBox.Append(newLogsLinkLabel(), true)
 		panelDownloadStatus.pauseStatusBox.Append(hBox, false)
