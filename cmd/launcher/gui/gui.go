@@ -2,13 +2,11 @@ package gui
 
 import (
 	"context"
-	"strings"
+	"github.com/setlog/trivrost/pkg/misc"
 	"sync"
 
 	"github.com/andlabs/ui"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/setlog/trivrost/pkg/misc"
 )
 
 var (
@@ -50,7 +48,6 @@ func BlockingDialog(title, message string, options []string, defaultOption int, 
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(1)
 	chosenOption := defaultOption
-	message = misc.WordWrap(message, 120) // The ui library itself wraps nothing, not even spaces, resulting in very wide windows (>10000 pixels) without this.
 	var waitGroupDoneTrigger sync.Once
 	ui.QueueMain(func() {
 		dialogWindow := ui.NewWindow(title, 600, 90, false)
@@ -63,17 +60,7 @@ func BlockingDialog(title, message string, options []string, defaultOption int, 
 
 		mainBox := ui.NewVerticalBox()
 		mainBox.SetPadded(true)
-
-		labelBox := ui.NewVerticalBox()
-
-		// HACK: When the GUI lib calculates string width, it ignores newlines,
-		// resulting in too large results, and thus too wide windows.
-		lines := strings.Split(message, "\n")
-		for _, line := range lines {
-			lineLabel := ui.NewLabel(line)
-			labelBox.Append(lineLabel, false)
-		}
-
+		labelBox, _ := textBox(ui.NewVerticalBox(), message, 120)
 		mainBox.Append(labelBox, true)
 
 		if len(options) > 0 {
@@ -146,8 +133,27 @@ func HideWaitDialog() {
 	})
 }
 
-func Pause(message string) {
-	// TODO: Pause
+func Pause(ctx context.Context, message string) {
+	var n int
+	var hBox *ui.Box
+	c := make(chan struct{}, 1)
+	ui.QueueMain(func() {
+		_, n = textBox(panelDownloadStatus.pauseStatusBox, message, 120)
+		hBox = ui.NewHorizontalBox()
+		hBox.Append(newLinkLabel("Continue", ui.DrawTextAlignLeft, func() { c <- struct{}{} }), true)
+		hBox.Append(ui.NewLabel(""), false) // Needed or else the box has no minimum dimensions.
+		hBox.Append(newLogsLinkLabel(), true)
+		panelDownloadStatus.pauseStatusBox.Append(hBox, false)
+		panelDownloadStatus.inlineStatusBox.Hide()
+		panelDownloadStatus.pauseStatusBox.Show()
+	})
+	misc.WaitCancelable(ctx, c)
+	ui.QueueMain(func() {
+		panelDownloadStatus.pauseStatusBox.Hide()
+		panelDownloadStatus.inlineStatusBox.Show()
+		clearBox(panelDownloadStatus.pauseStatusBox, n+1)
+		hBox.Destroy()
+	})
 }
 
 // Main hands control over to ui.Main() to initialize and manage the GUI. It blocks until gui.Quit() is called.

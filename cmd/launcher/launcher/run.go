@@ -50,22 +50,23 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 			locking.Restart(true, launcherFlags)
 		}
 	}
+
 	updater.DetermineBundleRequirements(places.GetBundleFolderPath(), places.GetSystemWideBundleFolderPath())
 	if updater.HasChangesToUserBundles() {
 		locking.AwaitApplicationsTerminated(ctx)
 		updater.InstallBundleUpdates()
 	}
-	handleSystemBundleChanges(updater)
+	handleSystemBundleChanges(ctx, updater)
 
 	launch(ctx, &updater.GetDeploymentConfig().Execution, launcherFlags)
 }
 
-func handleSystemBundleChanges(updater *bundle.Updater) {
+func handleSystemBundleChanges(ctx context.Context, updater *bundle.Updater) {
 	const howTo = "To bring the application up to date, its latest release needs to be installed with administrative privileges."
 	if updater.HasChangesToSystemBundles(true) {
 		panic(misc.NewNestedError("A mandatory update was not applied because it needs to write files in protected system folders. "+howTo, nil))
 	} else if updater.HasChangesToSystemBundles(false) {
-		gui.Pause("Some optional updates were not applied because they need to write files in protected system folders. " + howTo)
+		gui.Pause(ctx, "Some optional updates were not applied because they need to write files in protected system folders. "+howTo)
 	}
 }
 

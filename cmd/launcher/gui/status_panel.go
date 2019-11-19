@@ -7,6 +7,10 @@ import (
 type DownloadStatusPanel struct {
 	*ui.Box
 
+	mainVerticalBox *ui.Box
+	inlineStatusBox *ui.Box
+	pauseStatusBox  *ui.Box
+
 	labelStage *ui.Label
 
 	barTotalProgress *ui.ProgressBar
@@ -29,10 +33,18 @@ func newDownloadStatusPanel() *DownloadStatusPanel {
 	panel.Box.Append(panel.labelStage, false)
 	panel.Box.Append(panel.barTotalProgress, false)
 
-	hBox := ui.NewHorizontalBox()
-	hBox.Append(panel.labelStatus, false)
-	hBox.Append(newLinkLabel("Show logs...", showLogFolder), true)
-	panel.Box.Append(hBox, false)
+	panel.pauseStatusBox = ui.NewVerticalBox()
+	panel.pauseStatusBox.Hide()
+	panel.Box.Append(panel.pauseStatusBox, false)
+
+	panel.inlineStatusBox = ui.NewHorizontalBox()
+	panel.inlineStatusBox.Append(panel.labelStatus, false)
+	panel.inlineStatusBox.Append(newLogsLinkLabel(), true)
+	panel.Box.Append(panel.inlineStatusBox, false)
 
 	return panel
+}
+
+func newLogsLinkLabel() *ui.Area {
+	return newLinkLabel("Show logs...", ui.DrawTextAlignRight, showLogFolder)
 }
