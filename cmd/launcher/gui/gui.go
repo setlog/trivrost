@@ -154,6 +154,7 @@ func Pause(ctx context.Context, message string) {
 		hBox.Append(ui.NewLabel(""), false) // Needed or else the box has no minimum dimensions.
 		hBox.Append(newLogsLinkLabel(), true)
 		panelDownloadStatus.pauseStatusBox.Append(hBox, false)
+		setProgressState(statePaused)
 		panelDownloadStatus.inlineStatusBox.Hide()
 		panelDownloadStatus.pauseStatusBox.Show()
 	})
@@ -162,6 +163,7 @@ func Pause(ctx context.Context, message string) {
 		panelDownloadStatus.pauseStatusBox.Hide()
 		setWindowDimensions(window.Handle(), windowCalculatedWidth, windowCalculatedHeight)
 		panelDownloadStatus.inlineStatusBox.Show()
+		setProgressState(stateInfo)
 		clearBox(panelDownloadStatus.pauseStatusBox, n+1)
 		hBox.Destroy()
 	})

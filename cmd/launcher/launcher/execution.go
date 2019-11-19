@@ -20,7 +20,6 @@ import (
 
 func executeCommands(ctx context.Context, commandConfigs []config.Command, launcherFlags *flags.LauncherFlags) {
 	log.Infof("Executing %d command(s)...", len(commandConfigs))
-	gui.SetStage(gui.StageLaunchApplication, 0)
 
 	lastIndex := len(commandConfigs) - 1
 	for i, commandConfig := range commandConfigs {

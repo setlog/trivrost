@@ -14,7 +14,6 @@ import (
 	"github.com/setlog/trivrost/pkg/misc"
 
 	"github.com/setlog/trivrost/pkg/launcher/bundle"
-	"github.com/setlog/trivrost/pkg/launcher/config"
 )
 
 func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
@@ -56,9 +55,8 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 		locking.AwaitApplicationsTerminated(ctx)
 		updater.InstallBundleUpdates()
 	}
-	handleSystemBundleChanges(ctx, updater)
 
-	launch(ctx, &updater.GetDeploymentConfig().Execution, launcherFlags)
+	launch(ctx, updater, launcherFlags)
 }
 
 func handleSystemBundleChanges(ctx context.Context, updater *bundle.Updater) {
@@ -93,7 +91,10 @@ func doHousekeeping() {
 	deleteLeftoverBinaries()
 }
 
-func launch(ctx context.Context, execution *config.ExecutionConfig, launcherFlags *flags.LauncherFlags) {
+func launch(ctx context.Context, updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
+	gui.SetStage(gui.StageLaunchApplication, 0)
+	handleSystemBundleChanges(ctx, updater)
+	execution := updater.GetDeploymentConfig().Execution
 	executeCommands(ctx, execution.Commands, launcherFlags)
 	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
 }
