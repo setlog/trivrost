@@ -18,7 +18,32 @@ int centerWindow(ULONG_PTR ulpWindowHandle) {
     LONG windowHeight = rect.bottom - rect.top;
     LONG newX = (monitorInfo.rcWork.right - windowWidth) / 2;
     LONG newY = (monitorInfo.rcWork.bottom - windowHeight) / 2;
-    SetWindowPos(windowHandle, HWND_TOP, newX, newY, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSIZE);
+    SetWindowPos(windowHandle, HWND_TOP, newX, newY, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSIZE);
+}
+
+int getWindowWidth(ULONG_PTR ulpWindowHandle) {
+    HANDLE windowHandle = (HANDLE)ulpWindowHandle;
+    RECT r;
+    BOOL result = GetWindowRect(windowHandle, &r);
+    if (result == 0) {
+        return 200;
+    }
+    return r.right - r.left;
+}
+
+int getWindowHeight(ULONG_PTR ulpWindowHandle) {
+    HANDLE windowHandle = (HANDLE)ulpWindowHandle;
+    RECT r;
+    BOOL result = GetWindowRect(windowHandle, &r);
+    if (result == 0) {
+        return 100;
+    }
+    return r.bottom - r.top;
+}
+
+int setWindowDimensions(ULONG_PTR ulpWindowHandle, int w, int h) {
+    HANDLE windowHandle = (HANDLE)ulpWindowHandle;
+    SetWindowPos(windowHandle, HWND_TOP, 0, 0, (LONG)w, (LONG)h, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE);
 }
 
 HICON largeIcon = NULL;

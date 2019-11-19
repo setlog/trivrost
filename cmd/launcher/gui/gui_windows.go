@@ -27,6 +27,14 @@ func centerWindow(handle uintptr) {
 	}
 }
 
+func getWindowDimensions(handle uintptr) (w, h int) {
+	return int(C.getWindowWidth(C.ULONG_PTR(handle))), int(C.getWindowHeight(C.ULONG_PTR(handle)))
+}
+
+func setWindowDimensions(handle uintptr, w, h int) {
+	C.setWindowDimensions(C.ULONG_PTR(handle), C.int(w), C.int(h))
+}
+
 func applyIconToWindow(handle uintptr) {
 	if !didLoadIcons {
 		loadIcons()

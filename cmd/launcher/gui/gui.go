@@ -2,19 +2,21 @@ package gui
 
 import (
 	"context"
-	"github.com/setlog/trivrost/pkg/misc"
 	"sync"
+
+	"github.com/setlog/trivrost/pkg/misc"
 
 	"github.com/andlabs/ui"
 	log "github.com/sirupsen/logrus"
 )
 
 var (
-	window              *ui.Window
-	windowTitle         string
-	waitDialog          *ui.Window
-	waitDialogText      *ui.Label
-	panelDownloadStatus *DownloadStatusPanel
+	window                                        *ui.Window
+	windowCalculatedWidth, windowCalculatedHeight int
+	windowTitle                                   string
+	waitDialog                                    *ui.Window
+	waitDialogText                                *ui.Label
+	panelDownloadStatus                           *DownloadStatusPanel
 
 	guiInitWaitGroup = &sync.WaitGroup{}
 	didQuit          bool
@@ -150,6 +152,7 @@ func Pause(ctx context.Context, message string) {
 	misc.WaitCancelable(ctx, c)
 	ui.QueueMain(func() {
 		panelDownloadStatus.pauseStatusBox.Hide()
+		setWindowDimensions(window.Handle(), windowCalculatedWidth, windowCalculatedHeight)
 		panelDownloadStatus.inlineStatusBox.Show()
 		clearBox(panelDownloadStatus.pauseStatusBox, n+1)
 		hBox.Destroy()
@@ -185,6 +188,7 @@ func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow b
 		if showMainWindow {
 			centerWindow(window.Handle())
 			window.Show()
+			windowCalculatedWidth, windowCalculatedHeight = getWindowDimensions(window.Handle())
 			centerWindow(window.Handle())
 		}
 
