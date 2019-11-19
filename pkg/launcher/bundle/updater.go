@@ -6,11 +6,11 @@ import (
 	"runtime"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/setlog/trivrost/pkg/fetching"
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/launcher/timestamps"
 	"github.com/setlog/trivrost/pkg/system"
+	log "github.com/sirupsen/logrus"
 )
 
 type UpdaterStatus int
@@ -27,10 +27,11 @@ const (
 // BundleUpdateInfo contains information on what files need updating on the user's machine for the bundle specified by the embedded BundleConfig.
 type BundleUpdateInfo struct {
 	config.BundleConfig
-	IsSystemBundle bool
-	PresentState   config.FileInfoMap
-	RemoteState    config.FileInfoMap
-	WantedState    config.FileInfoMap
+	IsSystemBundle    bool
+	IsUpdateMandatory bool
+	PresentState      config.FileInfoMap
+	RemoteState       config.FileInfoMap
+	WantedState       config.FileInfoMap
 }
 
 type Updater struct {

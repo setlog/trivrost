@@ -159,6 +159,10 @@ func HideWaitDialog() {
 	})
 }
 
+func Pause(message string) {
+	// TODO: Pause
+}
+
 // Main hands control over to ui.Main() to initialize and manage the GUI. It blocks until gui.Quit() is called.
 func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow bool) error {
 	log.WithFields(log.Fields{"title": title, "showMainWindow": showMainWindow}).Info("Initializing GUI.")

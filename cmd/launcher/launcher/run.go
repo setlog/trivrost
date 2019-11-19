@@ -11,6 +11,7 @@ import (
 
 	"github.com/setlog/trivrost/pkg/fetching"
 	"github.com/setlog/trivrost/pkg/logging"
+	"github.com/setlog/trivrost/pkg/misc"
 
 	"github.com/setlog/trivrost/pkg/launcher/bundle"
 	"github.com/setlog/trivrost/pkg/launcher/config"
@@ -49,12 +50,23 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 			locking.Restart(true, launcherFlags)
 		}
 	}
-	if updater.DetermineBundleUpdateRequired(places.GetBundleFolderPath(), places.GetSystemWideBundleFolderPath()) {
+	updater.DetermineBundleRequirements(places.GetBundleFolderPath(), places.GetSystemWideBundleFolderPath())
+	if updater.HasChangesToUserBundles() {
 		locking.AwaitApplicationsTerminated(ctx)
 		updater.InstallBundleUpdates()
 	}
+	handleSystemBundleChanges(updater)
 
 	launch(ctx, &updater.GetDeploymentConfig().Execution, launcherFlags)
+}
+
+func handleSystemBundleChanges(updater *bundle.Updater) {
+	const howTo = "To bring the application up to date, its latest release needs to be installed with administrative privileges."
+	if updater.HasChangesToSystemBundles(true) {
+		panic(misc.NewNestedError("A mandatory update was not applied because it needs to write files in protected system folders. "+howTo, nil))
+	} else if updater.HasChangesToSystemBundles(false) {
+		gui.Pause("Some optional updates were not applied because they need to write files in protected system folders. " + howTo)
+	}
 }
 
 func handleStatusChange(status bundle.UpdaterStatus, expectedProgressUnits uint64) {

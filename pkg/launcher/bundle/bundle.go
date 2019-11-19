@@ -3,7 +3,6 @@ package bundle
 import (
 	"path/filepath"
 
-	"github.com/setlog/trivrost/pkg/misc"
 	"github.com/setlog/trivrost/pkg/system"
 )
 
@@ -20,33 +19,22 @@ func (u *Updater) wantBundleWithName(localDirectory string) bool {
 	return false
 }
 
-func (u *Updater) assertUpdatePossible() {
-	if u.hasChangesToSystemBundles() && u.hasChangesToUserBundles() {
-		panic(misc.NewNestedError("There is an update which needs to make changes to protected system folders.\n"+
-			"Your system administrator should already be aware of this, and apply the update shortly.", nil))
-	}
-}
-
-func (u *Updater) hasChangesToSystemBundles() bool {
+func (u *Updater) HasChangesToSystemBundles(considerMandatoryChangesOnly bool) bool {
 	for _, bundleUpdateInfo := range u.bundleUpdateInfos {
-		if bundleUpdateInfo.IsSystemBundle && bundleUpdateInfo.WantedState.HasChanges() {
+		if (!considerMandatoryChangesOnly || bundleUpdateInfo.IsUpdateMandatory) && bundleUpdateInfo.IsSystemBundle && bundleUpdateInfo.WantedState.HasChanges() {
 			return true
 		}
 	}
 	return false
 }
 
-func (u *Updater) hasChangesToUserBundles() bool {
+func (u *Updater) HasChangesToUserBundles() bool {
 	for _, bundleUpdateInfo := range u.bundleUpdateInfos {
 		if !bundleUpdateInfo.IsSystemBundle && bundleUpdateInfo.WantedState.HasChanges() {
 			return true
 		}
 	}
 	return false
-}
-
-func (u *Updater) isAtLeastOneChangeRequired() bool {
-	return u.hasChangesToSystemBundles() || u.hasChangesToUserBundles()
 }
 
 func countUpdatesBytes(bundleUpdateConfigs []*BundleUpdateInfo) uint64 {
