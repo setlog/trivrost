@@ -15,3 +15,6 @@ func applyIconToWindow(handle uintptr) {
 
 func applyWindowStyle(handle uintptr) {
 }
+
+func setProgressState(s progressState) {
+}

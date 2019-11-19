@@ -10,6 +10,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type progressState int
+
+const (
+	stateInfo   progressState = 1
+	stateError  progressState = 2
+	statePaused progressState = 3
+)
+
 var (
 	window                                        *ui.Window
 	windowCalculatedWidth, windowCalculatedHeight int

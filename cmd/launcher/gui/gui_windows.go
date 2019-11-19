@@ -72,3 +72,7 @@ func goStringToConstantUTF16WinApiString(s string) C.LPCWSTR {
 	}
 	return (C.LPCWSTR)(unsafe.Pointer(utf16StringPointer))
 }
+
+func setProgressState(s progressState) {
+	C.setProgressBarState(C.ULONG_PTR(panelDownloadStatus.barTotalProgress.Handle()), C.int(s))
+}
