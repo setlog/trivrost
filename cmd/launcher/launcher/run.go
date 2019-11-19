@@ -19,8 +19,7 @@ import (
 func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	doHousekeeping()
 
-	handler := wireHandler(gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads))
-	updater := wireUpdater(bundle.NewUpdater(ctx, handler, resources.PublicRsaKeys), handler)
+	updater := createUpdater(ctx, wireHandler(gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)))
 
 	gui.SetStage(gui.StageGetDeploymentConfig, 0)
 	updater.RetrieveDeploymentConfig(resources.LauncherConfig.DeploymentConfigURL)
@@ -52,7 +51,8 @@ func wireHandler(handler *gui.GuiDownloadProgressHandler) *gui.GuiDownloadProgre
 	return handler
 }
 
-func wireUpdater(updater *bundle.Updater, handler *gui.GuiDownloadProgressHandler) *bundle.Updater {
+func createUpdater(ctx context.Context, handler *gui.GuiDownloadProgressHandler) *bundle.Updater {
+	updater := bundle.NewUpdater(ctx, handler, resources.PublicRsaKeys)
 	updater.EnableTimestampVerification(places.GetTimestampsFilePath())
 	updater.SetStatusCallback(func(status bundle.UpdaterStatus, expectedProgressUnits uint64) {
 		handler.ResetProgress()
