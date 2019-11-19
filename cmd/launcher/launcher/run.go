@@ -31,6 +31,12 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	launch(ctx, updater, launcherFlags)
 }
 
+func doHousekeeping() {
+	logging.DeleteOldLogFiles()
+	locking.MinimizeApplicationSignaturesList()
+	deleteLeftoverBinaries()
+}
+
 func wireHandler(handler *gui.GuiDownloadProgressHandler) *gui.GuiDownloadProgressHandler {
 	hashLauncherProgress, hashBundlesProgress := newProgressFaker(10), newProgressFaker(10)
 	gui.ProgressFunc = func(s gui.Stage) uint64 {
@@ -73,6 +79,14 @@ func updateBundles(ctx context.Context, updater *bundle.Updater) {
 	}
 }
 
+func launch(ctx context.Context, updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
+	gui.SetStage(gui.StageLaunchApplication, 0)
+	handleSystemBundleChanges(ctx, updater)
+	execution := updater.GetDeploymentConfig().Execution
+	executeCommands(ctx, execution.Commands, launcherFlags)
+	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
+}
+
 func handleSystemBundleChanges(ctx context.Context, updater *bundle.Updater) {
 	const howTo = "To bring the application up to date, its latest release needs to be installed with administrative privileges."
 	if updater.HasChangesToSystemBundles(true) {
@@ -97,18 +111,4 @@ func handleStatusChange(status bundle.UpdaterStatus, expectedProgressUnits uint6
 	case bundle.DownloadBundleFiles:
 		gui.SetStage(gui.StageDownloadBundleUpdates, expectedProgressUnits)
 	}
-}
-
-func doHousekeeping() {
-	logging.DeleteOldLogFiles()
-	locking.MinimizeApplicationSignaturesList()
-	deleteLeftoverBinaries()
-}
-
-func launch(ctx context.Context, updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
-	gui.SetStage(gui.StageLaunchApplication, 0)
-	handleSystemBundleChanges(ctx, updater)
-	execution := updater.GetDeploymentConfig().Execution
-	executeCommands(ctx, execution.Commands, launcherFlags)
-	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
 }
