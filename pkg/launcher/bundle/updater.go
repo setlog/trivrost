@@ -27,11 +27,10 @@ const (
 // BundleUpdateInfo contains information on what files need updating on the user's machine for the bundle specified by the embedded BundleConfig.
 type BundleUpdateInfo struct {
 	config.BundleConfig
-	IsSystemBundle    bool
-	IsUpdateMandatory bool
-	PresentState      config.FileInfoMap
-	RemoteState       config.FileInfoMap
-	WantedState       config.FileInfoMap
+	IsSystemBundle bool
+	PresentState   config.FileInfoMap
+	RemoteState    config.FileInfoMap
+	WantedState    config.FileInfoMap
 }
 
 type Updater struct {
@@ -82,17 +81,24 @@ func (u *Updater) announceStatus(status UpdaterStatus, progressTarget uint64) {
 	}
 }
 
-func (u *Updater) RetrieveDeploymentConfig(fromURL string) {
-	log.Infof("Downloading deployment config from \"%s\".", fromURL)
-	data, err := u.downloader.DownloadSignedResource(fromURL, u.publicKeys)
+func (u *Updater) Prepare(deploymentConfigURL string) (isSelfUpdateMandatory bool) {
+	log.Infof("Downloading deployment config from \"%s\".", deploymentConfigURL)
+	data, err := u.downloader.DownloadSignedResource(deploymentConfigURL, u.publicKeys)
 	if err != nil {
 		panic(err)
 	}
+
 	deploymentConfig := config.ParseDeploymentConfig(strings.NewReader(string(data)), runtime.GOOS, system.GetOSArch())
 	if u.timestampFilePath != "" {
 		timestamps.VerifyDeploymentConfigTimestamp(deploymentConfig.Timestamp, u.timestampFilePath)
 	}
 	u.deploymentConfig = deploymentConfig
+
+	updateConfig := u.deploymentConfig.GetLauncherUpdateConfig()
+	if updateConfig != nil {
+		return updateConfig.IsUpdateMandatory
+	}
+	return false
 }
 
 func (u *Updater) GetDeploymentConfig() *config.DeploymentConfig {

@@ -2,6 +2,8 @@ package launcher
 
 import (
 	"context"
+	"github.com/setlog/trivrost/pkg/launcher/config"
+	"github.com/setlog/trivrost/pkg/system"
 
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/gui"
@@ -22,12 +24,17 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	updater := createUpdater(ctx, wireHandler(gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)))
 
 	gui.SetStage(gui.StageGetDeploymentConfig, 0)
-	updater.RetrieveDeploymentConfig(resources.LauncherConfig.DeploymentConfigURL)
+	isSelfUpdateMandatory := updater.Prepare(resources.LauncherConfig.DeploymentConfigURL)
 
-	updateSelf(updater, launcherFlags)
+	errSelfUpdate := updateSelf(updater, launcherFlags)
+	if isSelfUpdateMandatory && system.IsPermission(errSelfUpdate) {
+		handleInsufficientPrivileges(ctx, true)
+	}
 	updateBundles(ctx, updater)
 
-	launch(ctx, updater, launcherFlags)
+	gui.SetStage(gui.StageLaunchApplication, 0)
+	handleUpdateOmissions(ctx, updater, system.IsPermission(errSelfUpdate))
+	launch(ctx, updater.GetDeploymentConfig().Execution, launcherFlags)
 }
 
 func doHousekeeping() {
@@ -61,12 +68,24 @@ func createUpdater(ctx context.Context, handler *gui.GuiDownloadProgressHandler)
 	return updater
 }
 
-func updateSelf(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
+func updateSelf(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) (err error) {
 	updater.SetIgnoredSelfUpdateBundleInfoSHAs(resources.LauncherConfig.IgnoreLauncherBundleInfoHashes)
 	if !(launcherFlags.SkipSelfUpdate || IsInstanceInstalledSystemWide()) {
+		defer permissionPanicToError(&err)
 		if updater.UpdateSelf() {
 			runPostBinaryUpdateProvisioning()
 			locking.Restart(true, launcherFlags)
+		}
+	}
+	return nil
+}
+
+func permissionPanicToError(errPtr *error) {
+	if r := recover(); r != nil {
+		if err, ok := r.(error); ok && system.IsPermission(err) {
+			*errPtr = err
+		} else {
+			panic(r)
 		}
 	}
 }
@@ -79,21 +98,26 @@ func updateBundles(ctx context.Context, updater *bundle.Updater) {
 	}
 }
 
-func launch(ctx context.Context, updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
-	gui.SetStage(gui.StageLaunchApplication, 0)
-	handleSystemBundleChanges(ctx, updater)
-	execution := updater.GetDeploymentConfig().Execution
-	executeCommands(ctx, execution.Commands, launcherFlags)
-	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
+func handleUpdateOmissions(ctx context.Context, updater *bundle.Updater, wasAtLeastOneOptionalUpdateOmittedDueToInsufficientPrivileges bool) {
+	if updater.HasChangesToSystemBundles(true) {
+		handleInsufficientPrivileges(ctx, true)
+	} else if updater.HasChangesToSystemBundles(false) || wasAtLeastOneOptionalUpdateOmittedDueToInsufficientPrivileges {
+		handleInsufficientPrivileges(ctx, false)
+	}
 }
 
-func handleSystemBundleChanges(ctx context.Context, updater *bundle.Updater) {
+func handleInsufficientPrivileges(ctx context.Context, wasAtLeastOneMandatoryUpdateOmitted bool) {
 	const howTo = "To bring the application up to date, its latest release needs to be installed with administrative privileges."
-	if updater.HasChangesToSystemBundles(true) {
+	if wasAtLeastOneMandatoryUpdateOmitted {
 		panic(misc.NewNestedError("A mandatory update was not applied because it needs to write files in protected system folders. "+howTo, nil))
-	} else if updater.HasChangesToSystemBundles(false) {
+	} else {
 		gui.Pause(ctx, "Some optional updates were not applied because they need to write files in protected system folders. "+howTo)
 	}
+}
+
+func launch(ctx context.Context, execution config.ExecutionConfig, launcherFlags *flags.LauncherFlags) {
+	executeCommands(ctx, execution.Commands, launcherFlags)
+	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
 }
 
 func handleStatusChange(status bundle.UpdaterStatus, expectedProgressUnits uint64) {

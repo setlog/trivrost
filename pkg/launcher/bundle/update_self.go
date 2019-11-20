@@ -90,6 +90,7 @@ func (u *Updater) swapBinary(localBinaryPath string, remoteURL string, newFileIn
 			if err2 := os.Rename(oldBinaryNewPath, localBinaryPath); err2 != nil {
 				log.WithFields(log.Fields{"err": err, "localBinaryPath": localBinaryPath, "oldBinaryNewPath": oldBinaryNewPath}).
 					Error("Could not revert rename. Installation will be broken.")
+				panic(fmt.Sprintf("Could not revert-rename new binary \"%s\" to \"%s\": %v. Preceded by: %v", newBinaryTempPath, localBinaryPath, err2, err))
 			}
 		}
 		panic(system.NewFileSystemError(fmt.Sprintf("Could not rename new binary \"%s\" to \"%s\"", newBinaryTempPath, localBinaryPath), err))

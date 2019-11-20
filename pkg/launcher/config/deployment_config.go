@@ -18,8 +18,9 @@ type DeploymentConfig struct {
 }
 
 type HashDataConfig struct {
-	BundleInfoURL string `json:"BundleInfoURL"`
-	BaseURL       string `json:"BaseURL,omitempty"`
+	BundleInfoURL     string `json:"BundleInfoURL"`
+	BaseURL           string `json:"BaseURL,omitempty"`
+	IsUpdateMandatory bool   `json:"IsUpdateMandatory,omitempty"`
 }
 
 type LauncherUpdateConfig struct {

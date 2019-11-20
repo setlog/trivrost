@@ -145,6 +145,8 @@ func HideWaitDialog() {
 	})
 }
 
+// Pause shows given message in the download status panel along with a clickable link
+// which reads "Continue" and blocks until the user clicks it.
 func Pause(ctx context.Context, message string) {
 	var n int
 	var hBox *ui.Box
