@@ -35,6 +35,10 @@ func setWindowDimensions(handle uintptr, w, h int) {
 	C.setWindowDimensions(C.ULONG_PTR(handle), C.int(w), C.int(h))
 }
 
+func flashWindow(handle uintptr) {
+	C.flashWindow(C.ULONG_PTR(handle))
+}
+
 func applyIconToWindow(handle uintptr) {
 	if !didLoadIcons {
 		loadIcons()

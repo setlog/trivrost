@@ -47,6 +47,17 @@ int setWindowDimensions(ULONG_PTR ulpWindowHandle, int w, int h) {
     SetWindowPos(windowHandle, HWND_TOP, 0, 0, (LONG)w, (LONG)h, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE);
 }
 
+int flashWinow(ULONG_PTR ulpWindowHandle) {
+    HANDLE windowHandle = (HANDLE)ulpWindowHandle;
+    FLASHWINFO fwi;
+    fwi.cbSize = sizeof(fwi);
+    fwi.hwnd = windowHandle;
+    fwi.dwFlags = FLASHW_TRAY;
+    fwi.uCount = 2;
+    wi.dwTimeout = 0;
+    FlashWindowEx(&pfwi);
+}
+
 HICON largeIcon = NULL;
 HICON smallIcon = NULL;
 

@@ -161,6 +161,7 @@ func Pause(ctx context.Context, message string) {
 		setProgressState(statePaused)
 		panelDownloadStatus.inlineStatusBox.Hide()
 		panelDownloadStatus.pauseStatusBox.Show()
+		flashWindow(window.Handle())
 	})
 	misc.WaitCancelable(ctx, c)
 	ui.QueueMain(func() {

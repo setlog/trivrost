@@ -12,6 +12,9 @@ func getWindowDimensions(handle uintptr) (w, h int) {
 func setWindowDimensions(handle uintptr, w, h int) {
 }
 
+func flashWindow(handle uintptr) {
+}
+
 func applyIconToWindow(handle uintptr) {
 }
 
