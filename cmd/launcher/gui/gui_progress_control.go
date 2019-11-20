@@ -31,6 +31,11 @@ func SetStage(s Stage, progressTarget uint64) {
 		panelDownloadStatus.barTotalProgress.SetValue(barProgress)
 		panelDownloadStatus.currentProblemMessage = ""
 		panelDownloadStatus.labelStatus.SetText("")
+		if s.IsWaitingStage() {
+			setProgressState(statePaused)
+		} else {
+			setProgressState(stateInfo)
+		}
 	})
 }
 

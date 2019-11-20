@@ -117,3 +117,8 @@ func (s Stage) IsDownloadStage() bool {
 		s == StageRetrieveRemoteBundleVersions ||
 		s == StageDownloadBundleUpdates
 }
+
+func (s Stage) IsWaitingStage() bool {
+	return s == StageAcquireLock ||
+		s == StageAwaitApplicationsTerminated
+}
