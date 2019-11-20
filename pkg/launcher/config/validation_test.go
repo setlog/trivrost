@@ -39,6 +39,20 @@ func TestDetectBadEnvVarValue(t *testing.T) {
 	}
 }
 
+func TestNoSelfUpdateAllowed(t *testing.T) {
+	err := config.ValidateDeploymentConfig(string(system.MustReadFile("test/dpc_no_self_update.json")))
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+}
+
+func TestEmptySelfUpdateAllowed(t *testing.T) {
+	err := config.ValidateDeploymentConfig(string(system.MustReadFile("test/dpc_empty_self_update.json")))
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+}
+
 func TestDetectMissingExecution(t *testing.T) {
 	err := config.ValidateDeploymentConfig(string(system.MustReadFile("test/dpc_exec_missing.json")))
 	if err == nil || !strings.Contains(err.Error(), "Execution is required") {

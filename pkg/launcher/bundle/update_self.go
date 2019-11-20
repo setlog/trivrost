@@ -17,8 +17,7 @@ import (
 )
 
 func (u *Updater) UpdateSelf() (needsRestart bool) {
-	updateConfig := u.deploymentConfig.GetLauncherUpdateConfig()
-	if updateConfig == nil {
+	if u.deploymentConfig.GetLauncherUpdateConfig() == nil {
 		return false
 	}
 	programPath := system.GetProgramPath()

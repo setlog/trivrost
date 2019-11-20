@@ -54,7 +54,7 @@ func (dc *DeploymentConfig) GetLauncherUpdateConfig() *LauncherUpdateConfig {
 	if dc.HasLauncherUpdateConfig() {
 		return &dc.LauncherUpdate[0]
 	}
-	panic(fmt.Sprintf("Deployment config had %d launcher updates. Expected 1.", len(dc.LauncherUpdate)))
+	return nil
 }
 
 func ReadDeploymentConfig(reader io.Reader, os string, arch string) (string, error) {
