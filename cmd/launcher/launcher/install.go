@@ -139,6 +139,13 @@ func getTargetProgramPath() string {
 	return filepath.Join(places.GetLauncherTargetDirectoryPath(), getTargetProgramName())
 }
 
+func ReportProgramNameDivergence() {
+	if filepath.Base(system.GetProgramPath()) != getTargetProgramName() {
+		log.Warnf("Program name on disk (\"%s\") has diverged from configured program name (\"%s\").",
+			filepath.Base(system.GetProgramPath()), getTargetProgramName())
+	}
+}
+
 func getTargetProgramName() string {
 	if runtime.GOOS == system.OsWindows {
 		return resources.LauncherConfig.BinaryName + ".exe"

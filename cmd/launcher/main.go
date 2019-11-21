@@ -15,7 +15,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"syscall"
@@ -131,10 +130,7 @@ func processFlags(args []string) (launcherFlags *flags.LauncherFlags, err error)
 func logState(argumentError, flagError, pathError, evalError error) {
 	log.Infof("Git description of this build: %s; Commit hash: %s; Branch: %s; Built with %v", gitDescription, gitHash, gitBranch, runtime.Version())
 
-	if filepath.Base(system.GetProgramPath()) != resources.LauncherConfig.BinaryName {
-		log.Warnf("Program name on disk (\"%s\") has diverged from configured program name (\"%s\").",
-			filepath.Base(system.GetProgramPath()), resources.LauncherConfig.BinaryName)
-	}
+	launcher.ReportProgramNameDivergence()
 
 	if argumentError != nil {
 		log.Errorf("Fatal: Parsing arguments failed: %v", argumentError)
