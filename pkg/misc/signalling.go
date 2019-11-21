@@ -31,7 +31,7 @@ func WaitCancelable(ctx context.Context, c <-chan struct{}) {
 	select {
 	case <-ctx.Done():
 		err := ctx.Err()
-		if err == nil {
+		if err != nil {
 			panic(err)
 		}
 	case <-c:
