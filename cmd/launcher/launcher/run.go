@@ -107,7 +107,8 @@ func handleUpdateOmissions(ctx context.Context, updater *bundle.Updater, wasAtLe
 }
 
 func handleInsufficientPrivileges(ctx context.Context, wasAtLeastOneMandatoryUpdateOmitted bool) {
-	const howTo = "To bring the application up to date, its latest release needs to be installed with administrative privileges."
+	const howTo = "To bring the application up to date, its latest release needs to be installed with administrative privileges.\n" +
+		"You may click \"Continue\" to ignore this for the time being."
 	if wasAtLeastOneMandatoryUpdateOmitted {
 		panic(misc.NewNestedError("A mandatory update was not applied because it needs to write files in protected system folders. "+howTo, nil))
 	} else {
