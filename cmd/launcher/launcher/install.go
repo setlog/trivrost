@@ -33,7 +33,7 @@ func HasInstallation() bool {
 
 // IsInstanceInstalled returns true iff the binary running this code is to be considered installed.
 func IsInstanceInstalled() bool {
-	isInstalled := IsInstanceInstalledSystemWide() || IsInstanceInstalledForCurrentUser()
+	isInstalled := IsInstanceInstalledInSystemMode() || IsInstanceInstalledForCurrentUser()
 	if isInstalled {
 		log.Debugf(`Launcher is installed. Application path "%s" matches with target application path.`, system.GetProgramPath())
 	} else {
@@ -43,8 +43,8 @@ func IsInstanceInstalled() bool {
 	return isInstalled
 }
 
-// IsInstanceInstalledSystemWide returns true iff a folder called "systembundles" is located in the same folder as the program running this code.
-func IsInstanceInstalledSystemWide() bool {
+// IsInstanceInstalledInSystemMode returns true iff we are in system mode.
+func IsInstanceInstalledInSystemMode() bool {
 	return system.FolderExists(places.GetSystemWideBundleFolderPath())
 }
 

@@ -2,8 +2,8 @@ package launcher
 
 import (
 	"context"
+
 	"github.com/setlog/trivrost/pkg/launcher/config"
-	"github.com/setlog/trivrost/pkg/system"
 
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/gui"
@@ -26,14 +26,13 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	gui.SetStage(gui.StageGetDeploymentConfig, 0)
 	isSelfUpdateMandatory := updater.Prepare(resources.LauncherConfig.DeploymentConfigURL)
 
-	errSelfUpdate := updateSelf(updater, launcherFlags)
-	if isSelfUpdateMandatory && system.IsPermission(errSelfUpdate) {
-		handleInsufficientPrivileges(ctx, true)
+	if (!IsInstanceInstalledInSystemMode() || isSelfUpdateMandatory) && !launcherFlags.SkipSelfUpdate {
+		updateSelf(updater, launcherFlags)
 	}
 	updateBundles(ctx, updater)
 
 	gui.SetStage(gui.StageLaunchApplication, 0)
-	handleUpdateOmissions(ctx, updater, system.IsPermission(errSelfUpdate))
+	handleUpdateOmissions(ctx, updater)
 	launch(ctx, updater.GetDeploymentConfig().Execution, launcherFlags)
 }
 
@@ -68,25 +67,11 @@ func createUpdater(ctx context.Context, handler *gui.GuiDownloadProgressHandler)
 	return updater
 }
 
-func updateSelf(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) (err error) {
+func updateSelf(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
 	updater.SetIgnoredSelfUpdateBundleInfoSHAs(resources.LauncherConfig.IgnoreLauncherBundleInfoHashes)
-	if !(launcherFlags.SkipSelfUpdate || IsInstanceInstalledSystemWide()) {
-		defer permissionPanicToError(&err)
-		if updater.UpdateSelf() {
-			runPostBinaryUpdateProvisioning()
-			locking.Restart(true, launcherFlags)
-		}
-	}
-	return nil
-}
-
-func permissionPanicToError(errPtr *error) {
-	if r := recover(); r != nil {
-		if err, ok := r.(error); ok && system.IsPermission(err) {
-			*errPtr = err
-		} else {
-			panic(r)
-		}
+	if updater.UpdateSelf() {
+		runPostBinaryUpdateProvisioning()
+		locking.Restart(true, launcherFlags)
 	}
 }
 
@@ -98,10 +83,10 @@ func updateBundles(ctx context.Context, updater *bundle.Updater) {
 	}
 }
 
-func handleUpdateOmissions(ctx context.Context, updater *bundle.Updater, wasAtLeastOneOptionalUpdateOmittedDueToInsufficientPrivileges bool) {
+func handleUpdateOmissions(ctx context.Context, updater *bundle.Updater) {
 	if updater.HasChangesToSystemBundles(true) {
 		handleInsufficientPrivileges(ctx, true)
-	} else if updater.HasChangesToSystemBundles(false) || wasAtLeastOneOptionalUpdateOmittedDueToInsufficientPrivileges {
+	} else if updater.HasChangesToSystemBundles(false) {
 		handleInsufficientPrivileges(ctx, false)
 	}
 }
