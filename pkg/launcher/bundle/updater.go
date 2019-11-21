@@ -24,15 +24,6 @@ const (
 	DownloadBundleFiles
 )
 
-// BundleUpdateInfo contains information on what files need updating on the user's machine for the bundle specified by the embedded BundleConfig.
-type BundleUpdateInfo struct {
-	config.BundleConfig
-	IsSystemBundle bool
-	PresentState   config.FileInfoMap
-	RemoteState    config.FileInfoMap
-	WantedState    config.FileInfoMap
-}
-
 type Updater struct {
 	downloader       *fetching.Downloader
 	deploymentConfig *config.DeploymentConfig

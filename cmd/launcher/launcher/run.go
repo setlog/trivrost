@@ -77,7 +77,7 @@ func updateSelf(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
 
 func updateBundles(ctx context.Context, updater *bundle.Updater) {
 	updater.DetermineBundleRequirements(places.GetBundleFolderPath(), places.GetSystemWideBundleFolderPath())
-	if updater.HasChangesToUserBundles() {
+	if updater.HasChangesToUserBundles() || updater.HasChangesToSystemBundles(false) {
 		locking.AwaitApplicationsTerminated(ctx)
 		updater.InstallBundleUpdates()
 	}

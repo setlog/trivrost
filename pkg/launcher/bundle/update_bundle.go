@@ -118,7 +118,12 @@ func (u *Updater) RetrieveBundleInfo(fromURL string, publicKeys []*rsa.PublicKey
 func (u *Updater) installBundleUpdates() {
 	u.announceStatus(DownloadBundleFiles, countUpdatesBytes(u.bundleUpdateInfos))
 	for _, bundleUpdateConfig := range u.bundleUpdateInfos {
-		if !bundleUpdateConfig.IsSystemBundle {
+		if bundleUpdateConfig.IsSystemBundle {
+			if bundleUpdateConfig.WantedState.HasChanges() {
+				log.Warnf("Cannot update bundle \"%s\" because it is a system bundle. The following changes will not be applied:", bundleUpdateConfig.LocalDirectory)
+				bundleUpdateConfig.LogChanges()
+			}
+		} else {
 			log.Infof("Downloading %d files for bundle \"%s\".", bundleUpdateConfig.WantedState.UpdateFileCount(), bundleUpdateConfig.LocalDirectory)
 			bundleDirectory := filepath.Join(u.userBundlesFolderPath, bundleUpdateConfig.LocalDirectory)
 			deleteChangedFiles(bundleUpdateConfig.WantedState, bundleDirectory)
