@@ -27,7 +27,7 @@ func newDownloadStatusPanel() *DownloadStatusPanel {
 
 	panel.labelStage = ui.NewLabel("Initializing...")
 	panel.barTotalProgress = ui.NewProgressBar()
-	panel.barTotalProgress.SetValue(-1)
+	setBarProgress(panel.barTotalProgress, -1)
 	panel.labelStatus = ui.NewLabel("")
 
 	panel.Box.Append(panel.labelStage, false)
