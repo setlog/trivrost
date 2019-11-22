@@ -54,8 +54,8 @@ type Download struct {
 	// Calls to methods of handler occur during Download.Read(). The calls are followed by these behaviors:
 	// HandleStartDownload(): Read() will start its first (ideally only) HTTP request.
 	// HandleHttpGetError() and HandleBadHttpResponse(): Read() will not return. The request will be retried after one second.
-	// HandleReadError(): Read() will return with a nil error, having accepted all data which has been received so far,
-	//                    and continue with a range-request immediately.
+	// HandleReadError(): If at least 1 byte has been read, Read() will return with a nil error, having accepted all data which
+	//                    has been received so far. Either way, Download will continue with a range-request immediately.
 	// HandleFailDownload(): Read() will return with a non-nil, non-io.EOF error.
 	// HandleFinishDownload(): Read() will return with io.EOF.
 	handler DownloadProgressHandler
