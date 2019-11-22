@@ -2,34 +2,31 @@ package gui
 
 import (
 	"context"
-	"strings"
 	"sync"
+
+	"github.com/setlog/trivrost/pkg/misc"
 
 	"github.com/andlabs/ui"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/setlog/trivrost/pkg/misc"
 )
 
-type DownloadStatusPanel struct {
-	*ui.Box
+type progressState int
 
-	labelStage *ui.Label
+const (
+	stateInfo   progressState = 1
+	stateError  progressState = 2
+	statePaused progressState = 3
+)
 
-	barTotalProgress *ui.ProgressBar
-	labelStatus      *ui.Label
-
-	progressPrevious, progressCurrent, progressTarget uint64 // Whether these refer to amount of bytes downloaded or something else depends on the current GUI stage.
-	currentProblemMessage                             string
-	stage                                             Stage
-}
+const maxLineWidth = 110
 
 var (
-	window              *ui.Window
-	windowTitle         string
-	waitDialog          *ui.Window
-	waitDialogText      *ui.Label
-	panelDownloadStatus *DownloadStatusPanel
+	window                                        *ui.Window
+	windowCalculatedWidth, windowCalculatedHeight int
+	windowTitle                                   string
+	waitDialog                                    *ui.Window
+	waitDialogText                                *ui.Label
+	panelDownloadStatus                           *DownloadStatusPanel
 
 	guiInitWaitGroup = &sync.WaitGroup{}
 	didQuit          bool
@@ -63,7 +60,6 @@ func BlockingDialog(title, message string, options []string, defaultOption int, 
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(1)
 	chosenOption := defaultOption
-	message = misc.WordWrap(message, 120) // The ui library itself wraps nothing, not even spaces, resulting in very wide windows (>10000 pixels) without this.
 	var waitGroupDoneTrigger sync.Once
 	ui.QueueMain(func() {
 		dialogWindow := ui.NewWindow(title, 600, 90, false)
@@ -76,17 +72,7 @@ func BlockingDialog(title, message string, options []string, defaultOption int, 
 
 		mainBox := ui.NewVerticalBox()
 		mainBox.SetPadded(true)
-
-		labelBox := ui.NewVerticalBox()
-
-		// HACK: When the GUI lib calculates string width, it ignores newlines,
-		// resulting in too large results, and thus too wide windows.
-		lines := strings.Split(message, "\n")
-		for _, line := range lines {
-			lineLabel := ui.NewLabel(line)
-			labelBox.Append(lineLabel, false)
-		}
-
+		labelBox, _ := textBox(ui.NewVerticalBox(), message, maxLineWidth)
 		mainBox.Append(labelBox, true)
 
 		if len(options) > 0 {
@@ -159,6 +145,35 @@ func HideWaitDialog() {
 	})
 }
 
+// Pause shows given message in the download status panel along with a clickable link
+// which reads "Continue" and blocks until the user clicks it.
+func Pause(ctx context.Context, message string) {
+	var n int
+	var hBox *ui.Box
+	c := make(chan struct{}, 1)
+	ui.QueueMain(func() {
+		_, n = textBox(panelDownloadStatus.pauseStatusBox, message, maxLineWidth)
+		hBox = ui.NewHorizontalBox()
+		hBox.Append(newLinkLabel("Continue", ui.DrawTextAlignLeft, misc.WriteAttempter(c)), true)
+		hBox.Append(ui.NewLabel(""), false) // Needed or else the box has no minimum dimensions.
+		hBox.Append(newLogsLinkLabel(), true)
+		panelDownloadStatus.pauseStatusBox.Append(hBox, false)
+		setProgressState(statePaused)
+		panelDownloadStatus.inlineStatusBox.Hide()
+		panelDownloadStatus.pauseStatusBox.Show()
+		flashWindow(window.Handle())
+	})
+	misc.WaitCancelable(ctx, c)
+	ui.QueueMain(func() {
+		panelDownloadStatus.pauseStatusBox.Hide()
+		setWindowDimensions(window.Handle(), windowCalculatedWidth, windowCalculatedHeight)
+		panelDownloadStatus.inlineStatusBox.Show()
+		setProgressState(stateInfo)
+		clearBox(panelDownloadStatus.pauseStatusBox, n+1)
+		hBox.Destroy()
+	})
+}
+
 // Main hands control over to ui.Main() to initialize and manage the GUI. It blocks until gui.Quit() is called.
 func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow bool) error {
 	log.WithFields(log.Fields{"title": title, "showMainWindow": showMainWindow}).Info("Initializing GUI.")
@@ -175,7 +190,7 @@ func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow b
 			return false
 		})
 
-		panelDownloadStatus = makeContent()
+		panelDownloadStatus = newDownloadStatusPanel()
 		window.SetChild(panelDownloadStatus)
 		window.SetMargined(true)
 
@@ -188,6 +203,7 @@ func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow b
 		if showMainWindow {
 			centerWindow(window.Handle())
 			window.Show()
+			windowCalculatedWidth, windowCalculatedHeight = getWindowDimensions(window.Handle())
 			centerWindow(window.Handle())
 		}
 
@@ -195,24 +211,4 @@ func Main(ctx context.Context, cancelFunc func(), title string, showMainWindow b
 
 		guiInitWaitGroup.Done()
 	})
-}
-
-func makeContent() *DownloadStatusPanel {
-	panel := &DownloadStatusPanel{Box: ui.NewVerticalBox()}
-	panel.SetPadded(true)
-
-	panel.labelStage = ui.NewLabel("Initializing...")
-	panel.barTotalProgress = ui.NewProgressBar()
-	panel.barTotalProgress.SetValue(-1)
-	panel.labelStatus = ui.NewLabel("")
-
-	panel.Box.Append(panel.labelStage, false)
-	panel.Box.Append(panel.barTotalProgress, false)
-
-	hBox := ui.NewHorizontalBox()
-	hBox.Append(panel.labelStatus, false)
-	hBox.Append(newLinkLabel("Show logs...", showLogFolder), true)
-	panel.Box.Append(hBox, false)
-
-	return panel
 }

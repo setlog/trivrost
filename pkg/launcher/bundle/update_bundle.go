@@ -20,16 +20,11 @@ import (
 	"github.com/setlog/trivrost/pkg/launcher/hashing"
 )
 
-func (u *Updater) DetermineBundleUpdateRequired(userBundlesFolderPath, systemBundlesFolderPath string) bool {
+func (u *Updater) DetermineBundleRequirements(userBundlesFolderPath, systemBundlesFolderPath string) {
 	u.userBundlesFolderPath, u.systemBundlesFolderPath = userBundlesFolderPath, systemBundlesFolderPath
 	u.determineLocalBundleVersions()
 	u.removeUnknownBundles()
 	u.determineBundleChanges()
-	isUpdatedRequired := u.isAtLeastOneChangeRequired()
-	if isUpdatedRequired {
-		u.assertUpdatePossible()
-	}
-	return isUpdatedRequired
 }
 
 func (u *Updater) InstallBundleUpdates() {
@@ -123,11 +118,18 @@ func (u *Updater) RetrieveBundleInfo(fromURL string, publicKeys []*rsa.PublicKey
 func (u *Updater) installBundleUpdates() {
 	u.announceStatus(DownloadBundleFiles, countUpdatesBytes(u.bundleUpdateInfos))
 	for _, bundleUpdateConfig := range u.bundleUpdateInfos {
-		log.Infof("Downloading %d files for bundle \"%s\".", bundleUpdateConfig.WantedState.UpdateFileCount(), bundleUpdateConfig.LocalDirectory)
-		bundleDirectory := filepath.Join(u.userBundlesFolderPath, bundleUpdateConfig.LocalDirectory)
-		deleteChangedFiles(bundleUpdateConfig.WantedState, bundleDirectory)
-		u.downloader.MustDownloadToDirectory(bundleUpdateConfig.BaseURL, bundleUpdateConfig.WantedState, bundleDirectory)
-		system.MustRecursivelyRemoveEmptyFolders(bundleDirectory)
+		if bundleUpdateConfig.IsSystemBundle {
+			if bundleUpdateConfig.WantedState.HasChanges() {
+				log.Warnf("Cannot update bundle \"%s\" because it is a system bundle. The following changes will not be applied:", bundleUpdateConfig.LocalDirectory)
+				bundleUpdateConfig.LogChanges()
+			}
+		} else {
+			log.Infof("Downloading %d files for bundle \"%s\".", bundleUpdateConfig.WantedState.UpdateFileCount(), bundleUpdateConfig.LocalDirectory)
+			bundleDirectory := filepath.Join(u.userBundlesFolderPath, bundleUpdateConfig.LocalDirectory)
+			deleteChangedFiles(bundleUpdateConfig.WantedState, bundleDirectory)
+			u.downloader.MustDownloadToDirectory(bundleUpdateConfig.BaseURL, bundleUpdateConfig.WantedState, bundleDirectory)
+			system.MustRecursivelyRemoveEmptyFolders(bundleDirectory)
+		}
 	}
 }
 

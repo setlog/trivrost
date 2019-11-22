@@ -26,3 +26,23 @@ func WaitForSignal(c <-chan struct{}, timeout time.Duration) bool {
 		return false
 	}
 }
+
+func WaitCancelable(ctx context.Context, c <-chan struct{}) {
+	select {
+	case <-ctx.Done():
+		err := ctx.Err()
+		if err != nil {
+			panic(err)
+		}
+	case <-c:
+	}
+}
+
+func WriteAttempter(c chan<- struct{}) func() {
+	return func() {
+		select {
+		case c <- struct{}{}:
+		default:
+		}
+	}
+}

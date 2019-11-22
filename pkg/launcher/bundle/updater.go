@@ -6,11 +6,11 @@ import (
 	"runtime"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/setlog/trivrost/pkg/fetching"
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/launcher/timestamps"
 	"github.com/setlog/trivrost/pkg/system"
+	log "github.com/sirupsen/logrus"
 )
 
 type UpdaterStatus int
@@ -23,15 +23,6 @@ const (
 	RetrieveRemoteBundleVersions
 	DownloadBundleFiles
 )
-
-// BundleUpdateInfo contains information on what files need updating on the user's machine for the bundle specified by the embedded BundleConfig.
-type BundleUpdateInfo struct {
-	config.BundleConfig
-	IsSystemBundle bool
-	PresentState   config.FileInfoMap
-	RemoteState    config.FileInfoMap
-	WantedState    config.FileInfoMap
-}
 
 type Updater struct {
 	downloader       *fetching.Downloader
@@ -81,12 +72,13 @@ func (u *Updater) announceStatus(status UpdaterStatus, progressTarget uint64) {
 	}
 }
 
-func (u *Updater) RetrieveDeploymentConfig(fromURL string) {
-	log.Infof("Downloading deployment config from \"%s\".", fromURL)
-	data, err := u.downloader.DownloadSignedResource(fromURL, u.publicKeys)
+func (u *Updater) Prepare(deploymentConfigURL string) {
+	log.Infof("Downloading deployment config from \"%s\".", deploymentConfigURL)
+	data, err := u.downloader.DownloadSignedResource(deploymentConfigURL, u.publicKeys)
 	if err != nil {
 		panic(err)
 	}
+
 	deploymentConfig := config.ParseDeploymentConfig(strings.NewReader(string(data)), runtime.GOOS, system.GetOSArch())
 	if u.timestampFilePath != "" {
 		timestamps.VerifyDeploymentConfigTimestamp(deploymentConfig.Timestamp, u.timestampFilePath)

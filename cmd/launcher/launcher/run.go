@@ -3,6 +3,8 @@ package launcher
 import (
 	"context"
 
+	"github.com/setlog/trivrost/pkg/launcher/config"
+
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/gui"
 	"github.com/setlog/trivrost/cmd/launcher/locking"
@@ -11,22 +13,36 @@ import (
 
 	"github.com/setlog/trivrost/pkg/fetching"
 	"github.com/setlog/trivrost/pkg/logging"
+	"github.com/setlog/trivrost/pkg/misc"
 
 	"github.com/setlog/trivrost/pkg/launcher/bundle"
-	"github.com/setlog/trivrost/pkg/launcher/config"
 )
 
 func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	doHousekeeping()
 
-	handler := gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)
-	updater := bundle.NewUpdater(ctx, handler, resources.PublicRsaKeys)
-	updater.EnableTimestampVerification(places.GetTimestampsFilePath())
-	updater.SetStatusCallback(func(status bundle.UpdaterStatus, expectedProgressUnits uint64) {
-		handler.ResetProgress()
-		handleStatusChange(status, expectedProgressUnits)
-	})
+	updater := createUpdater(ctx, wireHandler(gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)))
 
+	gui.SetStage(gui.StageGetDeploymentConfig, 0)
+	updater.Prepare(resources.LauncherConfig.DeploymentConfigURL)
+
+	if !IsInstanceInstalledInSystemMode() && !launcherFlags.SkipSelfUpdate {
+		updateSelf(updater, launcherFlags)
+	}
+	updateBundles(ctx, updater)
+
+	gui.SetStage(gui.StageLaunchApplication, 0)
+	handleUpdateOmissions(ctx, updater)
+	launch(ctx, updater.GetDeploymentConfig().Execution, launcherFlags)
+}
+
+func doHousekeeping() {
+	logging.DeleteOldLogFiles()
+	locking.MinimizeApplicationSignaturesList()
+	deleteLeftoverBinaries()
+}
+
+func wireHandler(handler *gui.GuiDownloadProgressHandler) *gui.GuiDownloadProgressHandler {
 	hashLauncherProgress, hashBundlesProgress := newProgressFaker(10), newProgressFaker(10)
 	gui.ProgressFunc = func(s gui.Stage) uint64 {
 		if s.IsDownloadStage() {
@@ -38,23 +54,56 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 		}
 		return 0
 	}
-	gui.SetStage(gui.StageGetDeploymentConfig, 0)
+	return handler
+}
 
-	updater.RetrieveDeploymentConfig(resources.LauncherConfig.DeploymentConfigURL)
+func createUpdater(ctx context.Context, handler *gui.GuiDownloadProgressHandler) *bundle.Updater {
+	updater := bundle.NewUpdater(ctx, handler, resources.PublicRsaKeys)
+	updater.EnableTimestampVerification(places.GetTimestampsFilePath())
+	updater.SetStatusCallback(func(status bundle.UpdaterStatus, expectedProgressUnits uint64) {
+		handler.ResetProgress()
+		handleStatusChange(status, expectedProgressUnits)
+	})
+	return updater
+}
 
+func updateSelf(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
 	updater.SetIgnoredSelfUpdateBundleInfoSHAs(resources.LauncherConfig.IgnoreLauncherBundleInfoHashes)
-	if !(launcherFlags.SkipSelfUpdate || IsInstanceInstalledSystemWide()) {
-		if updater.UpdateSelf() {
-			runPostBinaryUpdateProvisioning()
-			locking.Restart(true, launcherFlags)
-		}
+	if updater.UpdateSelf() {
+		runPostBinaryUpdateProvisioning()
+		locking.Restart(true, launcherFlags)
 	}
-	if updater.DetermineBundleUpdateRequired(places.GetBundleFolderPath(), places.GetSystemWideBundleFolderPath()) {
+}
+
+func updateBundles(ctx context.Context, updater *bundle.Updater) {
+	updater.DetermineBundleRequirements(places.GetBundleFolderPath(), places.GetSystemWideBundleFolderPath())
+	if updater.HasChangesToUserBundles() || updater.HasChangesToSystemBundles(false) {
 		locking.AwaitApplicationsTerminated(ctx)
 		updater.InstallBundleUpdates()
 	}
+}
 
-	launch(ctx, &updater.GetDeploymentConfig().Execution, launcherFlags)
+func handleUpdateOmissions(ctx context.Context, updater *bundle.Updater) {
+	if updater.HasChangesToSystemBundles(true) {
+		handleInsufficientPrivileges(ctx, true)
+	} else if updater.HasChangesToSystemBundles(false) {
+		handleInsufficientPrivileges(ctx, false)
+	}
+}
+
+func handleInsufficientPrivileges(ctx context.Context, wasAtLeastOneMandatoryUpdateOmitted bool) {
+	const howTo = "To bring the application up to date, its latest release needs to be installed with administrative privileges."
+	if wasAtLeastOneMandatoryUpdateOmitted {
+		panic(misc.NewNestedError("A mandatory change cannot be applied because it affects files in protected system folders. "+howTo, nil))
+	} else {
+		gui.Pause(ctx, "Some optional changes were not applied because they affect files in protected system folders. "+howTo+
+			"\nYou may click \"Continue\" to ignore this for the time being.")
+	}
+}
+
+func launch(ctx context.Context, execution config.ExecutionConfig, launcherFlags *flags.LauncherFlags) {
+	executeCommands(ctx, execution.Commands, launcherFlags)
+	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
 }
 
 func handleStatusChange(status bundle.UpdaterStatus, expectedProgressUnits uint64) {
@@ -72,15 +121,4 @@ func handleStatusChange(status bundle.UpdaterStatus, expectedProgressUnits uint6
 	case bundle.DownloadBundleFiles:
 		gui.SetStage(gui.StageDownloadBundleUpdates, expectedProgressUnits)
 	}
-}
-
-func doHousekeeping() {
-	logging.DeleteOldLogFiles()
-	locking.MinimizeApplicationSignaturesList()
-	deleteLeftoverBinaries()
-}
-
-func launch(ctx context.Context, execution *config.ExecutionConfig, launcherFlags *flags.LauncherFlags) {
-	executeCommands(ctx, execution.Commands, launcherFlags)
-	lingerTimeMilliseconds = execution.LingerTimeMilliseconds
 }

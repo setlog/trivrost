@@ -8,10 +8,10 @@ import (
 var linkColor = ui.TextColor{R: 0, G: float64(0x66) / 255.0, B: float64(0xCC) / 255.0, A: 1}
 var linkColorHover = ui.TextColor{R: float64(0x33) / 255.0, G: float64(0x99) / 255.0, B: float64(0xFF) / 255.0, A: 1}
 
-func newLinkLabel(labelText string, onClickFunc func()) *ui.Area {
+func newLinkLabel(labelText string, align ui.DrawTextAlign, onClickFunc func()) *ui.Area {
 	attrString := ui.NewAttributedString(labelText)
 	attrString.SetAttribute(linkColor, 0, len(labelText))
-	return ui.NewArea(&linkAreaHandler{attributedString: attrString, defaultFont: getDefaultFont(), onClickFunc: onClickFunc})
+	return ui.NewArea(&linkAreaHandler{attributedString: attrString, defaultFont: getDefaultFont(), onClickFunc: onClickFunc, align: align})
 }
 
 type linkAreaHandler struct {
@@ -19,6 +19,7 @@ type linkAreaHandler struct {
 	defaultFont      *ui.FontDescriptor
 	onClickFunc      func()
 	isInHoverEffect  bool
+	align            ui.DrawTextAlign
 }
 
 func getDefaultFont() *ui.FontDescriptor {
@@ -37,7 +38,7 @@ func (ah *linkAreaHandler) Draw(a *ui.Area, p *ui.AreaDrawParams) {
 		String:      ah.attributedString,
 		DefaultFont: ah.defaultFont,
 		Width:       p.AreaWidth,
-		Align:       ui.DrawTextAlignRight,
+		Align:       ah.align,
 	})
 	defer tl.Free()
 	p.Context.Text(tl, 0, -1)

@@ -12,24 +12,6 @@ import (
 	"github.com/setlog/trivrost/pkg/misc"
 )
 
-type FileSystemError struct {
-	Message      string
-	CausingError error
-}
-
-func (fse *FileSystemError) Error() string {
-	var causingErrorMessage string
-	if fse.CausingError == nil {
-		causingErrorMessage = "<nil>"
-	} else {
-		causingErrorMessage = fse.CausingError.Error()
-	}
-	if fse == nil {
-		return "<nil>: " + causingErrorMessage
-	}
-	return fse.Message + ": " + causingErrorMessage
-}
-
 func MustMakeTempDirectory(forFolderAtPath string) string {
 	randomHex := misc.MustGetRandomHexString(8)
 	tempDirPath := filepath.Join(filepath.Dir(forFolderAtPath), "~"+filepath.Base(forFolderAtPath)+".dl."+randomHex)

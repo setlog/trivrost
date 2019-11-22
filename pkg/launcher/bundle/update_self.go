@@ -17,8 +17,7 @@ import (
 )
 
 func (u *Updater) UpdateSelf() (needsRestart bool) {
-	updateConfig := u.deploymentConfig.GetLauncherUpdateConfig()
-	if updateConfig == nil {
+	if u.deploymentConfig.GetLauncherUpdateConfig() == nil {
 		return false
 	}
 	programPath := system.GetProgramPath()
@@ -82,7 +81,7 @@ func (u *Updater) swapBinary(localBinaryPath string, remoteURL string, newFileIn
 
 	if runtime.GOOS == system.OsWindows { // On Windows, you cannot delete a running binary, but you can rename it.
 		if err := os.Rename(localBinaryPath, oldBinaryNewPath); err != nil {
-			panic(&system.FileSystemError{Message: fmt.Sprintf("Could not rename old binary \"%s\" to \"%s\"", localBinaryPath, oldBinaryNewPath), CausingError: err})
+			panic(system.NewFileSystemError(fmt.Sprintf("Could not rename old binary \"%s\" to \"%s\"", localBinaryPath, oldBinaryNewPath), err))
 		}
 	}
 
@@ -91,9 +90,10 @@ func (u *Updater) swapBinary(localBinaryPath string, remoteURL string, newFileIn
 			if err2 := os.Rename(oldBinaryNewPath, localBinaryPath); err2 != nil {
 				log.WithFields(log.Fields{"err": err, "localBinaryPath": localBinaryPath, "oldBinaryNewPath": oldBinaryNewPath}).
 					Error("Could not revert rename. Installation will be broken.")
+				panic(fmt.Sprintf("Could not revert-rename new binary \"%s\" to \"%s\": %v. Preceded by: %v", newBinaryTempPath, localBinaryPath, err2, err))
 			}
 		}
-		panic(&system.FileSystemError{Message: fmt.Sprintf("Could not rename new binary \"%s\" to \"%s\"", newBinaryTempPath, localBinaryPath), CausingError: err})
+		panic(system.NewFileSystemError(fmt.Sprintf("Could not rename new binary \"%s\" to \"%s\"", newBinaryTempPath, localBinaryPath), err))
 	}
 }
 

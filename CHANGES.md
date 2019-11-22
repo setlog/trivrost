@@ -1,11 +1,16 @@
 # Release-Changelog
 
-## 1.3.6 (TBD)
+## 1.4.0 (TBD)
 ### Features
 * `cmd/validator` will now check that command binary's *will be* downloaded per platform, where previously it would only check if they are available under their respective bundle URL.
+* Added new field `IsUpdateMandatory` to [deployment-config](docs/deployment-config.md), which allows to deny the user the launch of the application when system bundles require changes.
 ### Fixes
 * Fixed changes to the launcher icon not being applied after a self-update on Linux.
 * `cmd/validator`: fix only the first missing bundle URL being reported.
+* Fix missing `LauncherUpdate` in deployment-config leading to error when documentation explicitly allows it.
+* Fix false positives in log warning about program name on disk having diverged from what is configured in the embedded launcher-config on Windows and MacOS.
+### Changes
+* trivrost now allows users to continue past failed self-updates as well as omitted changes to system bundles in [system mode](docs/lifecycle.md#system-mode) installations, unless [further configuration](docs/deployment-config.md) is made; see the new field `IsUpdateMandatory` in deployment-config.
 
 ## 1.3.5 (2019-11-11)
 ### Fixes
