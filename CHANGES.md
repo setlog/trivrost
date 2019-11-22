@@ -1,6 +1,6 @@
 # Release-Changelog
 
-## 1.4.0 (TBD)
+## 1.4.0 (2019-11-22)
 ### Features
 * `cmd/validator` will now check that command binary's *will be* downloaded per platform, where previously it would only check if they are available under their respective bundle URL.
 * Added new field `IsUpdateMandatory` to [deployment-config](docs/deployment-config.md), which allows to deny the user the launch of the application when system bundles require changes.
