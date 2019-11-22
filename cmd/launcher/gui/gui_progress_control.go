@@ -21,6 +21,7 @@ var ProgressFunc = func(s Stage) uint64 {
 func SetStage(s Stage, progressTarget uint64) {
 	log.Debugf("Changing stage to %v with total %d.\n", s, progressTarget)
 	ui.QueueMain(func() {
+		isStateChange := panelDownloadStatus.stage.IsWaitingStage() != s.IsWaitingStage()
 		panelDownloadStatus.stage = s
 		panelDownloadStatus.progressCurrent = 0
 		panelDownloadStatus.progressPrevious = 0
@@ -28,9 +29,16 @@ func SetStage(s Stage, progressTarget uint64) {
 		panelDownloadStatus.labelStage.SetText(s.getText())
 		barProgress, percentage := calculateProgress(panelDownloadStatus.stage, panelDownloadStatus.progressCurrent, panelDownloadStatus.progressTarget)
 		window.SetTitle(fmt.Sprintf("[%.1f%%] %s", percentage, windowTitle))
-		panelDownloadStatus.barTotalProgress.SetValue(barProgress)
 		panelDownloadStatus.currentProblemMessage = ""
 		panelDownloadStatus.labelStatus.SetText("")
+		if isStateChange {
+			if s.IsWaitingStage() {
+				setProgressState(statePaused)
+			} else {
+				setProgressState(stateInfo)
+			}
+		}
+		setBarProgress(panelDownloadStatus.barTotalProgress, barProgress)
 	})
 }
 
@@ -114,7 +122,7 @@ func updateProgressBar() {
 	if !didQuit {
 		ui.QueueMain(func() {
 			barProgress, _ := calculateProgress(panelDownloadStatus.stage, ProgressFunc(panelDownloadStatus.stage), panelDownloadStatus.progressTarget)
-			panelDownloadStatus.barTotalProgress.SetValue(barProgress)
+			setBarProgress(panelDownloadStatus.barTotalProgress, barProgress)
 		})
 	}
 }

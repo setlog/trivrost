@@ -4,6 +4,25 @@ import (
 	"github.com/setlog/trivrost/pkg/system"
 )
 
+type Platform struct { // TODO: Use this instead of separate os and arch string
+	OS, Arch string
+}
+
+func (p *Platform) String() string {
+	if p.Arch == "" {
+		return p.OS
+	}
+	if p.OS == "" {
+		return p.Arch
+	}
+	return p.OS + "-" + p.Arch
+}
+
+func (p *Platform) Equals(os, arch string) bool {
+	platformString := p.String()
+	return (platformString == os) || (platformString == os+"-"+arch) || (platformString == arch)
+}
+
 func FilterLauncherUpdatesByPlatform(launcherUpdates []LauncherUpdateConfig, os string, arch string) []LauncherUpdateConfig {
 	var filteredLauncherUpdates []LauncherUpdateConfig
 	for _, launcherUpdate := range launcherUpdates {

@@ -118,7 +118,7 @@ func (downloader *Downloader) MustDownloadToTempDirectory(baseUrl string, fileMa
 func (downloader *Downloader) MustDownloadToDirectory(baseUrl string, fileMap config.FileInfoMap, localDirPath string) {
 	err := os.MkdirAll(localDirPath, 0700)
 	if err != nil {
-		panic(&system.FileSystemError{Message: fmt.Sprintf("Could not create directory \"%s\"", localDirPath), CausingError: err})
+		panic(system.NewFileSystemError(fmt.Sprintf("Could not create directory \"%s\"", localDirPath), err))
 	}
 	err = downloader.DownloadToDirectory(baseUrl, fileMap, localDirPath)
 	if err != nil {
@@ -255,7 +255,7 @@ func updateFile(dl *Download, expectedFileInfo *config.FileInfo, localFilePath s
 	system.MustMakeDir(filepath.Dir(localFilePath))
 	file, err := os.OpenFile(localFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0700)
 	if err != nil {
-		return &system.FileSystemError{Message: fmt.Sprintf("Could not open file \"%s\" for writing", localFilePath), CausingError: err}
+		return system.NewFileSystemError(fmt.Sprintf("Could not open file \"%s\" for writing", localFilePath), err)
 	}
 	defer system.CleanUpFileOperation(file, &returnError)
 	if err = preallocate.File(file, expectedFileInfo.Size); err != nil { // Important: Screws up royally on files opened with the os.O_APPEND-flag.

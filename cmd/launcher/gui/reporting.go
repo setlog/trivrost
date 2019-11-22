@@ -50,11 +50,11 @@ func getPanicMessage(r interface{}) string {
 
 	fileSystemError, ok := r.(*system.FileSystemError)
 	if ok && fileSystemError != nil {
-		if os.IsPermission(fileSystemError.CausingError) {
+		if os.IsPermission(fileSystemError.Unwrap()) {
 			message = "Error: Insufficient permissions to write files in your own user directory. " +
 				"Please contact your system administrator and verify that you have full access to your user directory."
 		} else {
-			message = "Error: Your machine's file system denied a required operation. The error received was: " + fileSystemError.CausingError.Error()
+			message = fmt.Sprintf("Error: Your machine's file system denied a required operation. The error received was: %v", fileSystemError.Unwrap())
 		}
 	}
 

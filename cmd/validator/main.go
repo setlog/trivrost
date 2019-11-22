@@ -92,7 +92,7 @@ func checkURLs(data []byte, filePath string, skipJarCheck bool) {
 				fmt.Printf("\033[0;91mHTTP HEAD request to URL '%s' failed: %v. (Check reason: %v)\033[0m\n", url, err, details)
 				atomic.AddInt32(&errorCount, 1)
 			} else if code != http.StatusOK {
-				fmt.Printf("\033[0;91mHTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v).\033[0m\n", url, code, details)
+				fmt.Printf("\033[0;91mHTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)\033[0m\n", url, code, details)
 				atomic.AddInt32(&errorCount, 1)
 			} else {
 				fmt.Printf("OK: Resource %s is available. (Reason for check: %v)\n", url, details)
@@ -125,7 +125,7 @@ func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails
 				addUrlWithDetails(urlMap, update.BundleInfoURL, checkDetails{reasonBundle, operatingsystem, arch, 0})
 			}
 			for _, command := range deploymentConfig.Execution.Commands {
-				success = success && collectCommandURLs(urlMap, deploymentConfig, operatingsystem, arch, command, skipJarCheck)
+				success = collectCommandURLs(urlMap, deploymentConfig, operatingsystem, arch, command, skipJarCheck) && success
 			}
 		}
 	}
@@ -150,7 +150,7 @@ func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config
 	bundleName := misc.FirstElementOfPath(commandNameUnix)
 	bundleURL := getBundleURL(bundleName, deploymentConfig)
 	if bundleURL == "" {
-		fmt.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\". (Required for command \"%s\" on platform %s-%s).\033[0m\n", bundleName, command.Name, os, arch)
+		fmt.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\" for platform %s-%s. (Required for command \"%s\")\033[0m\n", bundleName, os, arch, command.Name)
 		return false
 	}
 	binaryURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(commandNameUnix))

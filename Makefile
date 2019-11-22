@@ -140,15 +140,15 @@ help:            ## Show this help
 	@fgrep -h "##" ${MAKEFILE_LIST} | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
 sign:            ## Sign the Windows exe using CERT_FILE (bas64 encoded) and password from CERT_KEY
+ifneq (${OS},windows)
+	$(warning Signing is currently only implemented for windows, skipping)
+else
 ifndef CERT_FILE
 	$(error CERT_FILE is undefined)
 endif
 ifndef CERT_KEY
 	$(error CERT_KEY is undefined)
 endif
-ifneq (${OS},windows)
-	$(warning Signing is currently only implemented for windows, skipping)
-else
 	$(info Signing windows release files...)
 	echo "$${CERT_FILE}" | base64 -d > ~tmp_launcher_cert
 	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /t ${TIMESTAMP_SERVER} /fd SHA512 "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.exe"

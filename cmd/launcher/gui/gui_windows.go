@@ -27,6 +27,18 @@ func centerWindow(handle uintptr) {
 	}
 }
 
+func getWindowDimensions(handle uintptr) (w, h int) {
+	return int(C.getWindowWidth(C.ULONG_PTR(handle))), int(C.getWindowHeight(C.ULONG_PTR(handle)))
+}
+
+func setWindowDimensions(handle uintptr, w, h int) {
+	C.setWindowDimensions(C.ULONG_PTR(handle), C.int(w), C.int(h))
+}
+
+func flashWindow(handle uintptr) {
+	C.flashWindow(C.ULONG_PTR(handle))
+}
+
 func applyIconToWindow(handle uintptr) {
 	if !didLoadIcons {
 		loadIcons()
@@ -63,4 +75,8 @@ func goStringToConstantUTF16WinApiString(s string) C.LPCWSTR {
 		currentCharPointer = (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(currentCharPointer)) + unsafe.Sizeof(uint16(0))))
 	}
 	return (C.LPCWSTR)(unsafe.Pointer(utf16StringPointer))
+}
+
+func setProgressState(s progressState) {
+	C.setProgressBarState(C.ULONG_PTR(panelDownloadStatus.barTotalProgress.Handle()), C.int(s))
 }

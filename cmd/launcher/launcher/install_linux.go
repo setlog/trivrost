@@ -52,7 +52,7 @@ func init() {
 	}
 }
 
-func prepareShortcutInstallation() {
+func runPostBinaryUpdateProvisioning() {
 	installLauncherIcon()
 }
 
