@@ -9,7 +9,7 @@ The deployment-config is a JSON-file which is supposed to be hosted on a webserv
   * **`BundleInfoURL`**, **`BaseURL`**, **`TargetPlatforms`**: See [Common fields](#Common-fields) below.
   * **`LocalDirectory`** (string): Desired name of the bundle's folder in the file system.
   * **`Tags`** (array): An array of strings describing arbitrary tags. Currently only used by bundown to fetch the files required to build `.msi`-installers for Windows for [system mode](walkthrough.md#System-mode).
-  * **`IsUpdateMandatory`** (bool): If set to true, specifies that the user cannot choose to ignore when required changes to a bundle are omitted due to it being a [system bundle](glossary.md#system-bundle); the user will however be informed about omitted updates either way. This has no effect on [user bundles](glossary.md#user-bundle).
+  * **`IsUpdateMandatory`** (bool): If set to true, specifies that the user cannot choose to ignore when required changes to a bundle are omitted due to it being a [system bundle](glossary.md#system-bundle). If set to false, they will still be informed about the problem, but given the option to continue anyway. This has no effect on [user bundles](glossary.md#user-bundle), because keeping those up to date is always mandatory.
 * **`Execution`** (object): Object which describes trivrost's behavior after having downloaded and updated itself and all bundles.
   * **`Commands`** (array): An array of objects which define individual commands which will be executed in the order they appear. After starting the last command, trivrost will terminate without waiting for it to complete.
     * **`TargetPlatforms`**: See [Common fields](#Common-fields) below.
