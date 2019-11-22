@@ -24,9 +24,9 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	updater := createUpdater(ctx, wireHandler(gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)))
 
 	gui.SetStage(gui.StageGetDeploymentConfig, 0)
-	isSelfUpdateMandatory := updater.Prepare(resources.LauncherConfig.DeploymentConfigURL)
+	updater.Prepare(resources.LauncherConfig.DeploymentConfigURL)
 
-	if (!IsInstanceInstalledInSystemMode() || isSelfUpdateMandatory) && !launcherFlags.SkipSelfUpdate {
+	if !IsInstanceInstalledInSystemMode() && !launcherFlags.SkipSelfUpdate {
 		updateSelf(updater, launcherFlags)
 	}
 	updateBundles(ctx, updater)

@@ -72,7 +72,7 @@ func (u *Updater) announceStatus(status UpdaterStatus, progressTarget uint64) {
 	}
 }
 
-func (u *Updater) Prepare(deploymentConfigURL string) (isSelfUpdateMandatory bool) {
+func (u *Updater) Prepare(deploymentConfigURL string) {
 	log.Infof("Downloading deployment config from \"%s\".", deploymentConfigURL)
 	data, err := u.downloader.DownloadSignedResource(deploymentConfigURL, u.publicKeys)
 	if err != nil {
@@ -84,12 +84,6 @@ func (u *Updater) Prepare(deploymentConfigURL string) (isSelfUpdateMandatory boo
 		timestamps.VerifyDeploymentConfigTimestamp(deploymentConfig.Timestamp, u.timestampFilePath)
 	}
 	u.deploymentConfig = deploymentConfig
-
-	updateConfig := u.deploymentConfig.GetLauncherUpdateConfig()
-	if updateConfig != nil {
-		return updateConfig.IsUpdateMandatory
-	}
-	return false
 }
 
 func (u *Updater) GetDeploymentConfig() *config.DeploymentConfig {

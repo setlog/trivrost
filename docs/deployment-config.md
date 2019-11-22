@@ -9,6 +9,7 @@ The deployment-config is a JSON-file which is supposed to be hosted on a webserv
   * **`BundleInfoURL`**, **`BaseURL`**, **`TargetPlatforms`**: See [Common fields](#Common-fields) below.
   * **`LocalDirectory`** (string): Desired name of the bundle's folder in the file system.
   * **`Tags`** (array): An array of strings describing arbitrary tags. Currently only used by bundown to fetch the files required to build `.msi`-installers for Windows for [system mode](walkthrough.md#System-mode).
+  * **`IsUpdateMandatory`** (bool): If set to true, specifies that the user cannot choose to ignore when required changes to a bundle are omitted due to it being a [system bundle](glossary.md#system-bundle); the user will however be informed about omitted updates either way. This has no effect on [user bundles](glossary.md#user-bundle).
 * **`Execution`** (object): Object which describes trivrost's behavior after having downloaded and updated itself and all bundles.
   * **`Commands`** (array): An array of objects which define individual commands which will be executed in the order they appear. After starting the last command, trivrost will terminate without waiting for it to complete.
     * **`TargetPlatforms`**: See [Common fields](#Common-fields) below.
@@ -21,7 +22,6 @@ The deployment-config is a JSON-file which is supposed to be hosted on a webserv
 * **`BundleInfoURL`** (string): URL to a [bundle information file](walkthrough.md#Bundle-info) describing this bundle.
 * **`BaseURL`** (string): URL, to which bundle info file paths get joined to to determine download URLs for all files. If omitted, it will be inferred by taking `BundleInfoURL` and stripping the last path element from it.
 * **`TargetPlatforms`** (array): Array of strings specifying allowed OS/architecture combinations ("platforms") which this element applies to, using the `GOOS` and `GOARCH` [naming scheme](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63) in one of the forms `GOOS`, `GOARCH` or `GOOS-GOARCH`, e.g. `windows-amd64`. If omitted, the element applies to all platforms. See also: [Placeholders](#placeholders).
-* **`IsUpdateMandatory`** (bool): For `LauncherUpdate`, if set to true, specifies that the launcher should attempt a self-update even if it is in system mode. For `Bundles`, if set to true, specifies that the user cannot choose to ignore when required changes to a bundle are omitted due to it being a [system bundle](glossary.md#system-bundle); the user will however be informed about omitted updates either way. This has no effect on [user bundles](glossary.md#user-bundle).
 
 ## Placeholders
 * **`{{.OS}}`**: Identifier for the operating system the running trivrost binary was built for. (`darwin`, `windows` or `linux`)
