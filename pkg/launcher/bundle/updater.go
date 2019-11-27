@@ -58,10 +58,6 @@ func (u *Updater) DisableTimestampVerification() {
 	u.timestampFilePath = ""
 }
 
-func (u *Updater) IsTimestampVerificationEnabled() bool {
-	return u.timestampFilePath == ""
-}
-
 func (u *Updater) SetStatusCallback(statusCallback func(UpdaterStatus, uint64)) {
 	u.statusCallback = statusCallback
 }
