@@ -29,8 +29,8 @@ type Updater struct {
 	deploymentConfig *config.DeploymentConfig
 	publicKeys       []*rsa.PublicKey
 
-	bundleUpdateInfos               []*BundleUpdateInfo
-	ignoredSelfUpdateBundleInfoSHAs []string
+	bundleUpdateInfos                   []*BundleUpdateInfo
+	ignoredLauncherUpdateBundleInfoSHAs []string
 
 	userBundlesFolderPath   string
 	systemBundlesFolderPath string

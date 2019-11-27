@@ -26,7 +26,9 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	gui.SetStage(gui.StageGetDeploymentConfig, 0)
 	updater.Prepare(resources.LauncherConfig.DeploymentConfigURL)
 
-	bringLauncherToWantedVersion(updater, launcherFlags)
+	if !IsInstanceInstalledInSystemMode() && !launcherFlags.SkipSelfUpdate {
+		updateLauncherToLatestVersion(updater, launcherFlags)
+	}
 	updateBundles(ctx, updater)
 
 	gui.SetStage(gui.StageLaunchApplication, 0)
@@ -65,16 +67,9 @@ func createUpdater(ctx context.Context, handler *gui.GuiDownloadProgressHandler)
 	return updater
 }
 
-func bringLauncherToWantedVersion(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
-	if IsInstanceInstalledInSystemMode() || launcherFlags.SkipSelfUpdate {
-		return
-	}
-	updateLauncherToLatestVersion(updater, launcherFlags)
-}
-
 func updateLauncherToLatestVersion(updater *bundle.Updater, launcherFlags *flags.LauncherFlags) {
-	updater.SetIgnoredSelfUpdateBundleInfoSHAs(resources.LauncherConfig.IgnoreLauncherBundleInfoHashes)
-	if updater.UpdateSelf() {
+	updater.SetIgnoredLauncherUpdateBundleInfoSHAs(resources.LauncherConfig.IgnoreLauncherBundleInfoHashes)
+	if updater.UpdateLauncherToLatestVersion() {
 		runPostBinaryUpdateProvisioning()
 		locking.Restart(true, launcherFlags)
 	}
