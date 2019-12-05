@@ -1,0 +1,8 @@
+{
+    "LauncherUpdate": [
+        {
+            "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
+            "TargetPlatforms": [ "{{.OS}}-{{.Arch}}" ]
+        }
+    ]
+}
