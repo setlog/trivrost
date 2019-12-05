@@ -2,9 +2,8 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"text/template"
-
-	"github.com/setlog/trivrost/pkg/misc"
 )
 
 type templateFields struct {
@@ -18,11 +17,11 @@ func expandPlaceholders(s string, os string, arch string) (string, error) {
 		return "", fmt.Errorf("Could not parse template: %v", err)
 	}
 
-	dw := &misc.ByteSliceWriter{}
-	err = tmpl.Execute(dw, templateFields{os, arch})
+	sb := &strings.Builder{}
+	err = tmpl.Execute(sb, templateFields{os, arch})
 	if err != nil {
 		return "", fmt.Errorf("Could not execute template: %v", err)
 	}
 
-	return string(dw.Data), nil
+	return sb.String(), nil
 }
