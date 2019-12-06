@@ -1,11 +1,11 @@
 package launcher
 
 import (
-	"github.com/setlog/trivrost/pkg/misc"
+	"time"
 )
 
 var lingerTimeMilliseconds int
 
 func Linger() {
-	misc.SleepMilliseconds(lingerTimeMilliseconds)
+	time.Sleep(time.Duration(lingerTimeMilliseconds) * time.Millisecond)
 }
