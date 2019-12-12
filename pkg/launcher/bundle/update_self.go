@@ -16,7 +16,7 @@ import (
 	"github.com/setlog/trivrost/pkg/system"
 )
 
-func (u *Updater) UpdateSelf() (needsRestart bool) {
+func (u *Updater) UpdateLauncherToLatestVersion() (madeChanges bool) {
 	if u.deploymentConfig.GetLauncherUpdateConfig() == nil {
 		return false
 	}
@@ -25,7 +25,7 @@ func (u *Updater) UpdateSelf() (needsRestart bool) {
 	return u.updateProgram(programPath)
 }
 
-func (u *Updater) updateProgram(programPath string) (needsRestart bool) {
+func (u *Updater) updateProgram(programPath string) (madeChanges bool) {
 	log.Infof("Calculating local hashes.")
 	u.announceStatus(DetermineLocalLauncherVersion, 20)
 	presentState := hashing.MustHash(u.ctx, programPath)
@@ -97,12 +97,12 @@ func (u *Updater) swapBinary(localBinaryPath string, remoteURL string, newFileIn
 	}
 }
 
-func (u *Updater) SetIgnoredSelfUpdateBundleInfoSHAs(ignoreShas []string) {
-	u.ignoredSelfUpdateBundleInfoSHAs = ignoreShas
+func (u *Updater) SetIgnoredLauncherUpdateBundleInfoSHAs(ignoreShas []string) {
+	u.ignoredLauncherUpdateBundleInfoSHAs = ignoreShas
 }
 
 func (u *Updater) IsShaIgnored(sha string) bool {
-	for _, ignoreSha := range u.ignoredSelfUpdateBundleInfoSHAs {
+	for _, ignoreSha := range u.ignoredLauncherUpdateBundleInfoSHAs {
 		if ignoreSha == sha {
 			return true
 		}

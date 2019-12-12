@@ -29,8 +29,8 @@ type Updater struct {
 	deploymentConfig *config.DeploymentConfig
 	publicKeys       []*rsa.PublicKey
 
-	bundleUpdateInfos               []*BundleUpdateInfo
-	ignoredSelfUpdateBundleInfoSHAs []string
+	bundleUpdateInfos                   []*BundleUpdateInfo
+	ignoredLauncherUpdateBundleInfoSHAs []string
 
 	userBundlesFolderPath   string
 	systemBundlesFolderPath string
@@ -56,10 +56,6 @@ func (u *Updater) EnableTimestampVerification(filePath string) {
 
 func (u *Updater) DisableTimestampVerification() {
 	u.timestampFilePath = ""
-}
-
-func (u *Updater) IsTimestampVerificationEnabled() bool {
-	return u.timestampFilePath == ""
 }
 
 func (u *Updater) SetStatusCallback(statusCallback func(UpdaterStatus, uint64)) {
