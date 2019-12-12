@@ -1,6 +1,7 @@
 package hashing
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -49,13 +50,13 @@ func dummyListDirectory(dirPath string) ([]os.FileInfo, error) {
 func dummyReadFile(filePath string) (io.ReadCloser, error) {
 	switch filePath {
 	case filepath.FromSlash("x/foo"):
-		return &dummy.ReadCloser{Data: []byte("abc")}, nil
+		return &dummy.ByteReadCloser{Buffer: bytes.NewBuffer([]byte("abc"))}, nil
 	case filepath.FromSlash("x/foo/bar"):
-		return &dummy.ReadCloser{Data: []byte("def")}, nil
+		return &dummy.ByteReadCloser{Buffer: bytes.NewBuffer([]byte("def"))}, nil
 	case filepath.FromSlash("x/fuu/baaar"):
-		return &dummy.ReadCloser{Data: []byte("ghi")}, nil
+		return &dummy.ByteReadCloser{Buffer: bytes.NewBuffer([]byte("ghi"))}, nil
 	case filepath.FromSlash("x/fuu/moo/meow/bla"):
-		return &dummy.ReadCloser{Data: []byte("jkl")}, nil
+		return &dummy.ByteReadCloser{Buffer: bytes.NewBuffer([]byte("jkl"))}, nil
 	}
 	return nil, fmt.Errorf("File not found")
 }
