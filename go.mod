@@ -5,6 +5,7 @@ require (
 	github.com/MMulthaupt/chronometry v0.1.1
 	github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705 // indirect
 	github.com/andlabs/ui v0.0.0-20180902183112-867a9e5a498d
+	github.com/codeskyblue/go-sh v0.0.0-20190412065543-76bd3d59ff27
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.7.0
 	github.com/go-ole/go-ole v1.2.4
