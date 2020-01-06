@@ -2,16 +2,14 @@ package main
 
 import (
 	"crypto/x509"
-	"flag"
 	"fmt"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/setlog/trivrost/pkg/misc"
 
@@ -20,40 +18,32 @@ import (
 )
 
 func main() {
-	deploymentConfigURL, skipurlcheck, skipJarCheck := parseFlags()
-	fmt.Printf("Validating deployment-config at %s...\n", deploymentConfigURL)
-	data, err := getFile(deploymentConfigURL)
-	if err != nil {
-		panic(err)
-	}
-
-	// validate json schema
-	err = config.ValidateDeploymentConfig(string(data))
-	if err != nil {
-		panic(err)
-	}
-
-	if !skipurlcheck {
-		errs := checkURLs(data, skipJarCheck)
-		if len(errs) > 0 {
-			panic(errs)
+	flags := parseFlags()
+	if flags.ActAsService {
+		actAsService(flags)
+	} else {
+		if len(validateDeploymentConfig(flags.DeploymentConfigUrl, flags.SkipUrlCheck, flags.SkipJarChek)) > 0 {
+			os.Exit(1)
 		}
 	}
 }
 
-func getFile(url string) ([]byte, error) {
-	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
-		resp, err := http.Get(url)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return ioutil.ReadAll(resp.Body)
+func validateDeploymentConfig(url string, skipUrlCheck bool, skipJarCheck bool) []error {
+	log.Printf("Validating deployment-config at %s...\n", url)
+	data, err := getFile(url)
+	if err != nil {
+		return []error{err}
 	}
-	if strings.HasPrefix(url, "file://") {
-		url = url[7:]
+
+	err = config.ValidateDeploymentConfig(string(data))
+	if err != nil {
+		return []error{err}
 	}
-	return ioutil.ReadFile(url)
+
+	if !skipUrlCheck {
+		return checkURLs(data, skipJarCheck)
+	}
+	return nil
 }
 
 func checkURLs(data []byte, skipJarCheck bool) []error {
@@ -68,24 +58,25 @@ func checkURLs(data []byte, skipJarCheck bool) []error {
 	for url, details := range urlMap {
 		go func(url string, details checkDetails) {
 			defer waitgroup.Done()
-			code, err := getUrlHeadResult(url)
+			code, err := getHttpHeadResult(url)
 			if err != nil {
 				_, isUnknownAuthorityError := err.(x509.UnknownAuthorityError)
 				gotCertError = gotCertError || isUnknownAuthorityError
-				fmt.Printf("\033[0;91mHTTP HEAD request to URL '%s' failed: %v. (Check reason: %v)\033[0m\n", url, err, details)
+				log.Printf("\033[0;91mHTTP HEAD request to URL '%s' failed: %v. (Check reason: %v)\033[0m\n", url, err, details)
 				atomic.AddInt32(&errorCount, 1)
 			} else if code != http.StatusOK {
-				fmt.Printf("\033[0;91mHTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)\033[0m\n", url, code, details)
+				log.Printf("\033[0;91mHTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)\033[0m\n", url, code, details)
 				atomic.AddInt32(&errorCount, 1)
 			} else {
-				fmt.Printf("OK: Resource %s is available. (Reason for check: %v)\n", url, details)
+				log.Printf("OK: Resource %s is available. (Reason for check: %v)\n", url, details)
 			}
 		}(url, details)
 	}
 	waitgroup.Wait()
 	if errorCount > 0 {
 		if gotCertError {
-			fmt.Printf("\033[0;91mThere was at least one certificate-related error. The system's certificate pool may be out of date.\033[0m\n")
+			log.Printf("\033[0;91mThere was at least one certificate-related error. The system's certificate pool may be out of date.\033[0m\n")
+			errs = append(errs, fmt.Errorf("there was at least one certificate-related error. The system's certificate pool may be out of date"))
 		}
 		errs = append(errs, fmt.Errorf("%d out of %d tested URLs do not point to valid resources", errorCount, len(urlMap)))
 	}
@@ -132,7 +123,7 @@ func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config
 	bundleName := misc.FirstElementOfPath(commandNameUnix)
 	bundleURL := getBundleURL(bundleName, deploymentConfig)
 	if bundleURL == "" {
-		fmt.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\" for platform %s-%s. (Required for command \"%s\")\033[0m\n", bundleName, os, arch, command.Name)
+		log.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\" for platform %s-%s. (Required for command \"%s\")\033[0m\n", bundleName, os, arch, command.Name)
 		return fmt.Errorf("could not get bundle URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\")", bundleName, os, arch, command.Name)
 	}
 	binaryURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(commandNameUnix))
@@ -182,34 +173,6 @@ func getBundleURL(bundleName string, deploymentConfig *config.DeploymentConfig) 
 		}
 	}
 	return ""
-}
-
-func getUrlHeadResult(url string) (responseCode int, err error) {
-	client := &http.Client{}
-	client.Timeout = time.Second * 30
-	var response *http.Response
-	response, err = client.Head(url)
-	if err != nil {
-		return 0, err
-	}
-	defer response.Body.Close()
-	return response.StatusCode, err
-}
-
-func parseFlags() (string, bool, bool) {
-	skipurlcheck := flag.Bool("skipurlcheck", false, "Disable checking of availability of all URLs in the config.")
-	skipJarCheck := flag.Bool("skipjarcheck", false, "Disable checking of availability of .jar files given to java with the -jar argument.")
-	flag.Parse()
-
-	if flag.NArg() != 1 {
-		fatalf("Need at least one arg: deploymentConfigURL")
-	}
-	deploymentConfigURL := flag.Arg(0)
-	if deploymentConfigURL == "" {
-		fatalf("deploymentConfigURL not set")
-	}
-
-	return deploymentConfigURL, *skipurlcheck, *skipJarCheck
 }
 
 func fatalf(formatMessage string, args ...interface{}) {
