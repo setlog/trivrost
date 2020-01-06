@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -19,22 +20,44 @@ import (
 )
 
 func main() {
-	filePath, skipurlcheck, skipJarCheck := parseFlags()
-	data := system.MustReadFile(filePath)
+	deploymentConfigURL, skipurlcheck, skipJarCheck := parseFlags()
+	fmt.Printf("Validating deployment-config at %s...\n", deploymentConfigURL)
+	data, err := getFile(deploymentConfigURL)
+	if err != nil {
+		panic(err)
+	}
 
 	// validate json schema
-	err := config.ValidateDeploymentConfig(string(data))
+	err = config.ValidateDeploymentConfig(string(data))
 	if err != nil {
-		fatalf("Could not validate deployment config \"%s\": %v", filePath, err)
+		panic(err)
 	}
 
 	if !skipurlcheck {
-		checkURLs(data, filePath, skipJarCheck)
+		errs := checkURLs(data, skipJarCheck)
+		if len(errs) > 0 {
+			panic(errs)
+		}
 	}
 }
 
-func checkURLs(data []byte, filePath string, skipJarCheck bool) {
-	urlMap, success := collectURLs(data, skipJarCheck)
+func getFile(url string) ([]byte, error) {
+	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
+		resp, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return ioutil.ReadAll(resp.Body)
+	}
+	if strings.HasPrefix(url, "file://") {
+		url = url[7:]
+	}
+	return ioutil.ReadFile(url)
+}
+
+func checkURLs(data []byte, skipJarCheck bool) []error {
+	urlMap, errs := collectURLs(data, skipJarCheck)
 
 	waitgroup := sync.WaitGroup{}
 	waitgroup.Add(len(urlMap))
@@ -64,17 +87,13 @@ func checkURLs(data []byte, filePath string, skipJarCheck bool) {
 		if gotCertError {
 			fmt.Printf("\033[0;91mThere was at least one certificate-related error. The system's certificate pool may be out of date.\033[0m\n")
 		}
-		fatalf("%d out of %d tested URLs from \"%s\" do not point to valid resources.", errorCount, len(urlMap), filePath)
-		success = false
+		errs = append(errs, fmt.Errorf("%d out of %d tested URLs do not point to valid resources", errorCount, len(urlMap)))
 	}
-	if !success {
-		os.Exit(1)
-	}
+	return errs
 }
 
-func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails, success bool) {
+func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails, errs []error) {
 	urlMap = make(map[string]checkDetails)
-	success = true
 	for _, operatingsystem := range []string{"windows", "darwin", "linux"} {
 		for _, arch := range []string{"386", "amd64"} {
 			deploymentConfig := config.ParseDeploymentConfig(strings.NewReader(string(data)), operatingsystem, arch)
@@ -85,11 +104,14 @@ func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails
 				addUrlWithDetails(urlMap, update.BundleInfoURL, checkDetails{reasonBundle, operatingsystem, arch, 0})
 			}
 			for _, command := range deploymentConfig.Execution.Commands {
-				success = collectCommandURLs(urlMap, deploymentConfig, operatingsystem, arch, command, skipJarCheck) && success
+				err := collectCommandURLs(urlMap, deploymentConfig, operatingsystem, arch, command, skipJarCheck)
+				if err != nil {
+					errs = append(errs, err)
+				}
 			}
 		}
 	}
-	return urlMap, success
+	return urlMap, errs
 }
 
 func addUrlWithDetails(urlMap map[string]checkDetails, url string, details checkDetails) {
@@ -102,16 +124,16 @@ func addUrlWithDetails(urlMap map[string]checkDetails, url string, details check
 	}
 }
 
-func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) (success bool) {
+func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) error {
 	commandNameUnix := strings.ReplaceAll(command.Name, `\`, "/")
 	if path.IsAbs(commandNameUnix) || !strings.Contains(commandNameUnix, "/") {
-		return
+		return fmt.Errorf("%s is not a relative path which descends into at least one folder", commandNameUnix)
 	}
 	bundleName := misc.FirstElementOfPath(commandNameUnix)
 	bundleURL := getBundleURL(bundleName, deploymentConfig)
 	if bundleURL == "" {
 		fmt.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\" for platform %s-%s. (Required for command \"%s\")\033[0m\n", bundleName, os, arch, command.Name)
-		return false
+		return fmt.Errorf("could not get bundle URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\")", bundleName, os, arch, command.Name)
 	}
 	binaryURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(commandNameUnix))
 	if os == system.OsWindows && !strings.HasSuffix(binaryURL, ".exe") {
@@ -124,7 +146,7 @@ func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config
 			collectJarURL(urlMap, deploymentConfig, command, os, arch)
 		}
 	}
-	return true
+	return nil
 }
 
 func stripFirstPathElement(s string) string {
@@ -180,14 +202,14 @@ func parseFlags() (string, bool, bool) {
 	flag.Parse()
 
 	if flag.NArg() != 1 {
-		fatalf("Need at least one arg: deploymentConfigPath")
+		fatalf("Need at least one arg: deploymentConfigURL")
 	}
-	deploymentConfigPath := flag.Arg(0)
-	if deploymentConfigPath == "" {
-		fatalf("deploymentConfigPath not set")
+	deploymentConfigURL := flag.Arg(0)
+	if deploymentConfigURL == "" {
+		fatalf("deploymentConfigURL not set")
 	}
 
-	return deploymentConfigPath, *skipurlcheck, *skipJarCheck
+	return deploymentConfigURL, *skipurlcheck, *skipJarCheck
 }
 
 func fatalf(formatMessage string, args ...interface{}) {
