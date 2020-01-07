@@ -33,3 +33,5 @@ Usage: `validator [-skipurlcheck] [-skipjarcheck] path/to/deployment-config.json
 
 * `-skipurlcheck`: Disable checking of availability of all URLs in the config.
 * `-skipjarcheck`: When checking URLs, disable checking of availability of `.jar`-files given to a `java`, `java.exe` or `javaw.exe` binary with the `-jar`-argument in defined commands.
+* `-act-as-service`: Validate deployment-config for HTTP GET requests on :80/validate.
+* `-port`: Override port for --act-as-service.
