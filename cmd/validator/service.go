@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type service struct {
@@ -50,7 +51,14 @@ func htmlLink(url string) string {
 }
 
 func actAsService(flags ValidatorFlags) {
-	handler := service{flags: flags}
-	http.Handle("/validate", handler)
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(flags.Port), nil))
+	s := &http.Server{
+		ReadTimeout:  time.Second * 1,
+		WriteTimeout: time.Second * 10,
+		IdleTimeout:  time.Second * 30,
+		Addr:         ":" + strconv.Itoa(flags.Port),
+	}
+	mux := http.NewServeMux()
+	mux.Handle("/validate", service{flags: flags})
+	s.Handler = mux
+	log.Fatal(s.ListenAndServe())
 }
