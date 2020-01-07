@@ -34,7 +34,8 @@ func (s service) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s service) writeHtmlErrorList(w io.Writer, errs []error) {
-	io.WriteString(w, "<html>\n")
+	io.WriteString(w, "<!doctype html>\n")
+	io.WriteString(w, "<html lang=\"en\">\n")
 	io.WriteString(w, "  <head><meta charset=\"UTF-8\"><title>Validator Response</title></head>\n")
 	io.WriteString(w, "  <body>\n")
 	io.WriteString(w, "    There were errors validating the deployment-config at "+htmlLink(s.flags.DeploymentConfigUrl)+":\n")
