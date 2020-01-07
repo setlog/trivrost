@@ -15,6 +15,7 @@ type service struct {
 
 func (s service) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "GET" {
+		w.Header().Add("Allow", "GET")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
