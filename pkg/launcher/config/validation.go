@@ -11,7 +11,7 @@ func ValidateDeploymentConfig(expandedDeploymentConfig string) error {
 	documentLoader := gojsonschema.NewStringLoader(expandedDeploymentConfig)
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		return fmt.Errorf("Could not begin validating the file: %v", err)
+		return fmt.Errorf("could not begin validating the file: %v", err)
 	}
 
 	if !result.Valid() {

@@ -33,11 +33,13 @@ func validateDeploymentConfig(url string, skipUrlCheck bool, skipJarCheck bool) 
 	log.Printf("Validating deployment-config at %s...\n", url)
 	data, err := getFile(url)
 	if err != nil {
+		log.Printf("\033[0;91mCould not validate deployment-config at URL %s: %v\033[0m\n", url, err)
 		return []error{err}
 	}
 
 	err = config.ValidateDeploymentConfig(string(data))
 	if err != nil {
+		log.Printf("\033[0;91mCould not validate deployment-config at URL %s: %v\033[0m\n", url, err)
 		return []error{err}
 	}
 
