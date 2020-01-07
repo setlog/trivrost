@@ -137,7 +137,11 @@ func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config
 	if !skipJarCheck {
 		if strings.HasSuffix(binaryURL, "/java.exe") || strings.HasSuffix(binaryURL, "/javaw.exe") ||
 			strings.HasSuffix(binaryURL, "/java") {
-			collectJarURL(urlMap, deploymentConfig, command, os, arch)
+			err := collectJarURL(urlMap, deploymentConfig, command, os, arch)
+			if err != nil {
+				log.Printf("\033[0;91mCould not get JAR URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\"): %v\033[0m\n", bundleName, os, arch, command.Name, err)
+				return fmt.Errorf("could not get JAR URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\"): %w", bundleName, os, arch, command.Name, err)
+			}
 		}
 	}
 	return nil
@@ -152,13 +156,16 @@ func stripFirstPathElement(s string) string {
 	return strings.Join(parts[1:], "/")
 }
 
-func collectJarURL(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, command config.Command, os, arch string) {
+func collectJarURL(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, command config.Command, os, arch string) error {
 	check := false
 	for _, arg := range command.Arguments {
 		if check {
 			jarPath := strings.ReplaceAll(arg, `\`, "/")
 			bundleName := misc.FirstElementOfPath(jarPath)
 			bundleURL := getBundleURL(bundleName, deploymentConfig)
+			if bundleURL == "" {
+				return fmt.Errorf("jar path '%s' does not descend into a bundle directory", arg)
+			}
 			jarURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(jarPath))
 			addUrlWithDetails(urlMap, jarURL, checkDetails{reasonJar, os, arch, 0})
 			break
@@ -167,6 +174,7 @@ func collectJarURL(urlMap map[string]checkDetails, deploymentConfig *config.Depl
 			check = true
 		}
 	}
+	return nil
 }
 
 func getBundleURL(bundleName string, deploymentConfig *config.DeploymentConfig) string {
