@@ -50,7 +50,6 @@ func htmlLink(url string) string {
 }
 
 func actAsService(flags ValidatorFlags) {
-	log.SetFlags(log.Ldate | log.Ltime)
 	handler := service{flags: flags}
 	http.Handle("/validate", handler)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(flags.Port), nil))

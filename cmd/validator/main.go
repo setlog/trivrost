@@ -22,6 +22,7 @@ func main() {
 	if flags.ActAsService {
 		actAsService(flags)
 	} else {
+		log.SetFlags(0)
 		if len(validateDeploymentConfig(flags.DeploymentConfigUrl, flags.SkipUrlCheck, flags.SkipJarChek)) > 0 {
 			os.Exit(1)
 		}
