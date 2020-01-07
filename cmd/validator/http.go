@@ -12,8 +12,7 @@ func getFile(fileUrlString string) ([]byte, error) {
 	fileUrl, err := url.Parse(fileUrlString)
 	if err == nil && fileUrl.Scheme == "file" {
 		fileUrl.Scheme = ""
-		fileUrlString = fileUrl.String()
-		return ioutil.ReadFile(fileUrlString)
+		return ioutil.ReadFile(fileUrl.String())
 	} else if err != nil || fileUrl.Scheme == "" {
 		return ioutil.ReadFile(fileUrlString)
 	}
