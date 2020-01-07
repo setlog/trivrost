@@ -41,9 +41,3 @@ func (cr checkReason) String() string {
 	}
 	panic(fmt.Sprintf("Unknown checkReason %d", cr))
 }
-
-type Check struct {
-	URL     string
-	Details checkDetails
-	Error   error
-}
