@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.4.X (TBD)
+### Features
+* `cmd/validator`: Run as service for use as healthcheck when started with `--act-as-service` command line argument; send HTTP GET requests to `:80/validate`. Customize port with `--port`.
+
 ## 1.4.0 (2019-11-22)
 ### Features
 * `cmd/validator` will now check that command binary's *will be* downloaded per platform, where previously it would only check if they are available under their respective bundle URL.
