@@ -31,26 +31,26 @@ func main() {
 
 func validateDeploymentConfig(url string, skipUrlCheck bool, skipJarCheck bool) []error {
 	log.Printf("Validating deployment-config at %s...\n", url)
-	data, err := getFile(url)
+	expandedDeploymentConfig, err := getFile(url)
 	if err != nil {
 		log.Printf("\033[0;91mCould not validate deployment-config at URL %s: %v\033[0m\n", url, err)
 		return []error{err}
 	}
 
-	err = config.ValidateDeploymentConfig(string(data))
+	err = config.ValidateDeploymentConfig(string(expandedDeploymentConfig))
 	if err != nil {
 		log.Printf("\033[0;91mCould not validate deployment-config at URL %s: %v\033[0m\n", url, err)
 		return []error{err}
 	}
 
 	if !skipUrlCheck {
-		return checkURLs(data, skipJarCheck)
+		return checkURLs(expandedDeploymentConfig, skipJarCheck)
 	}
 	return nil
 }
 
-func checkURLs(data []byte, skipJarCheck bool) []error {
-	urlMap, errs := collectURLs(data, skipJarCheck)
+func checkURLs(expandedDeploymentConfig []byte, skipJarCheck bool) []error {
+	urlMap, errs := collectURLs(expandedDeploymentConfig, skipJarCheck)
 
 	waitgroup := sync.WaitGroup{}
 	waitgroup.Add(len(urlMap))
