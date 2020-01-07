@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/x509"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,7 +8,6 @@ import (
 	"path"
 	"strings"
 	"sync"
-	"sync/atomic"
 
 	"github.com/setlog/trivrost/pkg/misc"
 
@@ -54,34 +52,29 @@ func checkURLs(expandedDeploymentConfig []byte, skipJarCheck bool) []error {
 
 	waitgroup := sync.WaitGroup{}
 	waitgroup.Add(len(urlMap))
-	var gotCertError bool
 
 	// Check all URLs in parallel.
-	var errorCount int32
+	errChan := make(chan error, len(urlMap))
 	for url, details := range urlMap {
 		go func(url string, details checkDetails) {
 			defer waitgroup.Done()
 			code, err := getHttpHeadResult(url)
 			if err != nil {
-				_, isUnknownAuthorityError := err.(x509.UnknownAuthorityError)
-				gotCertError = gotCertError || isUnknownAuthorityError
 				log.Printf("\033[0;91mHTTP HEAD request to URL '%s' failed: %v. (Check reason: %v)\033[0m\n", url, err, details)
-				atomic.AddInt32(&errorCount, 1)
+				errChan <- fmt.Errorf("HTTP HEAD request to URL '%s' failed: %w. (Check reason: %v)", url, err, details)
 			} else if code != http.StatusOK {
 				log.Printf("\033[0;91mHTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)\033[0m\n", url, code, details)
-				atomic.AddInt32(&errorCount, 1)
+				errChan <- fmt.Errorf("HTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)", url, code, details)
 			} else {
 				log.Printf("OK: Resource %s is available. (Reason for check: %v)\n", url, details)
 			}
 		}(url, details)
 	}
 	waitgroup.Wait()
-	if errorCount > 0 {
-		if gotCertError {
-			log.Printf("\033[0;91mThere was at least one certificate-related error. The system's certificate pool may be out of date.\033[0m\n")
-			errs = append(errs, fmt.Errorf("there was at least one certificate-related error. The system's certificate pool may be out of date"))
-		}
-		errs = append(errs, fmt.Errorf("%d out of %d tested URLs do not point to valid resources", errorCount, len(urlMap)))
+	close(errChan)
+
+	for err := range errChan {
+		errs = append(errs, err)
 	}
 	return errs
 }
