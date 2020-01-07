@@ -21,24 +21,33 @@ func main() {
 		actAsService(flags)
 	} else {
 		log.SetFlags(0)
-		if len(validateDeploymentConfig(flags.DeploymentConfigUrl, flags.SkipUrlCheck, flags.SkipJarChek)) > 0 {
+		reps := validateDeploymentConfig(flags.DeploymentConfigUrl, flags.SkipUrlCheck, flags.SkipJarChek)
+		logReports(reps)
+		if reps.HaveError() {
 			os.Exit(1)
 		}
 	}
 }
 
-func validateDeploymentConfig(url string, skipUrlCheck bool, skipJarCheck bool) []error {
-	log.Printf("Validating deployment-config at %s...\n", url)
+func logReports(reps reports) {
+	for _, rep := range reps {
+		if rep.isError {
+			log.Printf("\033[0;91m%s\033[0m\n", rep.message)
+		} else {
+			log.Printf("%s\n", rep.message)
+		}
+	}
+}
+
+func validateDeploymentConfig(url string, skipUrlCheck bool, skipJarCheck bool) reports {
 	expandedDeploymentConfig, err := getFile(url)
 	if err != nil {
-		log.Printf("\033[0;91mCould not validate deployment-config at URL %s: %v\033[0m\n", url, err)
-		return []error{err}
+		return []*report{errorReport("Could not retrieve deployment-config from URL %s: %v.", url, err)}
 	}
 
 	err = config.ValidateDeploymentConfig(string(expandedDeploymentConfig))
 	if err != nil {
-		log.Printf("\033[0;91mCould not validate deployment-config at URL %s: %v\033[0m\n", url, err)
-		return []error{err}
+		return []*report{errorReport("Could not validate deployment-config at URL %s: %v.", url, err)}
 	}
 
 	if !skipUrlCheck {
@@ -47,39 +56,39 @@ func validateDeploymentConfig(url string, skipUrlCheck bool, skipJarCheck bool) 
 	return nil
 }
 
-func checkURLs(expandedDeploymentConfig []byte, skipJarCheck bool) []error {
-	urlMap, errs := collectURLs(expandedDeploymentConfig, skipJarCheck)
+func checkURLs(expandedDeploymentConfig []byte, skipJarCheck bool) reports {
+	urlMap, reports := collectURLs(expandedDeploymentConfig, skipJarCheck)
 
-	waitgroup := sync.WaitGroup{}
-	waitgroup.Add(len(urlMap))
+	waitGroup := &sync.WaitGroup{}
+	waitGroup.Add(len(urlMap))
 
 	// Check all URLs in parallel.
-	errChan := make(chan error, len(urlMap))
+	reportChan := make(chan *report, len(urlMap))
 	for url, details := range urlMap {
-		go func(url string, details checkDetails) {
-			defer waitgroup.Done()
-			code, err := getHttpHeadResult(url)
-			if err != nil {
-				log.Printf("\033[0;91mHTTP HEAD request to URL '%s' failed: %v. (Check reason: %v)\033[0m\n", url, err, details)
-				errChan <- fmt.Errorf("HTTP HEAD request to URL '%s' failed: %w. (Check reason: %v)", url, err, details)
-			} else if code != http.StatusOK {
-				log.Printf("\033[0;91mHTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)\033[0m\n", url, code, details)
-				errChan <- fmt.Errorf("HTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)", url, code, details)
-			} else {
-				log.Printf("OK: Resource %s is available. (Reason for check: %v)\n", url, details)
-			}
-		}(url, details)
+		go checkURL(url, details, waitGroup, reportChan)
 	}
-	waitgroup.Wait()
-	close(errChan)
+	waitGroup.Wait()
+	close(reportChan)
 
-	for err := range errChan {
-		errs = append(errs, err)
+	for report := range reportChan {
+		reports = append(reports, report)
 	}
-	return errs
+	return reports
 }
 
-func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails, errs []error) {
+func checkURL(url string, details checkDetails, waitGroup *sync.WaitGroup, reportChan chan *report) {
+	defer waitGroup.Done()
+	code, err := getHttpHeadResult(url)
+	if err != nil {
+		reportChan <- errorReport("HTTP HEAD request to URL '%s' failed: %v. (Check reason: %v)", url, err, details)
+	} else if code != http.StatusOK {
+		reportChan <- errorReport("HTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)", url, code, details)
+	} else {
+		reportChan <- statusReport("OK: Resource %s is available. (Reason for check: %v)", url, details)
+	}
+}
+
+func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails, reps reports) {
 	urlMap = make(map[string]checkDetails)
 	for _, operatingsystem := range []string{"windows", "darwin", "linux"} {
 		for _, arch := range []string{"386", "amd64"} {
@@ -91,14 +100,14 @@ func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails
 				addUrlWithDetails(urlMap, update.BundleInfoURL, checkDetails{reasonBundle, operatingsystem, arch, 0})
 			}
 			for _, command := range deploymentConfig.Execution.Commands {
-				err := collectCommandURLs(urlMap, deploymentConfig, operatingsystem, arch, command, skipJarCheck)
-				if err != nil {
-					errs = append(errs, err)
+				report := collectCommandURLs(urlMap, deploymentConfig, operatingsystem, arch, command, skipJarCheck)
+				if report != nil {
+					reps = append(reps, report)
 				}
 			}
 		}
 	}
-	return urlMap, errs
+	return urlMap, reps
 }
 
 func addUrlWithDetails(urlMap map[string]checkDetails, url string, details checkDetails) {
@@ -111,16 +120,15 @@ func addUrlWithDetails(urlMap map[string]checkDetails, url string, details check
 	}
 }
 
-func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) error {
+func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) *report {
 	commandNameUnix := strings.ReplaceAll(command.Name, `\`, "/")
 	if path.IsAbs(commandNameUnix) || !strings.Contains(commandNameUnix, "/") {
-		return fmt.Errorf("%s is not a relative path which descends into at least one folder", commandNameUnix)
+		return errorReport("Path '%s' is not a relative path which descends into at least one folder.", commandNameUnix)
 	}
 	bundleName := misc.FirstElementOfPath(commandNameUnix)
 	bundleURL := getBundleURL(bundleName, deploymentConfig)
 	if bundleURL == "" {
-		log.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\" for platform %s-%s. (Required for command \"%s\")\033[0m\n", bundleName, os, arch, command.Name)
-		return fmt.Errorf("could not get bundle URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\")", bundleName, os, arch, command.Name)
+		return errorReport("Could not get bundle URL for bundle \"%s\" for platform %s-%s. (Required for command \"%s\")", bundleName, os, arch, command.Name)
 	}
 	binaryURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(commandNameUnix))
 	if os == system.OsWindows && !strings.HasSuffix(binaryURL, ".exe") {
@@ -132,8 +140,7 @@ func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config
 			strings.HasSuffix(binaryURL, "/java") {
 			err := collectJarURL(urlMap, deploymentConfig, command, os, arch)
 			if err != nil {
-				log.Printf("\033[0;91mCould not get JAR URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\"): %v\033[0m\n", bundleName, os, arch, command.Name, err)
-				return fmt.Errorf("could not get JAR URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\"): %w", bundleName, os, arch, command.Name, err)
+				return errorReport("Could not get JAR URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\"): %v", bundleName, os, arch, command.Name, err)
 			}
 		}
 	}
@@ -157,7 +164,7 @@ func collectJarURL(urlMap map[string]checkDetails, deploymentConfig *config.Depl
 			bundleName := misc.FirstElementOfPath(jarPath)
 			bundleURL := getBundleURL(bundleName, deploymentConfig)
 			if bundleURL == "" {
-				return fmt.Errorf("jar path '%s' does not descend into a bundle directory", arg)
+				return fmt.Errorf("JAR path '%s' does not descend into a bundle directory", arg)
 			}
 			jarURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(jarPath))
 			addUrlWithDetails(urlMap, jarURL, checkDetails{reasonJar, os, arch, 0})
