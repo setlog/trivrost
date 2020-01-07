@@ -10,7 +10,9 @@ import (
 
 func getFile(url string) ([]byte, error) {
 	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
-		resp, err := http.Get(url)
+		client := &http.Client{}
+		client.Timeout = time.Second * 30
+		resp, err := client.Get(url)
 		if err != nil {
 			return nil, err
 		}
