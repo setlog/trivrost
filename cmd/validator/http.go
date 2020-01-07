@@ -4,28 +4,31 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
+	"net/url"
 	"time"
 )
 
-func getFile(url string) ([]byte, error) {
-	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
-		client := &http.Client{}
-		client.Timeout = time.Second * 30
-		resp, err := client.Get(url)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("received bad status code %s", resp.Status)
-		}
-		return ioutil.ReadAll(resp.Body)
+func getFile(fileUrlString string) ([]byte, error) {
+	fileUrl, err := url.Parse(fileUrlString)
+	if err == nil && fileUrl.Scheme == "file" {
+		fileUrl.Scheme = ""
+		fileUrlString = fileUrl.String()
+		return ioutil.ReadFile(fileUrlString)
+	} else if err != nil || fileUrl.Scheme == "" {
+		return ioutil.ReadFile(fileUrlString)
 	}
-	if strings.HasPrefix(url, "file://") {
-		url = url[7:]
+
+	client := &http.Client{}
+	client.Timeout = time.Second * 30
+	resp, err := client.Get(fileUrlString)
+	if err != nil {
+		return nil, err
 	}
-	return ioutil.ReadFile(url)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("received bad status code %s", resp.Status)
+	}
+	return ioutil.ReadAll(resp.Body)
 }
 
 func getHttpHeadResult(url string) (responseCode int, err error) {
