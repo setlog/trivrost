@@ -56,7 +56,7 @@ func checkURLs(expandedDeploymentConfig []byte, skipJarCheck bool) []error {
 	waitgroup.Add(len(urlMap))
 	var gotCertError bool
 
-	// check all url in parallel
+	// Check all URLs in parallel.
 	var errorCount int32
 	for url, details := range urlMap {
 		go func(url string, details checkDetails) {
