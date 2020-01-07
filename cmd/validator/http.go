@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -14,6 +15,9 @@ func getFile(url string) ([]byte, error) {
 			return nil, err
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("received bad status code %s", resp.Status)
+		}
 		return ioutil.ReadAll(resp.Body)
 	}
 	if strings.HasPrefix(url, "file://") {
