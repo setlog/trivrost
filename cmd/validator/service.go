@@ -26,18 +26,18 @@ func (s service) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		// monitoring cannot do much beyond checking for the response's status code.
 		w.WriteHeader(http.StatusInternalServerError)
 
-		writeHtmlErrorList(w, s.flags.DeploymentConfigUrl, errs)
+		s.writeHtmlErrorList(w, errs)
 	} else {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	}
 }
 
-func writeHtmlErrorList(w io.Writer, deploymentConfigUrl string, errs []error) {
+func (s service) writeHtmlErrorList(w io.Writer, errs []error) {
 	io.WriteString(w, "<html>\n")
 	io.WriteString(w, "  <head><meta charset=\"UTF-8\"><title>Validator Response</title></head>\n")
 	io.WriteString(w, "  <body>\n")
-	io.WriteString(w, "    There were errors validating the deployment-config at "+htmlLink(deploymentConfigUrl)+":\n")
+	io.WriteString(w, "    There were errors validating the deployment-config at "+htmlLink(s.flags.DeploymentConfigUrl)+":\n")
 	io.WriteString(w, "    <ul>\n")
 	for _, err := range errs {
 		io.WriteString(w, "      <li>"+html.EscapeString(err.Error())+"</li>\n")
