@@ -179,9 +179,7 @@ ifeq (${TYPE},unit)
 	# If we use CC=clang for building C code, we could memory-sanatize the code
 	#go test -v -installsuffix _separate_test -ldflags '${LDFLAGS}' -msan ./...
 	# Race and coverage
-	echo "Start test"
-	go test -v -installsuffix _separate_test -ldflags '${LDFLAGS}' -covermode=atomic -coverprofile "${OUT_DIR}/coverage_${OS}.cov" ./... && echo Yea
-	echo "Test successful"
+	go test -v -installsuffix _separate_test -ldflags '${LDFLAGS}' -covermode=atomic -coverprofile "${OUT_DIR}/coverage_${OS}.cov" ./...
 	go tool cover -func="${OUT_DIR}/coverage_${OS}.cov"
 	go tool cover -html="${OUT_DIR}/coverage_${OS}.cov" -o "${OUT_DIR}/coverage_${OS}.html"
 endif
