@@ -28,7 +28,9 @@ jobs:
       run: |
         echo "PATH is ${PATH}"
         echo "GOPATH is ${GOPATH}"
-        ls -la ${GOPATH}/bin
+        echo "GOROOT is ${GOROOT}"
+        echo "GOTOOLDIR is ${GOTOOLDIR}"
+        echo "GOBIN is ${GOBIN}"
         make test
         make copy-test-files
         make
