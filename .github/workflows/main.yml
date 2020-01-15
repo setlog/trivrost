@@ -10,7 +10,6 @@ jobs:
     env:
       GO111MODULE: "on"
       GOPRIVATE: "gitlab.setlog.lan"
-      GOPATH: "${{ env.HOME }}/go"
     steps:
     - name: Install Go
       uses: actions/setup-go@v1
@@ -24,15 +23,17 @@ jobs:
     - name: Install goversioninfo
       shell: bash
       run: |
-        mkdir -p ${HOME}/go/bin
-        mkdir -p ${HOME}/go/pkg
-        mkdir -p ${HOME}/go/src
+        export GOPATH="${HOME}/go"
+        mkdir -p ${GOPATH}/bin
+        mkdir -p ${GOPATH}/pkg
+        mkdir -p ${GOPATH}/src
         go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786
     - name: Checkout repository
       uses: actions/checkout@v1
     - name: Test and build
       shell: bash
       run: |
+        export GOPATH="${HOME}/go"
         echo "PATH is ${PATH}"
         echo "GOPATH is ${GOPATH}"
         echo "GOROOT is ${GOROOT}"
