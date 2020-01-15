@@ -25,12 +25,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v1
     - name: Test and build
+      shell: bash
       run: |
         echo "PATH is ${PATH}"
         echo "GOPATH is ${GOPATH}"
         echo "GOROOT is ${GOROOT}"
         echo "GOTOOLDIR is ${GOTOOLDIR}"
         echo "GOBIN is ${GOBIN}"
+        ls -la ${GOROOT}/bin
         make test
         make copy-test-files
         make
