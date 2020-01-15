@@ -10,7 +10,7 @@ jobs:
     env:
       GO111MODULE: "on"
       GOPRIVATE: "gitlab.setlog.lan"
-      GOPATH: "${HOME}/go"
+      GOPATH: "${{ env.HOME }}/go"
     steps:
     - name: Install Go
       uses: actions/setup-go@v1
