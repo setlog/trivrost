@@ -1,0 +1,21 @@
+name: CI
+on: [push]
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.13.x]
+        platform: [ubuntu-18.04, macOS-10.14, windows-2019]
+    runs-on: ${{ matrix.platform }}
+    env:
+      GO111MODULE: "on"
+      GOPRIVATE: "gitlab.setlog.lan"
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout repository
+      uses: actions/checkout@v1
+    - name: Test
+      run: make test
