@@ -38,9 +38,9 @@ TIMESTAMP_SERVER = 'http://timestamp.verisign.com/scripts/timstamp.dll'
 #
 # Detect OS
 #
-OS = unkown
+OS = unknown
 OS_UNAME := $(shell uname -s)
-ifneq (,$(findstring CYGWIN_NT,${OS_UNAME}))
+ifneq (,$(filter CYGWIN_NT% MSYS_NT% MINGW64_NT%,${OS_UNAME}))
 	OS = windows
 	ifdef TRIVROST_FORCECONSOLE
 $(info TRIVROST_FORCECONSOLE is set, not hiding console)
