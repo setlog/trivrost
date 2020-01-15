@@ -34,13 +34,7 @@ jobs:
       shell: bash
       run: |
         export GOPATH="${HOME}/go"
-        echo "PATH is ${PATH}"
-        echo "GOPATH is ${GOPATH}"
-        echo "GOROOT is ${GOROOT}"
-        echo "GOTOOLDIR is ${GOTOOLDIR}"
-        echo "GOBIN is ${GOBIN}"
-        ls -la ${GOROOT}/bin
-        ls -la ${GOPATH}/bin
+        export PATH="${GOPATH}:${PATH}"
         make test
         make copy-test-files
         make
