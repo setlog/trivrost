@@ -94,7 +94,7 @@ func handleUpdateOmissions(ctx context.Context, updater *bundle.Updater) {
 func handleInsufficientPrivileges(ctx context.Context, wasAtLeastOneMandatoryUpdateOmitted bool) {
 	const howTo = "To bring the application up to date, its latest release needs to be installed with administrative privileges."
 	if wasAtLeastOneMandatoryUpdateOmitted {
-		panic(misc.NewNestedError("A mandatory change cannot be applied because it affects files in protected system folders. "+howTo, nil))
+		panic(misc.UserErrorf(nil, "A mandatory change cannot be applied because it affects files in protected system folders. "+howTo))
 	} else {
 		gui.Pause(ctx, "Some optional changes were not applied because they affect files in protected system folders. "+howTo+
 			"\nYou may click \"Continue\" to ignore this for the time being.")
