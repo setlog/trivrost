@@ -34,10 +34,7 @@ jobs:
       shell: bash
       run: |
         export GOPATH="${HOME}/go"
-        export PATH="${GOPATH}:${PATH}"
-        echo "GOPATH is ${GOPATH}"
-        echo "PATH is ${PATH}"
-        ls -la "${GOPATH}/bin"
+        export PATH="${GOPATH}/bin:${PATH}"
         make test
         make copy-test-files
         make
