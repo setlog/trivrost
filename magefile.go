@@ -33,13 +33,13 @@ var launcherBrandingName, _ = sh.Output("go", "run", "cmd/echo_field/main.go", "
 
 var launcherVersion = version()
 var binaryExt = ext()
-var gitDesc
+//var gitDesc
 
 // Version is latest tag corresponding to version regex
 var versionPattern = regexp.MustCompile(`^v[0-9]+\.[0-9]+\.[0-9]+$`)
 func version() string {
-
-	versionPattern.MatchString()
+    return ""
+//	versionPattern.MatchString()
 }
 
 func ext() string {
@@ -50,7 +50,7 @@ func ext() string {
 	}
 }
 
-func
+//func
 
 func init() {
 	timestamp := time.Now().Format(time.RFC3339)
