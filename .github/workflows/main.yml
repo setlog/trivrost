@@ -21,7 +21,13 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install -y libgtk-3-dev
     - name: Install goversioninfo
-      run: go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786
+      shell: bash
+      run: |
+        mkdir -p ${HOME}/go/bin
+        mkdir -p ${HOME}/go/pkg
+        mkdir -p ${HOME}/go/src
+        export GOPATH="${HOME}/go"
+        go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786
     - name: Checkout repository
       uses: actions/checkout@v1
     - name: Test and build
@@ -33,6 +39,7 @@ jobs:
         echo "GOTOOLDIR is ${GOTOOLDIR}"
         echo "GOBIN is ${GOBIN}"
         ls -la ${GOROOT}/bin
+        ls -la ${GOPATH}/bin
         make test
         make copy-test-files
         make
