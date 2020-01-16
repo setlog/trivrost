@@ -44,6 +44,6 @@ jobs:
       shell: bash
       run: |
         printf "%s" "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
-        docker build -f docker/validator-service.Dockerfile -t trivrost-validator:${GITHUB_REF##*/}
+        docker build -f docker/validator-service.Dockerfile -t trivrost-validator:${GITHUB_REF##*/} .
         docker push trivrost-validator:${GITHUB_REF##*/}
         docker logout
