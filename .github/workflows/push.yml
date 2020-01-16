@@ -43,7 +43,7 @@ jobs:
     - name: Build and push Docker image
       shell: bash
       run: |
-        docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+        printf "%s" "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
         docker build -f docker/validator-service.Dockerfile -t trivrost-validator:${GITHUB_REF##*/}
         docker push trivrost-validator:${GITHUB_REF##*/}
         docker logout
