@@ -18,12 +18,12 @@ func parseFlags() ValidatorFlags {
 	flag.IntVar(&flags.Port, "port", 80, "Override port for --act-as-service.")
 	flag.Parse()
 
-	if flag.NArg() != 1 {
-		fatalf("Need at least one arg: deploymentConfigURL")
-	}
-	flags.DeploymentConfigUrl = flag.Arg(0)
-	if flags.DeploymentConfigUrl == "" {
-		fatalf("deploymentConfigURL not set")
+	if flag.NArg() > 1 {
+		fatalf("Too many arguments. Required: deploymentConfigURL")
+	} else if flag.NArg() == 1 {
+		flags.DeploymentConfigUrl = flag.Arg(0)
+	} else if !flags.ActAsService {
+		fatalf("The following argument is required when not running with --act-as-service: deploymentConfigURL")
 	}
 
 	return flags
