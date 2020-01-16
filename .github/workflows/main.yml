@@ -9,7 +9,6 @@ jobs:
     runs-on: ${{ matrix.platform }}
     env:
       GO111MODULE: "on"
-      GOPRIVATE: "gitlab.setlog.lan"
     steps:
     - name: Install Go
       uses: actions/setup-go@v1
