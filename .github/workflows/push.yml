@@ -1,7 +1,9 @@
-name: CI
-on: [push]
+name: Push
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
 jobs:
-  cicd:
+  push:
     strategy:
       matrix:
         go-version: [1.13.x]
@@ -38,8 +40,7 @@ jobs:
         make copy-test-files
         make
         make tools
-    - name: Build and push tools Docker image
-      if: matrix.platform == 'ubuntu-18.04' && success() && matrix.go-version == '1.13.x' && github.ref == 'refs/tags/testv[0-9]+.[0-9]+.[0-9]+'
+    - name: Build and push Docker image
       shell: bash
       run: |
         echo "Looks like someone pushed the semver tag ${GITHUB_REF##*/}"
