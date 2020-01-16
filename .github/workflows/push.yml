@@ -1,7 +1,7 @@
 name: Push
 on:
   push:
-    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+", "trigger-push"]
 jobs:
   push:
     strategy:
@@ -43,4 +43,7 @@ jobs:
     - name: Build and push Docker image
       shell: bash
       run: |
-        echo "Looks like someone pushed the semver tag ${GITHUB_REF##*/}"
+        docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build -f docker/validator-service.Dockerfile -t trivrost-validator:${GITHUB_REF##*/}
+        docker push trivrost-validator:${GITHUB_REF##*/}
+        docker logout
