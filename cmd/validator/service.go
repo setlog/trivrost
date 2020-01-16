@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const configUrlParameterName = "configurl"
+
 type service struct {
 	flags ValidatorFlags
 }
@@ -19,10 +21,18 @@ func (s service) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	log.Printf("Validating deployment-config at %s...\n", s.flags.DeploymentConfigUrl)
-	reps := validateDeploymentConfig(s.flags.DeploymentConfigUrl, s.flags.SkipUrlCheck, s.flags.SkipJarChek)
+	configUrl := req.URL.Query().Get(configUrlParameterName)
+	if configUrl == "" && s.flags.DeploymentConfigUrl != "" {
+		configUrl = s.flags.DeploymentConfigUrl
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, "Required query parameter '"+configUrlParameterName+"' is missing.\n")
+		return
+	}
+	log.Printf("Validating deployment-config at %s...\n", configUrl)
+	reps := validateDeploymentConfig(configUrl, s.flags.SkipUrlCheck, s.flags.SkipJarChek)
 	logReports(reps)
-	log.Printf("Finished validation of deployment-config at %s...\n", s.flags.DeploymentConfigUrl)
+	log.Printf("Finished validation of deployment-config at %s...\n", configUrl)
 
 	haveError := reps.HaveError()
 	if haveError {
