@@ -10,7 +10,7 @@ type ValidatorFlags struct {
 	Port                int
 }
 
-func parseFlags() ValidatorFlags {
+func parseFlags() *ValidatorFlags {
 	flags := ValidatorFlags{}
 	flag.BoolVar(&flags.SkipUrlCheck, "skipurlcheck", false, "Disable checking of availability of all URLs in the config.")
 	flag.BoolVar(&flags.SkipJarChek, "skipjarcheck", false, "Disable checking of availability of .jar files given to java with the -jar argument.")
@@ -26,5 +26,5 @@ func parseFlags() ValidatorFlags {
 		fatalf("The following argument is required when not running with --act-as-service: deploymentConfigURL")
 	}
 
-	return flags
+	return &flags
 }

@@ -18,22 +18,23 @@ import (
 func main() {
 	flags := parseFlags()
 	if flags.ActAsService {
+		registerMetrics()
 		actAsService(flags)
 	} else {
 		log.SetFlags(0)
 		reps := validateDeploymentConfig(flags.DeploymentConfigUrl, flags.SkipUrlCheck, flags.SkipJarChek)
-		logReports(reps)
+		logReports(reps, false)
 		if reps.HaveError() {
 			os.Exit(1)
 		}
 	}
 }
 
-func logReports(reps reports) {
+func logReports(reps reports, errorsOnly bool) {
 	for _, rep := range reps {
 		if rep.isError {
 			log.Printf("\033[0;91m%s\033[0m\n", rep.message)
-		} else {
+		} else if !errorsOnly {
 			log.Printf("%s\n", rep.message)
 		}
 	}
