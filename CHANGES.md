@@ -1,8 +1,8 @@
 # Release-Changelog
 
-## 1.4.X (TBD)
+## 1.4.1 (2020-01-17)
 ### Features
-* `cmd/validator`: Run as service for use as healthcheck when started with `--act-as-service` command line argument; send HTTP GET requests to `:80/validate`. Customize port with `--port`.
+* `cmd/validator`: Run as service for use as healthcheck when started with `--act-as-service` command line argument; send HTTP GET requests to `:80/validate`. Customize port with `--port`. Override deployment-config URL with `configurl` query parameter.
 
 ## 1.4.0 (2019-11-22)
 ### Features
