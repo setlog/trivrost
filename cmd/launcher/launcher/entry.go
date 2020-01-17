@@ -9,14 +9,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/setlog/trivrost/cmd/launcher/flags"
-	"github.com/setlog/trivrost/cmd/launcher/gui"
 )
 
 func LauncherMain(ctx context.Context, launcherFlags *flags.LauncherFlags) {
-	gui.WaitUntilReady()
-	defer gui.Quit()
-	defer gui.HandlePanic(launcherFlags)
-
 	places.MakePlaces()
 	defer Linger()
 	locking.AcquireLock(ctx, launcherFlags)

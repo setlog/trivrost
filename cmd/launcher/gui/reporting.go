@@ -19,12 +19,6 @@ import (
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 )
 
-func ReportFatalError(fatalError error, launcherFlags *flags.LauncherFlags) {
-	WaitUntilReady()
-	defer Quit()
-	PanicInformatively(fatalError, launcherFlags)
-}
-
 func HandlePanic(launcherFlags *flags.LauncherFlags) {
 	if r := recover(); r != nil {
 		if err, ok := r.(error); ok && errors.Is(err, context.Canceled) {

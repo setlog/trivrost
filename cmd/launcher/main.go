@@ -45,25 +45,12 @@ var gitBranch string
 
 func main() {
 	defer misc.LogPanic()
-	launcherFlags, fatalError := initializeEnvironment()
+	launcherFlags, envErr := initializeEnvironment()
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
-	if fatalError == nil {
-		go launcher.LauncherMain(ctx, launcherFlags)
-	} else {
-		go gui.ReportFatalError(fatalError, launcherFlags)
-	}
+	go runLauncher(ctx, envErr, launcherFlags)
+	runGUI(ctx, cancelFunc, launcherFlags, envErr == nil)
 
-	// On MacOS, only the first thread created by the OS is allowed to be the main GUI thread.
-	// Also, on Windows, OLE code needs to run on the main thread, which we rely on when creating shortcuts.
-	runtime.LockOSThread()
-
-	err := gui.Main(ctx, cancelFunc, resources.LauncherConfig.BrandingName, !launcherFlags.Uninstall && fatalError == nil)
-	if err != nil {
-		log.Fatalf("gui.Main() failed: %v\n", err)
-	}
-
-	log.Info("End of main().")
 	log.Exit(0)
 }
 
@@ -78,6 +65,28 @@ func initializeEnvironment() (*flags.LauncherFlags, error) {
 	printProxySettings()
 	setGuiStatusMessages(resources.LauncherConfig.StatusMessages)
 	return launcherFlags, misc.NewNestedErrorFromFirstCause(argumentError, flagError, pathError, placesError)
+}
+
+func runLauncher(ctx context.Context, fatalError error, launcherFlags *flags.LauncherFlags) {
+	gui.WaitUntilReady()
+	defer gui.Quit()
+	if fatalError != nil {
+		gui.PanicInformatively(fatalError, launcherFlags)
+	}
+	defer gui.HandlePanic(launcherFlags)
+	launcher.LauncherMain(ctx, launcherFlags)
+}
+
+func runGUI(ctx context.Context, cancelFunc context.CancelFunc, launcherFlags *flags.LauncherFlags, showMainWindow bool) {
+	// On MacOS, only the first thread created by the OS is allowed to be the main GUI thread.
+	// Also, on Windows, OLE code needs to run on the main thread, which we rely on when creating shortcuts.
+	runtime.LockOSThread()
+
+	err := gui.Main(ctx, cancelFunc, resources.LauncherConfig.BrandingName, !launcherFlags.Uninstall && showMainWindow)
+	if err != nil {
+		log.Fatalf("gui.Main() failed: %v\n", err)
+	}
+	log.Info("runGUI() terminated.")
 }
 
 func parseEnvironment() (launcherFlags *flags.LauncherFlags, argumentError, flagError, pathError, evalError, placesError error) {

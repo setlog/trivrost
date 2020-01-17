@@ -1,16 +1,13 @@
 package main
 
 import (
-	"crypto/x509"
-	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 	"sync"
-	"sync/atomic"
-	"time"
 
 	"github.com/setlog/trivrost/pkg/misc"
 
@@ -18,103 +15,81 @@ import (
 	"github.com/setlog/trivrost/pkg/system"
 )
 
-type checkDetails struct {
-	reason      checkReason
-	os          string
-	arch        string
-	othersCount int
-}
-
-func (cd checkDetails) String() string {
-	if cd.othersCount > 0 {
-		if cd.othersCount > 1 {
-			return fmt.Sprintf("%s on platform %s-%s and %d others", cd.reason, cd.os, cd.arch, cd.othersCount)
-		}
-		return fmt.Sprintf("%s on platform %s-%s and one other", cd.reason, cd.os, cd.arch)
-	}
-	return fmt.Sprintf("%s on platform %s-%s", cd.reason, cd.os, cd.arch)
-}
-
-type checkReason int
-
-const (
-	reasonUpdate checkReason = iota
-	reasonBundle
-	reasonCommand
-	reasonJar
-)
-
-func (cr checkReason) String() string {
-	switch cr {
-	case reasonUpdate:
-		return "URL required for self-update"
-	case reasonBundle:
-		return "URL required for bundle-update"
-	case reasonCommand:
-		return "URL required for command binary"
-	case reasonJar:
-		return "URL required for Java application .jar"
-	}
-	panic(fmt.Sprintf("Unknown checkReason %d", cr))
-}
-
 func main() {
-	filePath, skipurlcheck, skipJarCheck := parseFlags()
-	data := system.MustReadFile(filePath)
-
-	// validate json schema
-	err := config.ValidateDeploymentConfig(string(data))
-	if err != nil {
-		fatalf("Could not validate deployment config \"%s\": %v", filePath, err)
-	}
-
-	if !skipurlcheck {
-		checkURLs(data, filePath, skipJarCheck)
-	}
-}
-
-func checkURLs(data []byte, filePath string, skipJarCheck bool) {
-	urlMap, success := collectURLs(data, skipJarCheck)
-
-	waitgroup := sync.WaitGroup{}
-	waitgroup.Add(len(urlMap))
-	var gotCertError bool
-
-	// check all url in parallel
-	var errorCount int32
-	for url, details := range urlMap {
-		go func(url string, details checkDetails) {
-			defer waitgroup.Done()
-			code, err := getUrlHeadResult(url)
-			if err != nil {
-				_, isUnknownAuthorityError := err.(x509.UnknownAuthorityError)
-				gotCertError = gotCertError || isUnknownAuthorityError
-				fmt.Printf("\033[0;91mHTTP HEAD request to URL '%s' failed: %v. (Check reason: %v)\033[0m\n", url, err, details)
-				atomic.AddInt32(&errorCount, 1)
-			} else if code != http.StatusOK {
-				fmt.Printf("\033[0;91mHTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)\033[0m\n", url, code, details)
-				atomic.AddInt32(&errorCount, 1)
-			} else {
-				fmt.Printf("OK: Resource %s is available. (Reason for check: %v)\n", url, details)
-			}
-		}(url, details)
-	}
-	waitgroup.Wait()
-	if errorCount > 0 {
-		if gotCertError {
-			fmt.Printf("\033[0;91mThere was at least one certificate-related error. The system's certificate pool may be out of date.\033[0m\n")
+	flags := parseFlags()
+	if flags.ActAsService {
+		actAsService(flags)
+	} else {
+		log.SetFlags(0)
+		reps := validateDeploymentConfig(flags.DeploymentConfigUrl, flags.SkipUrlCheck, flags.SkipJarChek)
+		logReports(reps)
+		if reps.HaveError() {
+			os.Exit(1)
 		}
-		fatalf("%d out of %d tested URLs from \"%s\" do not point to valid resources.", errorCount, len(urlMap), filePath)
-		success = false
-	}
-	if !success {
-		os.Exit(1)
 	}
 }
 
-func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails, success bool) {
+func logReports(reps reports) {
+	for _, rep := range reps {
+		if rep.isError {
+			log.Printf("\033[0;91m%s\033[0m\n", rep.message)
+		} else {
+			log.Printf("%s\n", rep.message)
+		}
+	}
+}
+
+func validateDeploymentConfig(url string, skipUrlCheck bool, skipJarCheck bool) reports {
+	expandedDeploymentConfig, err := getFile(url)
+	if err != nil {
+		return []*report{errorReport("Could not retrieve deployment-config from URL %s: %v.", url, err)}
+	}
+
+	err = config.ValidateDeploymentConfig(string(expandedDeploymentConfig))
+	if err != nil {
+		return []*report{errorReport("Could not validate deployment-config at URL %s: %v.", url, err)}
+	}
+
+	if !skipUrlCheck {
+		return checkURLs(expandedDeploymentConfig, skipJarCheck)
+	}
+	return nil
+}
+
+func checkURLs(expandedDeploymentConfig []byte, skipJarCheck bool) reports {
+	urlMap, reports := collectURLs(expandedDeploymentConfig, skipJarCheck)
+
+	waitGroup := &sync.WaitGroup{}
+	waitGroup.Add(len(urlMap))
+
+	// Check all URLs in parallel.
+	reportChan := make(chan *report, len(urlMap))
+	for url, details := range urlMap {
+		go checkURL(url, details, waitGroup, reportChan)
+	}
+	waitGroup.Wait()
+	close(reportChan)
+
+	for report := range reportChan {
+		reports = append(reports, report)
+	}
+	return reports
+}
+
+func checkURL(url string, details checkDetails, waitGroup *sync.WaitGroup, reportChan chan *report) {
+	defer waitGroup.Done()
+	code, err := getHttpHeadResult(url)
+	if err != nil {
+		reportChan <- errorReport("HTTP HEAD request to URL '%s' failed: %v. (Check reason: %v)", url, err, details)
+	} else if code != http.StatusOK {
+		reportChan <- errorReport("HTTP HEAD request to URL '%s' yielded bad response code %d. (Check reason: %v)", url, code, details)
+	} else {
+		reportChan <- statusReport("OK: Resource %s is available. (Reason for check: %v)", url, details)
+	}
+}
+
+func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails, reps reports) {
 	urlMap = make(map[string]checkDetails)
-	success = true
 	for _, operatingsystem := range []string{"windows", "darwin", "linux"} {
 		for _, arch := range []string{"386", "amd64"} {
 			deploymentConfig := config.ParseDeploymentConfig(strings.NewReader(string(data)), operatingsystem, arch)
@@ -125,11 +100,14 @@ func collectURLs(data []byte, skipJarCheck bool) (urlMap map[string]checkDetails
 				addUrlWithDetails(urlMap, update.BundleInfoURL, checkDetails{reasonBundle, operatingsystem, arch, 0})
 			}
 			for _, command := range deploymentConfig.Execution.Commands {
-				success = collectCommandURLs(urlMap, deploymentConfig, operatingsystem, arch, command, skipJarCheck) && success
+				report := collectCommandURLs(urlMap, deploymentConfig, operatingsystem, arch, command, skipJarCheck)
+				if report != nil {
+					reps = append(reps, report)
+				}
 			}
 		}
 	}
-	return urlMap, success
+	return urlMap, reps
 }
 
 func addUrlWithDetails(urlMap map[string]checkDetails, url string, details checkDetails) {
@@ -142,16 +120,15 @@ func addUrlWithDetails(urlMap map[string]checkDetails, url string, details check
 	}
 }
 
-func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) (success bool) {
+func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, os, arch string, command config.Command, skipJarCheck bool) *report {
 	commandNameUnix := strings.ReplaceAll(command.Name, `\`, "/")
 	if path.IsAbs(commandNameUnix) || !strings.Contains(commandNameUnix, "/") {
-		return
+		return errorReport("Path '%s' is not a relative path which descends into at least one folder.", commandNameUnix)
 	}
 	bundleName := misc.FirstElementOfPath(commandNameUnix)
 	bundleURL := getBundleURL(bundleName, deploymentConfig)
 	if bundleURL == "" {
-		fmt.Printf("\033[0;91mCould not get bundle URL for bundle \"%s\" for platform %s-%s. (Required for command \"%s\")\033[0m\n", bundleName, os, arch, command.Name)
-		return false
+		return errorReport("Could not get bundle URL for bundle \"%s\" for platform %s-%s. (Required for command \"%s\")", bundleName, os, arch, command.Name)
 	}
 	binaryURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(commandNameUnix))
 	if os == system.OsWindows && !strings.HasSuffix(binaryURL, ".exe") {
@@ -161,10 +138,13 @@ func collectCommandURLs(urlMap map[string]checkDetails, deploymentConfig *config
 	if !skipJarCheck {
 		if strings.HasSuffix(binaryURL, "/java.exe") || strings.HasSuffix(binaryURL, "/javaw.exe") ||
 			strings.HasSuffix(binaryURL, "/java") {
-			collectJarURL(urlMap, deploymentConfig, command, os, arch)
+			err := collectJarURL(urlMap, deploymentConfig, command, os, arch)
+			if err != nil {
+				return errorReport("Could not get JAR URL for bundle \"%s\" for platform %s-%s (Required for command \"%s\"): %v", bundleName, os, arch, command.Name, err)
+			}
 		}
 	}
-	return true
+	return nil
 }
 
 func stripFirstPathElement(s string) string {
@@ -176,13 +156,16 @@ func stripFirstPathElement(s string) string {
 	return strings.Join(parts[1:], "/")
 }
 
-func collectJarURL(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, command config.Command, os, arch string) {
+func collectJarURL(urlMap map[string]checkDetails, deploymentConfig *config.DeploymentConfig, command config.Command, os, arch string) error {
 	check := false
 	for _, arg := range command.Arguments {
 		if check {
 			jarPath := strings.ReplaceAll(arg, `\`, "/")
 			bundleName := misc.FirstElementOfPath(jarPath)
 			bundleURL := getBundleURL(bundleName, deploymentConfig)
+			if bundleURL == "" {
+				return fmt.Errorf("JAR path '%s' does not descend into a bundle directory", arg)
+			}
 			jarURL := misc.MustJoinURL(bundleURL, stripFirstPathElement(jarPath))
 			addUrlWithDetails(urlMap, jarURL, checkDetails{reasonJar, os, arch, 0})
 			break
@@ -191,6 +174,7 @@ func collectJarURL(urlMap map[string]checkDetails, deploymentConfig *config.Depl
 			check = true
 		}
 	}
+	return nil
 }
 
 func getBundleURL(bundleName string, deploymentConfig *config.DeploymentConfig) string {
@@ -200,34 +184,6 @@ func getBundleURL(bundleName string, deploymentConfig *config.DeploymentConfig) 
 		}
 	}
 	return ""
-}
-
-func getUrlHeadResult(url string) (responseCode int, err error) {
-	client := &http.Client{}
-	client.Timeout = time.Second * 30
-	var response *http.Response
-	response, err = client.Head(url)
-	if err != nil {
-		return 0, err
-	}
-	defer response.Body.Close()
-	return response.StatusCode, err
-}
-
-func parseFlags() (string, bool, bool) {
-	skipurlcheck := flag.Bool("skipurlcheck", false, "Disable checking of availability of all URLs in the config.")
-	skipJarCheck := flag.Bool("skipjarcheck", false, "Disable checking of availability of .jar files given to java with the -jar argument.")
-	flag.Parse()
-
-	if flag.NArg() != 1 {
-		fatalf("Need at least one arg: deploymentConfigPath")
-	}
-	deploymentConfigPath := flag.Arg(0)
-	if deploymentConfigPath == "" {
-		fatalf("deploymentConfigPath not set")
-	}
-
-	return deploymentConfigPath, *skipurlcheck, *skipJarCheck
 }
 
 func fatalf(formatMessage string, args ...interface{}) {

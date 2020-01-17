@@ -35,7 +35,7 @@
             "request": "launch",
             "mode": "debug",
             "env": {},
-            "args": [ "--os", "linux", "--arch", "amd64", "--deployment-config", "/home/user/trivrost/test.json" ],
+            "args": [ "--os", "linux", "--arch", "amd64", "--deployment-config", "${workspaceRoot}/test.json" ],
             "program": "${workspaceRoot}/cmd/bundown/main.go",
             "showLog": false,
             "apiVersion": 2
@@ -46,7 +46,7 @@
             "request": "launch",
             "mode": "debug",
             "env": {},
-            "args": [ "/home/user/trivrost/test.json" ],
+            "args": [ "${workspaceRoot}/test.json" ],
             "program": "${workspaceRoot}/cmd/validator/main.go",
             "showLog": false,
             "apiVersion": 2

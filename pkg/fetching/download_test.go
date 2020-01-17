@@ -64,7 +64,7 @@ func TestHttpClientDoFuncFailure(t *testing.T) {
 func TestBadHttpResponse(t *testing.T) {
 	de := fetching.CreateDummyEnvironment(t, 1000, -1)
 	fetching.DoForClientFunc = func(client *http.Client, req *http.Request) (*http.Response, error) {
-		return &http.Response{StatusCode: http.StatusInternalServerError, Body: &dummy.ReadCloser{}}, nil
+		return &http.Response{StatusCode: http.StatusInternalServerError, Body: &dummy.ByteReadCloser{}}, nil
 	}
 	de.TestDownloadRetries(t, "http://example.com")
 	de.OmitContentLength = true
