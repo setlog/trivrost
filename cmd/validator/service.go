@@ -46,18 +46,18 @@ func (s service) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 
-	s.writeReportListAsHTML(w, reps)
+	writeReportListAsHTML(w, reps, configUrl)
 }
 
-func (s service) writeReportListAsHTML(w io.Writer, reps reports) {
+func writeReportListAsHTML(w io.Writer, reps reports, deploymentConfigUrl string) {
 	io.WriteString(w, "<!doctype html>\n")
 	io.WriteString(w, "<html lang=\"en\">\n")
 	io.WriteString(w, "  <head><meta charset=\"UTF-8\"><title>Validator Response</title></head>\n")
 	io.WriteString(w, "  <body>\n")
 	if reps.HaveError() {
-		io.WriteString(w, "    There were errors validating the deployment-config at "+htmlLink(s.flags.DeploymentConfigUrl)+":\n")
+		io.WriteString(w, "    There were errors validating the deployment-config at "+htmlLink(deploymentConfigUrl)+":\n")
 	} else {
-		io.WriteString(w, "    The deployment-config at "+htmlLink(s.flags.DeploymentConfigUrl)+" was validated successfully:\n")
+		io.WriteString(w, "    The deployment-config at "+htmlLink(deploymentConfigUrl)+" was validated successfully:\n")
 	}
 	io.WriteString(w, "    <ul>\n")
 	for _, rep := range reps {

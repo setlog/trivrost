@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.4.3 (2020-01-17)
+### Fixes
+* Fix validator displaying wrong URL when using `configurl`.
+
 ## 1.4.2 (2020-01-17)
 ### Fixes
 * Fix validator saying `configurl` is not set when it is.
