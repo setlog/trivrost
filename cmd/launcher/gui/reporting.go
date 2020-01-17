@@ -9,6 +9,7 @@ import (
 	"github.com/setlog/trivrost/pkg/misc"
 
 	"github.com/setlog/trivrost/cmd/launcher/places"
+	"github.com/setlog/trivrost/cmd/launcher/resources"
 	"github.com/setlog/trivrost/pkg/logging"
 
 	"github.com/setlog/trivrost/pkg/system"
@@ -55,8 +56,8 @@ func getPanicMessage(r interface{}) string {
 }
 
 func presentError(message string, dismissGuiPrompts bool) {
-	if BlockingDialog("Error", fmt.Sprintf("%s\n\nYou can find additional information in the log files under\n%s\n",
-		message, places.GetAppLogFolderPath()), []string{"Open log folder and close", "Close"}, 1, dismissGuiPrompts) == 0 {
+	if BlockingDialog("Error", fmt.Sprintf("%s\n\nThis problem prevents %s from launching.\nYou can find additional information in the log files under\n%s\n",
+		message, resources.LauncherConfig.BrandingName, places.GetAppLogFolderPath()), []string{"Open log folder and close", "Close"}, 1, dismissGuiPrompts) == 0 {
 		showLogFolder()
 	}
 }

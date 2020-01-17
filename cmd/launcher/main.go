@@ -92,7 +92,7 @@ func runGUI(ctx context.Context, cancelFunc context.CancelFunc, launcherFlags *f
 func parseEnvironment() (launcherFlags *flags.LauncherFlags, argumentError, flagError, pathError, evalError, placesError error) {
 	launcherFlags = &flags.LauncherFlags{}
 	if len(os.Args) == 0 {
-		argumentError = misc.UserErrorf(nil, "Your system launched the application without any arguments, but there must be at least one.")
+		argumentError = misc.UserErrorf(fmt.Errorf("len(os.Args) was 0"), "Your system launched the application without any arguments, but there must be at least one.")
 	} else {
 		launcherFlags, flagError = processFlags(os.Args)
 		pathError, evalError = system.FindPaths()

@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+const programmingErrorInfo = "A programming error has been encountered."
+const uncommonErrorPrefix = "An error occurred. Technical information: "
+const unknownErrorInfo = "An unknown error occurred."
+
 // UserError is an error with a cause-agnostic message and the added semantic of that message being suitable
 // for display to users, i.e. non-programmers. It allows you to construct an error which will return a cause
 // with Unwrap(), without the unwrapped error's message appearing in strings returned from Message().
@@ -29,13 +33,13 @@ func (e *UserError) Unwrap() error {
 // Message returns a user-readable explanation of the error.
 func (e *UserError) Message() string {
 	if e == nil {
-		return "Encountered a programming error."
+		return programmingErrorInfo
 	}
-	if e.userMessage == "" && e.cause != nil {
+	if e.userMessage == "" {
 		if e.cause != nil {
-			return "Technical information: " + e.cause.Error()
+			return uncommonErrorPrefix + e.cause.Error()
 		}
-		return "An unknown error occurred."
+		return unknownErrorInfo
 	}
 	return e.userMessage
 }
@@ -54,7 +58,7 @@ func NewUserErrorFromErrors(errs ...error) error {
 			if userError, isUserError := err.(*UserError); isUserError {
 				return userError
 			}
-			return UserErrorf(err, "Technical information: %v", err)
+			return UserErrorf(err, "%s%v", uncommonErrorPrefix, err)
 		}
 	}
 	return nil
