@@ -12,7 +12,7 @@ import (
 const configUrlParameterName = "configurl"
 
 type service struct {
-	flags ValidatorFlags
+	flags *ValidatorFlags
 }
 
 func (s service) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -21,32 +21,27 @@ func (s service) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	configUrl := req.URL.Query().Get(configUrlParameterName)
+	configUrl := getConfigUrl(req, s.flags)
 	if configUrl == "" {
-		if s.flags.DeploymentConfigUrl != "" {
-			configUrl = s.flags.DeploymentConfigUrl
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-			io.WriteString(w, "Required query parameter '"+configUrlParameterName+"' is missing.\n")
-			return
-		}
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, "Required query parameter '"+configUrlParameterName+"' is missing.\n")
+		return
 	}
 	log.Printf("Validating deployment-config at %s...\n", configUrl)
 	reps := validateDeploymentConfig(configUrl, s.flags.SkipUrlCheck, s.flags.SkipJarChek)
-	logReports(reps)
+	logReports(reps, false)
 	log.Printf("Finished validation of deployment-config at %s...\n", configUrl)
 
-	haveError := reps.HaveError()
-	if haveError {
-		// It would be more correct to return http.StatusOK (since we were able to perform the validation, albeit with a bad outcome)
-		// and have the requester parse some error message from the response body, but we decided not to do this because Prometheus'
-		// monitoring cannot do much beyond checking for the response's status code.
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusOK)
-	}
-
+	w.WriteHeader(http.StatusOK)
 	writeReportListAsHTML(w, reps, configUrl)
+}
+
+func getConfigUrl(req *http.Request, flags *ValidatorFlags) string {
+	configUrl := req.URL.Query().Get(configUrlParameterName)
+	if configUrl == "" {
+		configUrl = flags.DeploymentConfigUrl
+	}
+	return configUrl
 }
 
 func writeReportListAsHTML(w io.Writer, reps reports, deploymentConfigUrl string) {
@@ -76,15 +71,18 @@ func htmlLink(url string) string {
 	return "<a href=\"" + url + "\">" + html.EscapeString(url) + "</a>"
 }
 
-func actAsService(flags ValidatorFlags) {
-	s := &http.Server{
+func actAsService(flags *ValidatorFlags) {
+	httpServer := &http.Server{
 		ReadTimeout:  time.Second * 1,
 		WriteTimeout: time.Second * 10,
 		IdleTimeout:  time.Second * 30,
 		Addr:         ":" + strconv.Itoa(flags.Port),
 	}
 	mux := http.NewServeMux()
-	mux.Handle("/validate", service{flags: flags})
-	s.Handler = mux
-	log.Fatal(s.ListenAndServe())
+	s := service{flags: flags}
+	mux.Handle("/validate", s)
+	mux.Handle("/metrics", metrics{service: s})
+	httpServer.Handler = mux
+	log.Printf("Listening for /validate and /metrics HTTP requests on port %d.\n", flags.Port)
+	log.Fatal(httpServer.ListenAndServe())
 }

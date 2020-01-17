@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.4.4 (2020-01-17)
+### Changes
+* Validator's `/validate` endpoint now always answers with status code 200 OK. Endpoint `/metrics` should be tested for value of `trivrost_validation_ok` as a healthcheck instead.
+
 ## 1.4.3 (2020-01-17)
 ### Fixes
 * Fix validator displaying wrong URL when using `configurl`.
