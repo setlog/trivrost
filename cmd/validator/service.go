@@ -22,12 +22,14 @@ func (s service) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	configUrl := req.URL.Query().Get(configUrlParameterName)
-	if configUrl == "" && s.flags.DeploymentConfigUrl != "" {
-		configUrl = s.flags.DeploymentConfigUrl
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
-		io.WriteString(w, "Required query parameter '"+configUrlParameterName+"' is missing.\n")
-		return
+	if configUrl == "" {
+		if s.flags.DeploymentConfigUrl != "" {
+			configUrl = s.flags.DeploymentConfigUrl
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+			io.WriteString(w, "Required query parameter '"+configUrlParameterName+"' is missing.\n")
+			return
+		}
 	}
 	log.Printf("Validating deployment-config at %s...\n", configUrl)
 	reps := validateDeploymentConfig(configUrl, s.flags.SkipUrlCheck, s.flags.SkipJarChek)
