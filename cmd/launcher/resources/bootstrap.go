@@ -4,9 +4,8 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"log"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 )
@@ -20,15 +19,15 @@ const (
 func readLauncherConfigAsset(a string) *config.LauncherConfig {
 	launcherConfig := config.ReadLauncherConfigFromReader(strings.NewReader(a))
 	if launcherConfig.BrandingName == "" {
-		log.Warnf("BrandingName empty. Setting it to \"%s\".", defaultBrandingName)
+		log.Printf("BrandingName empty. Setting it to \"%s\".", defaultBrandingName)
 		launcherConfig.BrandingName = defaultBrandingName
 	}
 	if launcherConfig.VendorName == "" {
-		log.Warnf("VendorName empty. Setting it to \"%s\".", defaultVendorName)
+		log.Printf("VendorName empty. Setting it to \"%s\".", defaultVendorName)
 		launcherConfig.VendorName = defaultVendorName
 	}
 	if launcherConfig.ProductName == "" {
-		log.Warnf("ProductName empty. Setting it to \"%s\".", defaultProductName)
+		log.Printf("ProductName empty. Setting it to \"%s\".", defaultProductName)
 		launcherConfig.ProductName = defaultProductName
 	}
 	return launcherConfig
