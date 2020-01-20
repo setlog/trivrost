@@ -69,7 +69,7 @@ func readPrivateKey(pemString []byte) *rsa.PrivateKey {
 		parseResult, err = x509.ParsePKCS1PrivateKey(block.Bytes)
 	}
 	if err != nil {
-		fatalf("Could not parse the private key as neither PKCS8- nor PKSC1-formed: %v.", err)
+		fatalf("Could not parse the private key as neither PKCS8- nor PKCS1-formed: %v.", err)
 	}
 	return parseResult.(*rsa.PrivateKey)
 }
