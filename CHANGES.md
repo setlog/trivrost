@@ -1,7 +1,9 @@
 # Release-Changelog
 
-## 1.4.5 (TBD)
+## 1.5.0 (TBD)
 ### Changes
+* DWARF symbols are now stripped from the trivrost binary to reduce file size. This can save a few bytes on some platforms.
+* The binary is now compressed with UPX when using `make`. Reduces the final filesystem to under 50%.
 * Shorter log-output for proxy detection. Reduces size of the log output by 5–15%.
 * Update some dependencies:
   * gopsutils: v2.19.4 -> v2.20.3
