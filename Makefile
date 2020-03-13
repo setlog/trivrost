@@ -69,14 +69,22 @@ export LAUNCHER_PROGRAM_EXT
 # See https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html
 .PHONY: build bundle bundle-msi test copy-test-files generate clean sign dist help
 
+build: generate compile compress package  ## Build (default)
+
 # Default target
-build: generate  ## Build (default)
+compile: generate  ## Compile with go build. Run after make generate.
 ifeq (${OS},windows)
 	# Removing unneeded PNG from Windows binary
 	rm cmd/launcher/resources/icon.png.gen.go
 endif
 	# See https://github.com/golang/go/issues/18400#issuecomment-270414574 for why -installsuffix is needed.
 	go build -o "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+	$(info # compile finished)
+
+compress:  ## Compress compiled binary with UPX. Needs to run after make compile, but before make sign.
+	upx "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}"
+
+package:
 ifeq (${OS},darwin)
 	# Mac bundle is special
 	mkdir -p "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/MacOS"
@@ -85,7 +93,6 @@ ifeq (${OS},darwin)
 	mkdir -p "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources"
 	if [ -f cmd/launcher/resources/icon.icns ]; then cp cmd/launcher/resources/icon.icns "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources/icon.icns"; fi
 endif
-	$(info # make build finished)
 
 bundle:          ## Bundle OS-specific files. Call after signing
 	mkdir -p "${RELEASE_FILES_DIR}/${OS}"
