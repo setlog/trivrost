@@ -30,7 +30,7 @@
 
 ## 1.3.5 (2019-11-11)
 ### Fixes
-* Ignore `--psn_X_YYYYY` arugment which is appended by MacOS to the command line arguments when the programm was launched through a Gatekeeper context. Regression found in v1.3.2, v1.3.3, v1.3.4.
+* Ignore `--psn_X_YYYYY` argument which is appended by MacOS to the command line arguments when the programm was launched through a Gatekeeper context. Regression found in v1.3.2, v1.3.3, v1.3.4.
 
 ## 1.3.4 (2019-10-29)
 ### Fixes
