@@ -27,11 +27,6 @@ func (u *Updater) DetermineBundleRequirements(userBundlesFolderPath, systemBundl
 	u.determineBundleChanges()
 }
 
-func (u *Updater) InstallBundleUpdates() {
-	log.Infof("Downloading bundle updates.")
-	u.installBundleUpdates()
-}
-
 func (u *Updater) determineLocalBundleVersions() {
 	u.announceStatus(DetermineLocalBundleVersions, 200)
 	for _, bundleConfig := range u.deploymentConfig.Bundles {
@@ -113,6 +108,11 @@ func (u *Updater) RetrieveBundleInfo(fromURL string, publicKeys []*rsa.PublicKey
 	}
 	shaBytes := sha256.Sum256(bundleInfosData[fromURL])
 	return info, hex.EncodeToString(shaBytes[:])
+}
+
+func (u *Updater) InstallBundleUpdates() {
+	log.Infof("Downloading bundle updates.")
+	u.installBundleUpdates()
 }
 
 func (u *Updater) installBundleUpdates() {
