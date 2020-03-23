@@ -18,36 +18,36 @@ type DownloadProgressHandler interface {
 
 	HandleHttpGetError(fromURL string, err error)   // The HTTP GET request to download the resource did not receive an HTTP response.
 	HandleBadHttpResponse(fromURL string, code int) // A bad HTTP response code was received.
-	HandleReadError(fromURL string, err error)      // An error occurred while reading the response body (data) of the resource at the given URL.
+	HandleReadError(fromURL string, err error, firstByteIndex int64)      // An error occurred while reading the response body (data) of the resource at the given URL.
 }
 
-type ConsoleDownloadPogressHandler struct {
+type ConsoleDownloadProgressHandler struct {
 }
 
-func (handler *ConsoleDownloadPogressHandler) HandleProgress(fromURL string, workerId int, receivedBytes uint64) {
+func (handler *ConsoleDownloadProgressHandler) HandleProgress(fromURL string, workerId int, receivedBytes uint64) {
 }
 
-func (handler *ConsoleDownloadPogressHandler) HandleStartDownload(fromURL string, workerId int) {
+func (handler *ConsoleDownloadProgressHandler) HandleStartDownload(fromURL string, workerId int) {
 	log.Infof("Downloading %s", fromURL)
 }
 
-func (handler *ConsoleDownloadPogressHandler) HandleFinishDownload(fromURL string, workerId int) {
+func (handler *ConsoleDownloadProgressHandler) HandleFinishDownload(fromURL string, workerId int) {
 }
 
-func (handler *ConsoleDownloadPogressHandler) HandleFailDownload(fromURL string, workerId int, err error) {
+func (handler *ConsoleDownloadProgressHandler) HandleFailDownload(fromURL string, workerId int, err error) {
 }
 
-func (handler *ConsoleDownloadPogressHandler) HandleHttpGetError(fromURL string, err error) {
+func (handler *ConsoleDownloadProgressHandler) HandleHttpGetError(fromURL string, err error) {
 	log.Errorf("Error downloading %s: %v.", fromURL, err)
 	os.Exit(1)
 }
 
-func (handler *ConsoleDownloadPogressHandler) HandleBadHttpResponse(fromURL string, code int) {
+func (handler *ConsoleDownloadProgressHandler) HandleBadHttpResponse(fromURL string, code int) {
 	log.Errorf("GET %s yielded bad HTTP response: %v (Code was %d)", fromURL, http.StatusText(code), code)
 	os.Exit(1)
 }
 
-func (handler *ConsoleDownloadPogressHandler) HandleReadError(fromURL string, err error) {
+func (handler *ConsoleDownloadProgressHandler) HandleReadError(fromURL string, err error, firstByteIndex int64) {
 	log.Errorf("Could not copy bytes from \"%s\": %v", fromURL, err)
 	os.Exit(1)
 }
@@ -73,5 +73,5 @@ func (handler *EmptyHandler) HandleHttpGetError(fromURL string, err error) {
 func (handler *EmptyHandler) HandleBadHttpResponse(fromURL string, code int) {
 }
 
-func (handler *EmptyHandler) HandleReadError(fromURL string, err error) {
+func (handler *EmptyHandler) HandleReadError(fromURL string, err error, firstByteIndex int64) {
 }
