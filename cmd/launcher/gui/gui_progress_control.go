@@ -10,6 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const barUpdateInterval = time.Millisecond * 100
+const labelUpdateInterval = time.Second * 3
+const titleUpdateInterval = time.Millisecond * 500
+
 // ProgressFunc should be set to a function which reports the progress of the given stage.
 var ProgressFunc = func(s Stage) uint64 {
 	return 0
@@ -67,9 +71,6 @@ func calculateProgress(s Stage, current, total uint64) (barProgress int, percent
 }
 
 func updateProgressPeriodically(ctx context.Context) {
-	const barUpdateInterval = time.Millisecond * 100
-	const labelUpdateInterval = time.Second
-	const titleUpdateInterval = time.Millisecond * 500
 	barTimer := time.NewTimer(barUpdateInterval)
 	labelTimer := time.NewTimer(labelUpdateInterval)
 	titleTimer := time.NewTimer(titleUpdateInterval)
@@ -138,7 +139,7 @@ func updateProgressLabel() {
 			delta := panelDownloadStatus.progressCurrent - panelDownloadStatus.progressPrevious
 			var message string
 			if panelDownloadStatus.stage.IsDownloadStage() {
-				message = fmt.Sprintf("Downloading at %s. ", rateString(delta))
+				message = fmt.Sprintf("Downloading at %s. ", rateString(uint64(float64(delta) / labelUpdateInterval.Seconds())))
 			}
 			if panelDownloadStatus.currentProblemMessage != "" {
 				message += fmt.Sprintf("(%s)", panelDownloadStatus.currentProblemMessage)
