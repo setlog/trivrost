@@ -137,7 +137,7 @@ func updateProgressLabel() {
 
 			delta := panelDownloadStatus.progressCurrent - panelDownloadStatus.progressPrevious
 			var message string
-			if panelDownloadStatus.stage.IsDownloadStage() && delta > 0 {
+			if panelDownloadStatus.stage.IsDownloadStage() {
 				message = fmt.Sprintf("Downloading at %s. ", rateString(delta))
 			}
 			if panelDownloadStatus.currentProblemMessage != "" {
