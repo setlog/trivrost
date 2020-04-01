@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-const Ellipsis = "…"
+const ellipsis = "…"
 
 // WordWrap performs word-wrapping on space-separated words within text, keeping existing newline
 // characters intact. Any words which exceed lineWidth in length will move to a new line, but words
@@ -57,12 +57,12 @@ func isBreakingSpace(r rune) bool {
 }
 
 func ShortString(s string, leadingCount int, trailingCount int) string {
-	maxLen := leadingCount + trailingCount + utf8.RuneCountInString(Ellipsis)
+	maxLen := leadingCount + trailingCount + utf8.RuneCountInString(ellipsis)
 	runeCount := utf8.RuneCountInString(s)
 	if runeCount > maxLen {
 		firstByteIndex := RuneIndexToByteIndex(s, leadingCount)
 		omitByteIndex := RuneIndexToByteIndex(s, runeCount-trailingCount)
-		s = s[:firstByteIndex] + Ellipsis + s[omitByteIndex:]
+		s = s[:firstByteIndex] + ellipsis + s[omitByteIndex:]
 	}
 	return s
 }
