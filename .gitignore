@@ -39,7 +39,6 @@ bin/
 # misc stuff
 *.kate-swp
 *.swp
-.idea
 .project
 *.orig
 coverage.out
@@ -50,3 +49,8 @@ test.json
 
 # duplicate workspace files for vscode so you can use multi monitor setup
 /ws?.code-workspace
+
+# other IDE stuff
+.idea/
+*.iml
+.vscode/
