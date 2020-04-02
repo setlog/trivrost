@@ -70,15 +70,15 @@ func TestShortString(t *testing.T) {
 		leadingCount, trailingCount int
 		expected                    string
 	}{
-		{"what a stupid text", 7, 5, "what a ... text"},
-		{"what a great text", 7, 7, "what a great text"},
-		{"what a great text", 6, 7, "what a...at text"},
-		{"日本語偽善者", 1, 2, "日本語偽善者"},
-		{"日本語偽善者", 1, 1, "日...者"},
-		{"ab日本語皮を被る", 1, 2, "a...被る"},
+		{"what a stupid text", 7, 5, "what a … text"},
+		{"what a great text", 8, 9, "what a great text"},
+		{"what a great text", 6, 7, "what a…at text"},
+		{"日本語偽善者", 2, 2, "日本…善者"},
+		{"日本語偽善者", 1, 1, "日…者"},
+		{"ab日本語皮を被る", 1, 2, "a…被る"},
 		{"", 0, 0, ""},
-		{"0123456789", 4, 0, "0123..."},
-		{"0123456789", 0, 4, "...6789"},
+		{"0123456789", 4, 0, "0123…"},
+		{"0123456789", 0, 4, "…6789"},
 	}
 	for i, test := range tests {
 		result := misc.ShortString(test.text, test.leadingCount, test.trailingCount)
