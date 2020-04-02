@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.4.5 (TBD)
+### Changes
+* Shorter log-output for proxy detection. Reduces size of the log output by 5–15%.
+
 ## 1.4.4 (2020-01-17)
 ### Changes
 * Validator's `/validate` endpoint now always answers with status code 200 OK. Endpoint `/metrics` should be tested for value of `trivrost_validation_ok` as a healthcheck instead.
