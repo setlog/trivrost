@@ -1,6 +1,7 @@
 <p align="center"><img width="128px" height="128px" style="width:128px;height:128px" src="docs/res/trivrostlogo.png" alt="trivrost" /></p>
 
 # trivrost
+![Test](https://github.com/setlog/trivrost/workflows/Test/badge.svg?branch=master)
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-go.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/built-with-science.svg)](https://forthebadge.com)
