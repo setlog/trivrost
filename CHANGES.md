@@ -3,6 +3,8 @@
 ## 1.4.5 (TBD)
 ### Changes
 * Shorter log-output for proxy detection. Reduces size of the log output by 5–15%.
+* Update some dependencies:
+  * gopsutils: v2.19.4 -> v2.20.3
 
 ## 1.4.4 (2020-01-17)
 ### Changes
