@@ -73,7 +73,7 @@ func TestShortString(t *testing.T) {
 		{"what a stupid text", 7, 5, "what a … text"},
 		{"what a great text", 8, 9, "what a great text"},
 		{"what a great text", 6, 7, "what a…at text"},
-		{"日本語偽善者", 2, 2, "日本…善者"},
+		{"日本語偽善者", 1, 4, "日本語偽善者"}, // Text + ellipsis must be shorter, or do not use ellipses
 		{"日本語偽善者", 1, 1, "日…者"},
 		{"ab日本語皮を被る", 1, 2, "a…被る"},
 		{"", 0, 0, ""},
