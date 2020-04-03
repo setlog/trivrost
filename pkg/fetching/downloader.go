@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"git.sr.ht/~tslocum/preallocate"
+	"github.com/smallnest/preallocate"
 	"github.com/setlog/trivrost/pkg/misc"
 	"github.com/setlog/trivrost/pkg/signatures"
 

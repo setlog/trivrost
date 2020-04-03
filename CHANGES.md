@@ -3,6 +3,7 @@
 ## 1.4.5 (TBD)
 ### Changes
 * Shorter log-output for proxy detection. Reduces size of the log output by 5–15%.
+* No longer preallocate files before downloading (code was unmaintained)
 
 ## 1.4.4 (2020-01-17)
 ### Changes
