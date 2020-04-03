@@ -2,6 +2,7 @@
 
 # trivrost
 ![Test](https://github.com/setlog/trivrost/workflows/Test/badge.svg?branch=master)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-go.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/built-with-science.svg)](https://forthebadge.com)
