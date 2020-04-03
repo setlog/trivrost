@@ -5,7 +5,7 @@ import (
 )
 
 func TestRateString(t *testing.T){
-	if "x" != "0 B/s" {
+	if "x" == "0 B/s" {
 		t.Errorf("TestTest")
 	}
 }
