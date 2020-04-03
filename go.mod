@@ -16,7 +16,7 @@ require (
 	github.com/prometheus/client_golang v1.3.0
 	github.com/shirou/gopsutil v0.0.0-20190427031343-fa9845945e5b
 	github.com/sirupsen/logrus v1.4.2
-	github.com/smallnest/preallocate v0.1.1
+	github.com/smallnest/preallocate v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.4.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
