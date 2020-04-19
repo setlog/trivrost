@@ -6,14 +6,12 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705 // indirect
 	github.com/andlabs/ui v0.0.0-20180902183112-867a9e5a498d
 	github.com/davecgh/go-spew v1.1.1
-	github.com/fatih/color v1.7.0
+	github.com/fatih/color v1.9.0
 	github.com/go-ole/go-ole v1.2.4
 	github.com/gofrs/flock v0.7.1
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/mattn/go-colorable v0.1.0 // indirect
 	github.com/mattn/go-ieproxy v0.0.0-20190805055040-f9202b1cfdeb
-	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/prometheus/client_golang v1.3.0
 	github.com/shirou/gopsutil v2.20.3+incompatible
 	github.com/sirupsen/logrus v1.4.2
