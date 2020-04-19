@@ -102,6 +102,7 @@ github.com/shirou/gopsutil v2.20.3+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.2 h1:SPIRibHv4MatM3XXNO2BJeFLZwZ2LvZgfQ5+UNI2im4=
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
+github.com/sirupsen/logrus v1.5.0/go.mod h1:+F7Ogzej0PZc/94MaYx/nvG9jOFMD2osvC3s+Squfpo=
 github.com/smallnest/preallocate v0.1.1 h1:D+i8gnJZsbWwdosnQiXaNFsI7MOfKFxfeonm+2/7HEA=
 github.com/smallnest/preallocate v0.1.1/go.mod h1:9yyz7jeM3zMwFJ0o6Njpu3K9KeXnWeyzCTbxW6UeXzQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
