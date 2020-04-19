@@ -18,7 +18,7 @@ import (
 
 	"github.com/setlog/trivrost/pkg/misc"
 	"github.com/setlog/trivrost/pkg/signatures"
-	"github.com/smallnest/preallocate"
+	"git.sr.ht/~tslocum/preallocate"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/system"
