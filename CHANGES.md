@@ -3,8 +3,16 @@
 ## 1.4.5 (TBD)
 ### Changes
 * Shorter log-output for proxy detection. Reduces size of the log output by 5–15%.
-* Update some dependencies:
+* Update most dependencies:
   * gopsutils: v2.19.4 -> v2.20.3
+  * testify: v1.4.0 -> v1.5.1
+  * gojsonschema: v1.1.0 -> v1.2.0
+  * logrus: v1.4.2 -> v1.5.0
+  * prometheus/client_golang: v1.3.0 -> v1.5.1
+  * go_ieproxy: (no module) -> v0.0.1
+  * fatih/color: v1.7.0 -> v1.9.0
+  * golang/x/sys: d4481ac -> 669c56c
+  * golang/x/net: a8b05e9 -> d3edc99
 
 ## 1.4.4 (2020-01-17)
 ### Changes
