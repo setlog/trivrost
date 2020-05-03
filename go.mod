@@ -13,7 +13,7 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.5.1
-	github.com/shirou/gopsutil v2.20.3+incompatible
+	github.com/shirou/gopsutil v2.20.4+incompatible
 	github.com/sirupsen/logrus v1.5.0
 	github.com/stretchr/testify v1.5.1
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
