@@ -1,5 +1,5 @@
 {
   "extends": ["config:base"],
   "rebaseWhen": "behind-base-branch",
-  "ignoreDeps": ["golang.org/x/net", "golang.org/x/system"]
+  "ignoreDeps": ["golang.org/x/net", "golang.org/x/sys"]
 }
