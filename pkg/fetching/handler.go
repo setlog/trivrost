@@ -47,8 +47,8 @@ func (handler *ConsoleDownloadProgressHandler) HandleBadHttpResponse(fromURL str
 	os.Exit(1)
 }
 
-func (handler *ConsoleDownloadProgressHandler) HandleReadError(fromURL string, err error, firstByteIndex int64) {
-	log.Errorf("Could not copy bytes from \"%s\": %v", fromURL, err)
+func (handler *ConsoleDownloadProgressHandler) HandleReadError(fromURL string, err error, receivedByteCount int64) {
+	log.Errorf("Could not copy bytes from \"%s\" (failed after %d bytes): %v", fromURL, receivedByteCount, err)
 	os.Exit(1)
 }
 
@@ -73,5 +73,5 @@ func (handler *EmptyHandler) HandleHttpGetError(fromURL string, err error) {
 func (handler *EmptyHandler) HandleBadHttpResponse(fromURL string, code int) {
 }
 
-func (handler *EmptyHandler) HandleReadError(fromURL string, err error, firstByteIndex int64) {
+func (handler *EmptyHandler) HandleReadError(fromURL string, err error, receivedByteCount int64) {
 }
