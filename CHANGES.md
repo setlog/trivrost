@@ -3,6 +3,7 @@
 ## 1.4.5 (TBD)
 ### Changes
 * Shorter log-output for proxy detection. Reduces size of the log output by 5–15%.
+* trivrost will log the progress of downloads if the connection was interrupted for any reason.
 * Update most dependencies:
   * gopsutils: v2.19.4 -> v2.20.3
   * testify: v1.4.0 -> v1.5.1

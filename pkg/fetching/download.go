@@ -204,7 +204,7 @@ func (dl *Download) readFromResponse(p []byte) (n int, err error) {
 		dl.cleanUp() // Note: https://github.com/golang/go/issues/26095#issuecomment-400903313
 		dl.response = nil
 		if err != io.EOF { // Network failures are temporary. Keep trying until it works.
-			dl.handler.HandleReadError(dl.url, err)
+			dl.handler.HandleReadError(dl.url, err, dl.firstByteIndex)
 			return n, nil
 		}
 		if (dl.lastByteIndex >= 0) && (dl.firstByteIndex < dl.lastByteIndex+1) {

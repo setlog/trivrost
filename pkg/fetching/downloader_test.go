@@ -39,7 +39,7 @@ func (handler *ErrorRecordingHandler) HandleBadHttpResponse(fromURL string, code
 	handler.ErrChan <- fmt.Errorf("HTTP %d: %s", code, http.StatusText(code))
 }
 
-func (handler *ErrorRecordingHandler) HandleReadError(fromURL string, err error) {
+func (handler *ErrorRecordingHandler) HandleReadError(fromURL string, err error, receivedByteCount int64) {
 	handler.ErrChan <- err
 }
 
