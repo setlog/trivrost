@@ -1,5 +1,7 @@
 # Contributing
-When contributing to this repository, please first discuss the change you wish to make via issue.
+When contributing to this repository, please first discuss the change you wish to make via an issue.
+
+This project uses [EditorConfig](https://editorconfig.org) to set some style rules. If your IDE does not support it natively, please install [a plugin](https://editorconfig.org/#download).
 
 ## Learning
 Developer documentation may be found under `docs/dev/`.
