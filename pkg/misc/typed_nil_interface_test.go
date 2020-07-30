@@ -3,8 +3,8 @@ package misc_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/setlog/trivrost/pkg/misc"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestIsNil(t *testing.T) {

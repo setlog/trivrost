@@ -1,13 +1,13 @@
 {
-	"Timestamp": "2019-02-07 14:53:17",
-	"LauncherUpdate": [
-	],
-	"Bundles": [
-		{
-			"BundleInfoURL": "https://example.com",
-			"LocalDirectory": "bun"
-		}
-	],
-	"Executioooon": {
-	}
+  "Timestamp": "2019-02-07 14:53:17",
+  "LauncherUpdate": [
+  ],
+  "Bundles": [
+    {
+      "BundleInfoURL": "https://example.com",
+      "LocalDirectory": "bun"
+    }
+  ],
+  "Executioooon": {
+  }
 }

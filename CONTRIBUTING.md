@@ -42,16 +42,16 @@ To create a release for the latest version:
   * Finish all pending changes to develop
   * Make sure CHANGES.md is complete and has the correct publication date and version number
   * Run these commands:
-```
-git checkout develop
-git pull
-# check with git log that the branch is in the state which you want to release
-git checkout master
-git pull
-git merge develop --ff-only
-git push
-# check if pipeline succeeds - should always be the case!
-```
+    ```
+    git checkout develop
+    git pull
+    # check with git log that the branch is in the state which you want to release
+    git checkout master
+    git pull
+    git merge develop --ff-only
+    git push
+    # check if pipeline succeeds - should always be the case!
+    ```
 Finally, make a release through [the release-overview of the project's GitHub page](https://github.com/setlog/trivrost/releases), creating a new tag against `master`. Tag should be `vX.Y.Z`, title should be `vX.Y.Z (YYYY-MM-DD)` and message should be the markdown-formatted list of fixes, features and changes from `CHANGES.md`.
 
 Alternatively:

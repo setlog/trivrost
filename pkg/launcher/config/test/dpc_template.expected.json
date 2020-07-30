@@ -1,8 +1,8 @@
 {
-    "LauncherUpdate": [
-        {
-            "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
-            "TargetPlatforms": [ "AmigaOS-68000x16" ]
-        }
-    ]
+  "LauncherUpdate": [
+    {
+      "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
+      "TargetPlatforms": [ "AmigaOS-68000x16" ]
+    }
+  ]
 }

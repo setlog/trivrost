@@ -1,49 +1,49 @@
 {
-    "Timestamp": "2019-02-07 14:53:17",
-    "LauncherUpdate": [
-        {
-            "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
-            "TargetPlatforms": [ "linuks" ]
-        }
-    ],
-    "Bundles": [
-        {
-            "BundleInfoURL": "https://example.com/testapp/32-bit/bundleinfo.json",
-            "LocalDirectory": "app",
-            "TargetPlatforms": [ "386-windows" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/testapp/64-bit/bundleinfo.json",
-            "LocalDirectory": "app",
-            "TargetPlatforms": [ "amd65" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/testapp/resources-bundleinfo.json",
-            "BaseURL": "https://media.example.com/testapp-pictures/",
-            "LocalDirectory": "pictures"
-        }
-    ],
-    "Execution": {
-        "Commands": [
-            {
-                "Name": "java\\bin\\javaw",
-                "Arguments": [ "-jar", "foo", "-special-win-32-bit-parameter", "-Xm1024M" ],
-                "Env": {
-                    "NEW_ENV": "New env variable.",
-                    "OMIT_ENV": null
-                },
-                "TargetPlatforms": [ "windows-386" ]
-            },
-            {
-                "Name": "java/bin/java",
-                "Arguments": [ "-jar", "-Xm1024M" ],
-                "Env": {
-                    "NEW_ENV": "New env variable.",
-                    "OMIT_ENV": null
-                },
-                "TargetPlatforms": [ "linux", "darwin-pc98" ]
-            }
-        ],
-        "LingerTimeMilliseconds": 800
+  "Timestamp": "2019-02-07 14:53:17",
+  "LauncherUpdate": [
+    {
+      "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
+      "TargetPlatforms": [ "linuks" ]
     }
+  ],
+  "Bundles": [
+    {
+      "BundleInfoURL": "https://example.com/testapp/32-bit/bundleinfo.json",
+      "LocalDirectory": "app",
+      "TargetPlatforms": [ "386-windows" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/testapp/64-bit/bundleinfo.json",
+      "LocalDirectory": "app",
+      "TargetPlatforms": [ "amd65" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/testapp/resources-bundleinfo.json",
+      "BaseURL": "https://media.example.com/testapp-pictures/",
+      "LocalDirectory": "pictures"
+    }
+  ],
+  "Execution": {
+    "Commands": [
+      {
+        "Name": "java\\bin\\javaw",
+        "Arguments": [ "-jar", "foo", "-special-win-32-bit-parameter", "-Xm1024M" ],
+        "Env": {
+          "NEW_ENV": "New env variable.",
+          "OMIT_ENV": null
+        },
+        "TargetPlatforms": [ "windows-386" ]
+      },
+      {
+        "Name": "java/bin/java",
+        "Arguments": [ "-jar", "-Xm1024M" ],
+        "Env": {
+          "NEW_ENV": "New env variable.",
+          "OMIT_ENV": null
+        },
+        "TargetPlatforms": [ "linux", "darwin-pc98" ]
+      }
+    ],
+    "LingerTimeMilliseconds": 800
+  }
 }
