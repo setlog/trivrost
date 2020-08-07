@@ -14,6 +14,8 @@
   * fatih/color: v1.7.0 -> v1.9.0
   * golang/x/sys: d4481ac -> 669c56c
   * golang/x/net: a8b05e9 -> d3edc99
+* Do not hide the download speed label, even if the speed is zero.
+* The download-speed label now shows a 3 second average.
 
 ## 1.4.4 (2020-01-17)
 ### Changes

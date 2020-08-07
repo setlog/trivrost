@@ -10,6 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const barUpdateInterval = time.Millisecond * 100
+const labelUpdateInterval = time.Second * 3
+const titleUpdateInterval = time.Millisecond * 500
+
 // ProgressFunc should be set to a function which reports the progress of the given stage.
 var ProgressFunc = func(s Stage) uint64 {
 	return 0
@@ -67,9 +71,6 @@ func calculateProgress(s Stage, current, total uint64) (barProgress int, percent
 }
 
 func updateProgressPeriodically(ctx context.Context) {
-	const barUpdateInterval = time.Millisecond * 100
-	const labelUpdateInterval = time.Second
-	const titleUpdateInterval = time.Millisecond * 500
 	barTimer := time.NewTimer(barUpdateInterval)
 	labelTimer := time.NewTimer(labelUpdateInterval)
 	titleTimer := time.NewTimer(titleUpdateInterval)
@@ -137,8 +138,8 @@ func updateProgressLabel() {
 
 			delta := panelDownloadStatus.progressCurrent - panelDownloadStatus.progressPrevious
 			var message string
-			if panelDownloadStatus.stage.IsDownloadStage() && delta > 0 {
-				message = fmt.Sprintf("Downloading at %s. ", rateString(delta))
+			if panelDownloadStatus.stage.IsDownloadStage() {
+				message = fmt.Sprintf("Downloading at %s. ", rateString(delta, labelUpdateInterval))
 			}
 			if panelDownloadStatus.currentProblemMessage != "" {
 				message += fmt.Sprintf("(%s)", panelDownloadStatus.currentProblemMessage)
@@ -161,17 +162,18 @@ func updateWindowTitle() {
 	}
 }
 
-func rateString(rate uint64) string {
-	if rate < 1000 {
-		return fmt.Sprintf("%d B/s", rate)
-	} else if rate < 1024*10 {
-		return fmt.Sprintf("%.2f KiB/s", float64(rate)/1024)
-	} else if rate < 1024*100 {
-		return fmt.Sprintf("%.1f KiB/s", float64(rate)/1024)
-	} else if rate < 1024*1000 {
-		return fmt.Sprintf("%d KiB/s", rate/1024)
-	} else if rate < 1024*1024*10 {
-		return fmt.Sprintf("%.2f MiB/s", float64(rate)/(1024*1024))
+func rateString(deltaBytes uint64, interval time.Duration) string {
+	delta := float64(deltaBytes) / interval.Seconds()
+	if delta < 1000 {
+		return fmt.Sprintf("%.0f B/s", delta)
+	} else if delta < 1024*10 {
+		return fmt.Sprintf("%.2f KiB/s", delta/1024)
+	} else if delta < 1024*100 {
+		return fmt.Sprintf("%.1f KiB/s", delta/1024)
+	} else if delta < 1024*1000 {
+		return fmt.Sprintf("%.0f KiB/s", delta/1024)
+	} else if delta < 1024*1024*10 {
+		return fmt.Sprintf("%.2f MiB/s", delta/(1024*1024))
 	}
-	return fmt.Sprintf("%.1f MiB/s", float64(rate)/(1024*1024))
+	return fmt.Sprintf("%.1f MiB/s", delta/(1024*1024))
 }
