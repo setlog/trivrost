@@ -16,9 +16,9 @@ type DownloadProgressHandler interface {
 	HandleFinishDownload(fromURL string, workerId int)                 // The download of resource at given URL finished successfully.
 	HandleFailDownload(fromURL string, workerId int, err error)        // The download of resource at given URL failed irrecoverably.
 
-	HandleHttpGetError(fromURL string, err error)   // The HTTP GET request to download the resource did not receive an HTTP response.
-	HandleBadHttpResponse(fromURL string, code int) // A bad HTTP response code was received.
-	HandleReadError(fromURL string, err error, firstByteIndex int64)      // An error occurred while reading the response body (data) of the resource at the given URL.
+	HandleHttpGetError(fromURL string, err error)                    // The HTTP GET request to download the resource did not receive an HTTP response.
+	HandleBadHttpResponse(fromURL string, code int)                  // A bad HTTP response code was received.
+	HandleReadError(fromURL string, err error, firstByteIndex int64) // An error occurred while reading the response body (data) of the resource at the given URL.
 }
 
 type ConsoleDownloadProgressHandler struct {
