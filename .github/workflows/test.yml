@@ -33,7 +33,7 @@ jobs:
           mkdir -p ${GOPATH}/src
           go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo@63e6d1acd3dd857ec6b8c54fbf52e10ce24a8786
       - name: Checkout repository
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v2.3.2
       - name: Test and build
         shell: bash
         run: |
