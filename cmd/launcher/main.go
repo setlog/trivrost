@@ -57,6 +57,9 @@ func main() {
 func initializeEnvironment() (*flags.LauncherFlags, error) {
 	registerSignalOverrides()
 
+	if (resources.LauncherConfig == nil) {
+		panic("LauncherConfig was not found / compiled into the binary.")
+	}
 	launcherFlags, argumentError, flagError, pathError, evalError, placesError := parseEnvironment()
 	launcherFlags.SetNextLogIndex(logging.Initialize(places.GetAppLogFolderPath(), resources.LauncherConfig.ProductName,
 		launcherFlags.LogIndexCounter, launcherFlags.LogInstanceCounter))
