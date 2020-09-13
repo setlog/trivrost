@@ -76,7 +76,7 @@ func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, er
 }
 
 func (handler *GuiDownloadProgressHandler) HandleBadHttpResponse(fromURL string, code int) {
-	log.Warnf("GET %s yielded bad HTTP response: %s (Code was %d)", fromURL, http.StatusText(code), code)
+	log.Warnf("GET %s, error %d: %s", fromURL, code, http.StatusText(code))
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
