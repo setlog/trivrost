@@ -39,6 +39,13 @@ func main() {
 
 func mustHashDirectory(uniqueBundleName, pathToHash, hashesFile string) {
 	log.WithFields(log.Fields{"uniqueBundleName": uniqueBundleName, "pathToHash": pathToHash, "hashesFile": hashesFile}).Info("Hashing directory.")
+	info, err := os.Stat(pathToHash)
+	if err != nil {
+		log.Panicf("Cannot hash \"%s\". %s", pathToHash, err)
+	}
+	if !info.IsDir() {
+		log.Panicf("\"%s\" must be a directory.", pathToHash)
+	}
 	bundleInfo := &config.BundleInfo{
 		BundleFiles:      hashing.MustHash(context.Background(), pathToHash),
 		Timestamp:        time.Now().UTC().Format(timeFormat),

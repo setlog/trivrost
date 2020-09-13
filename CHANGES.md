@@ -9,6 +9,8 @@
 * The download-speed label now shows a 3 second average.
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
+### Fixes
+* `hasher` will no longer create a directory if a non-existing one is passed as an argument.
 
 ## 1.4.4 (2020-01-17)
 ### Changes
