@@ -7,6 +7,7 @@
 * Update dependencies to recent versions: gopsutils, testify, gojsonschema, logrus, prometheus/client_golang, go_ieproxy, fatih/color, golang/x/sys, golang/x/net
 * Do not hide the download speed label, even if the speed is zero.
 * The download-speed label now shows a 3 second average.
+* `hasher` will no longer blindly overwrite an existing bundleinfo.json but instead error out.
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
 ### Fixes
