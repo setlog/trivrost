@@ -4,19 +4,11 @@
 ### Changes
 * Shorter log-output for proxy detection. Reduces average size of the log output by 5–15%.
 * Shorter log-output for HTTP errors, reduces size of log output by a few percent.
-* trivrost will log the progress of downloads if the connection was interrupted for any reason.
-* Update most dependencies:
-  * gopsutils: v2.19.4 -> v2.20.3
-  * testify: v1.4.0 -> v1.5.1
-  * gojsonschema: v1.1.0 -> v1.2.0
-  * logrus: v1.4.2 -> v1.5.0
-  * prometheus/client_golang: v1.3.0 -> v1.5.1
-  * go_ieproxy: (no module) -> v0.0.1
-  * fatih/color: v1.7.0 -> v1.9.0
-  * golang/x/sys: d4481ac -> 669c56c
-  * golang/x/net: a8b05e9 -> d3edc99
+* Update dependencies to recent versions: gopsutils, testify, gojsonschema, logrus, prometheus/client_golang, go_ieproxy, fatih/color, golang/x/sys, golang/x/net
 * Do not hide the download speed label, even if the speed is zero.
 * The download-speed label now shows a 3 second average.
+### Features
+* trivrost will log the progress of downloads if the connection was interrupted for any reason.
 
 ## 1.4.4 (2020-01-17)
 ### Changes
