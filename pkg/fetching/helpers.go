@@ -43,7 +43,7 @@ func GetProxyLoggingFunc() func(req *http.Request) (*url.URL, error) {
 			if proxyURL == nil {
 				log.Infof("GET %v (direct).", req.URL)
 			} else {
-				log.Infof("GET %v (with proxy: %v).", req.URL, proxyURL)
+				log.Infof("GET %v (proxy: %v).", req.URL, proxyURL)
 			}
 		}
 		return proxyURL, err

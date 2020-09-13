@@ -43,7 +43,7 @@ func (handler *ConsoleDownloadProgressHandler) HandleHttpGetError(fromURL string
 }
 
 func (handler *ConsoleDownloadProgressHandler) HandleBadHttpResponse(fromURL string, code int) {
-	log.Errorf("GET %s yielded bad HTTP response: %v (Code was %d)", fromURL, http.StatusText(code), code)
+	log.Errorf("GET %s, error %d: %v", fromURL, code, http.StatusText(code))
 	os.Exit(1)
 }
 
