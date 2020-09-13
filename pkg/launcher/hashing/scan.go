@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	log "github.com/sirupsen/logrus"
@@ -61,23 +62,29 @@ func mustHashRelatively(ctx context.Context, readDir readDirFunc, readFile readF
 }
 
 func mustHashDir(ctx context.Context, readDir readDirFunc, readFile readFileFunc, stat statFunc, hashFilePath string) config.FileInfoMap {
-	fm := make(config.FileInfoMap)
-	for _, info := range mustReadDir(readDir, hashFilePath) {
-		if info.IsDir() {
-			fm.Join(mustHashDir(ctx, readDir, readFile, stat, filepath.Join(hashFilePath, info.Name())))
+	fileMap := make(config.FileInfoMap)
+	for _, curPathInfo := range mustReadDir(readDir, hashFilePath) {
+		curPath := filepath.Join(hashFilePath, curPathInfo.Name())
+		resolvedPath := evaluateSoftLink(curPath)
+		if curPath != resolvedPath {
+			log.Warnf("File \"%s\"->\"%s\" is a symlink, will be treated as a regular file/dir.", curPath, resolvedPath)
+			curPath = resolvedPath
+		}
+		if !strings.HasPrefix(curPath, hashFilePath) {
+			panic(fmt.Errorf("hashing '%s' outside hash directory is not allowed", curPath))
+		}
+		curPathInfo, _ = stat(curPath)
+		if curPathInfo.IsDir() {
+			fileMap.Join(mustHashDir(ctx, readDir, readFile, stat, curPath))
 		} else {
-		filePath := filepath.Join(hashFilePath, info.Name())
-		if isDir(filePath) {
-			fm.Join(mustHashDir(readDir, readFile, stat, filePath))
-		} else {
-			sha, size, err := calculateSha256(ctx, filePath, readFile)
+			sha, size, err := calculateSha256(ctx, curPath, readFile)
 			if err != nil {
 				panic(fmt.Errorf("failed hashing file \"%s\": %w", hashFilePath, err))
 			}
-			fm[filePath] = &config.FileInfo{SHA256: sha, Size: size}
+			fileMap[curPath] = &config.FileInfo{SHA256: sha, Size: size}
 		}
 	}
-	return fm
+	return fileMap
 }
 
 func evaluateSoftLink(filePath string) string {
@@ -86,14 +93,6 @@ func evaluateSoftLink(filePath string) string {
 		panic(err)
 	}
 	return evaluatedName
-}
-
-func isDir(filePath string) bool {
-	fi, err := os.Stat(filePath)
-	if err != nil {
-		panic(err)
-	}
-	return fi.IsDir()
 }
 
 func mustReadDir(readDir readDirFunc, directoryPath string) []os.FileInfo {
