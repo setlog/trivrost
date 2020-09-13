@@ -143,7 +143,7 @@ func applyBundleUpdate(fileMap config.FileInfoMap, fromPath, toPath string) {
 }
 
 func deleteChangedFiles(fileMap config.FileInfoMap, localDirPath string) {
-	log.Infof("Deleting %d files, %d of which will be updated in \"%s\".", len(fileMap), uint64(len(fileMap))-fileMap.DeleteFileCount(), localDirPath)
+	log.Infof("If existing, removing %d files from previous bundle and adding/upating %d files in \"%s\".", len(fileMap), uint64(len(fileMap))-fileMap.DeleteFileCount(), localDirPath)
 	for filePath := range fileMap {
 		system.MustRemoveFile(filepath.Join(localDirPath, filePath))
 	}
