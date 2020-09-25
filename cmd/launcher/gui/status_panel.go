@@ -4,6 +4,8 @@ import (
 	"github.com/andlabs/ui"
 )
 
+const progressDeltaSampleCount = 3
+
 type DownloadStatusPanel struct {
 	*ui.Box
 
@@ -16,13 +18,20 @@ type DownloadStatusPanel struct {
 	barTotalProgress *ui.ProgressBar
 	labelStatus      *ui.Label
 
-	progressPrevious, progressCurrent, progressTarget uint64 // Whether these refer to amount of bytes downloaded or something else depends on the current GUI stage.
-	currentProblemMessage                             string
-	stage                                             Stage
+	// Whether these refer to amount of bytes downloaded or something else depends on the current GUI stage.
+	progressMovingAverage *MovingAverage
+	progressTarget        uint64
+
+	currentProblemMessage string
+	stage                 Stage
 }
 
 func newDownloadStatusPanel() *DownloadStatusPanel {
 	panel := &DownloadStatusPanel{Box: ui.NewVerticalBox()}
+	panel.progressMovingAverage = NewMovingAverage(progressDeltaSampleCount, labelUpdateInterval, func() uint64 {
+		return ProgressFunc(panel.stage)
+	})
+
 	panel.SetPadded(true)
 
 	panel.labelStage = ui.NewLabel("Initializing...")
