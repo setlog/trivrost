@@ -163,17 +163,17 @@ func updateWindowTitle() {
 }
 
 func rateString(deltaBytes uint64, interval time.Duration) string {
-	delta := float64(deltaBytes) / interval.Seconds()
-	if delta < 1000 {
-		return fmt.Sprintf("%.0f B/s", delta)
-	} else if delta < 1024*10 {
-		return fmt.Sprintf("%.2f KiB/s", delta/1024)
-	} else if delta < 1024*100 {
-		return fmt.Sprintf("%.1f KiB/s", delta/1024)
-	} else if delta < 1024*1000 {
-		return fmt.Sprintf("%.0f KiB/s", delta/1024)
-	} else if delta < 1024*1024*10 {
-		return fmt.Sprintf("%.2f MiB/s", delta/(1024*1024))
+	rate := float64(deltaBytes) / interval.Seconds()
+	if rate < 1000 {
+		return fmt.Sprintf("%.0f B/s", rate)
+	} else if rate < 1024*10 {
+		return fmt.Sprintf("%.2f KiB/s", rate/1024)
+	} else if rate < 1024*100 {
+		return fmt.Sprintf("%.1f KiB/s", rate/1024)
+	} else if rate < 1024*1000 {
+		return fmt.Sprintf("%.0f KiB/s", rate/1024)
+	} else if rate < 1024*1024*10 {
+		return fmt.Sprintf("%.2f MiB/s", rate/(1024*1024))
 	}
-	return fmt.Sprintf("%.1f MiB/s", delta/(1024*1024))
+	return fmt.Sprintf("%.1f MiB/s", rate/(1024*1024))
 }
