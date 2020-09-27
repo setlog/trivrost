@@ -107,12 +107,16 @@ func checkTimestamp(oldTimestampAsString, newTimestampAsString string) {
 	} else {
 		oldTimestamp, err := time.Parse(timeFormat, oldTimestampAsString)
 		if err != nil {
-			panic(fmt.Sprintf("Could not parse old timestamp \"%s\": %v", oldTimestampAsString, err))
+			log.Warnf("Could not parse old timestamp \"%s\": %v", oldTimestampAsString, err)
+			log.Warnf("Running without verifying that no downgrade attack is occurring.")
+			return
 		}
 
 		newTimestamp, err := time.Parse(timeFormat, newTimestampAsString)
 		if err != nil {
-			panic(fmt.Sprintf("Could not parse new timestamp \"%s\": %v", newTimestampAsString, err))
+			log.Warnf("Could not parse new timestamp \"%s\": %v", newTimestampAsString, err)
+			log.Warnf("Running without verifying that no downgrade attack is occurring.")
+			return
 		}
 
 		if newTimestamp.Before(oldTimestamp) {
