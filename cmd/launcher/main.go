@@ -43,6 +43,12 @@ var gitDescription string
 var gitHash string
 var gitBranch string
 
+func init() {
+	// On MacOS, only the first thread created by the OS is allowed to be the main GUI thread.
+	// Also, on Windows, OLE code needs to run on the main thread, which we rely on when creating shortcuts.
+	runtime.LockOSThread() // This call must be in init().
+}
+
 func main() {
 	defer misc.LogPanic()
 	launcherFlags, envErr := initializeEnvironment()
@@ -57,7 +63,7 @@ func main() {
 func initializeEnvironment() (*flags.LauncherFlags, error) {
 	registerSignalOverrides()
 
-	if (resources.LauncherConfig == nil) {
+	if resources.LauncherConfig == nil {
 		panic("LauncherConfig was not found / compiled into the binary.")
 	}
 	launcherFlags, argumentError, flagError, pathError, evalError, placesError := parseEnvironment()
@@ -81,10 +87,6 @@ func runLauncher(ctx context.Context, fatalError error, launcherFlags *flags.Lau
 }
 
 func runGUI(ctx context.Context, cancelFunc context.CancelFunc, launcherFlags *flags.LauncherFlags, showMainWindow bool) {
-	// On MacOS, only the first thread created by the OS is allowed to be the main GUI thread.
-	// Also, on Windows, OLE code needs to run on the main thread, which we rely on when creating shortcuts.
-	runtime.LockOSThread()
-
 	err := gui.Main(ctx, cancelFunc, resources.LauncherConfig.BrandingName, !launcherFlags.Uninstall && showMainWindow)
 	if err != nil {
 		log.Fatalf("gui.Main() failed: %v\n", err)
