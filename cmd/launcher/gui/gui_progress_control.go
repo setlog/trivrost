@@ -133,7 +133,7 @@ func updateProgressLabel() {
 	if !didQuit {
 		ui.QueueMain(func() {
 			panelDownloadStatus.progressMovingAverage.TakeSample()
-			average := panelDownloadStatus.progressMovingAverage.GetAverageDelta()
+			average := panelDownloadStatus.progressMovingAverage.AveragePerSecondDelta()
 
 			var message string
 			if panelDownloadStatus.stage.IsDownloadStage() {

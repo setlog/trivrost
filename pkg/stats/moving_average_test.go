@@ -16,7 +16,7 @@ func TestMovingAverageConstantDelta(t *testing.T) {
 	const sampleInterval = time.Millisecond * 200
 	movingAverage := stats.NewMovingAverage(sampleCount, sampleInterval, progressFunc)
 
-	average := movingAverage.GetAverageDelta()
+	average := movingAverage.AveragePerSecondDelta()
 	if average != 0 {
 		t.Fatalf("average was %f. Expected 0.", average)
 	}
@@ -24,7 +24,7 @@ func TestMovingAverageConstantDelta(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		mockedProgress += 1000
 		movingAverage.TakeSample()
-		average = movingAverage.GetAverageDelta()
+		average = movingAverage.AveragePerSecondDelta()
 		if int(average+0.5) != 5000 {
 			t.Fatalf("average was %d. Expected 5000. i = %d", int(average+0.5), i)
 		}
@@ -40,7 +40,7 @@ func TestMovingAverageChaotic(t *testing.T) {
 	const sampleInterval = time.Millisecond * 200
 	movingAverage := stats.NewMovingAverage(sampleCount, sampleInterval, progressFunc)
 
-	average := movingAverage.GetAverageDelta()
+	average := movingAverage.AveragePerSecondDelta()
 	if average != 0 {
 		t.Fatalf("average was %f. Expected 0.", average)
 	}
@@ -65,7 +65,7 @@ func TestMovingAverageChaotic(t *testing.T) {
 	for i, test := range tests {
 		mockedProgress += test.increment
 		movingAverage.TakeSample()
-		average = movingAverage.GetAverageDelta()
+		average = movingAverage.AveragePerSecondDelta()
 		if int(average+0.5) != test.expected {
 			t.Fatalf("average was %d. Expected %d. i = %d", int(average+0.5), test.expected, i)
 		}
