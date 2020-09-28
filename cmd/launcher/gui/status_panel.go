@@ -2,6 +2,7 @@ package gui
 
 import (
 	"github.com/andlabs/ui"
+	"github.com/setlog/trivrost/pkg/stats"
 )
 
 const progressDeltaSampleCount = 3
@@ -19,7 +20,7 @@ type DownloadStatusPanel struct {
 	labelStatus      *ui.Label
 
 	// Whether these refer to amount of bytes downloaded or something else depends on the current GUI stage.
-	progressMovingAverage *MovingAverage
+	progressMovingAverage *stats.MovingAverage
 	progressTarget        uint64
 
 	currentProblemMessage string
@@ -28,7 +29,7 @@ type DownloadStatusPanel struct {
 
 func newDownloadStatusPanel() *DownloadStatusPanel {
 	panel := &DownloadStatusPanel{Box: ui.NewVerticalBox()}
-	panel.progressMovingAverage = NewMovingAverage(progressDeltaSampleCount, labelUpdateInterval, func() uint64 {
+	panel.progressMovingAverage = stats.NewMovingAverage(progressDeltaSampleCount, labelUpdateInterval, func() uint64 {
 		return ProgressFunc(panel.stage)
 	})
 

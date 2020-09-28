@@ -1,18 +1,20 @@
-package gui
+package stats_test
 
 import (
 	"testing"
 	"time"
+
+	"github.com/setlog/trivrost/pkg/stats"
 )
 
-func TestPanelDownloadStatusAverageConstantDelta(t *testing.T) {
+func TestMovingAverageConstantDelta(t *testing.T) {
 	var mockedProgress uint64
 	progressFunc := func() uint64 {
 		return mockedProgress
 	}
 	const sampleCount = 42
 	const sampleInterval = time.Millisecond * 200
-	movingAverage := NewMovingAverage(sampleCount, sampleInterval, progressFunc)
+	movingAverage := stats.NewMovingAverage(sampleCount, sampleInterval, progressFunc)
 
 	average := movingAverage.GetAverageDelta()
 	if average != 0 {
@@ -29,14 +31,14 @@ func TestPanelDownloadStatusAverageConstantDelta(t *testing.T) {
 	}
 }
 
-func TestPanelDownloadStatusAverageChaotic(t *testing.T) {
+func TestMovingAverageChaotic(t *testing.T) {
 	var mockedProgress uint64
 	progressFunc := func() uint64 {
 		return mockedProgress
 	}
 	const sampleCount = 8
 	const sampleInterval = time.Millisecond * 200
-	movingAverage := NewMovingAverage(sampleCount, sampleInterval, progressFunc)
+	movingAverage := stats.NewMovingAverage(sampleCount, sampleInterval, progressFunc)
 
 	average := movingAverage.GetAverageDelta()
 	if average != 0 {
