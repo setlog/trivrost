@@ -138,7 +138,7 @@ func CreateDummyEnvironment(t *testing.T, dataLength, failEvery int) *DummyEnvir
 			response.Header["content-range"] = []string{fmt.Sprintf("bytes %d-%d/%d", rangeStart, rangeEnd, dataLength)}
 		}
 		if !de.OmitContentLength {
-			response.Header["content-range"] = []string{fmt.Sprintf("%d", rangeEnd-rangeStart+1)}
+			response.Header["content-length"] = []string{fmt.Sprintf("%d", rangeEnd-rangeStart+1)}
 		}
 		response.Header["etag"] = []string{hex.EncodeToString(de.Data)}
 		response.Body = &RiggedReader{Reader: bytes.NewReader(de.Data[rangeStart : rangeEnd+1]), failEvery: failEvery, ctx: req.Context()}
