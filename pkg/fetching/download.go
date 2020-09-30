@@ -184,9 +184,9 @@ func (dl *Download) processResponse() {
 }
 
 func (dl *Download) acceptFirstResponseHeader(header http.Header) {
-	contentLength, err := strconv.ParseInt(header.Get("Content-Length"), 10, 64)
+	contentLength, err := strconv.ParseInt(NewLowercaseHeaders(header).Get("content-length"), 10, 64)
 	if err != nil {
-		log.Printf("Assuming remote file won't change: Could not get Content-Length header from \"%s\": %v.", dl.url, err)
+		log.Printf("Assuming remote file won't change: Could not get content-length header from \"%s\": %v.", dl.url, err)
 		dl.lastByteIndex = -1
 	} else {
 		dl.lastByteIndex = contentLength - 1
@@ -284,5 +284,5 @@ func intMin(a, b int) int {
 }
 
 func isRangeRequest(req *http.Request) bool {
-	return strings.HasPrefix(req.Header.Get("Range"), "bytes=")
+	return strings.HasPrefix(NewLowercaseHeaders(req.Header).Get("range"), "bytes=")
 }
