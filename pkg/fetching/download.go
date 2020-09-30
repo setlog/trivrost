@@ -170,16 +170,21 @@ func (dl *Download) sendRequest(req *http.Request) *http.Response {
 }
 
 func (dl *Download) processResponse() {
-	if !isRangeRequest(dl.request) && dl.response.StatusCode == http.StatusOK {
-		dl.acceptFirstResponseHeader(dl.response.Header)
-	} else if !(isRangeRequest(dl.request) && dl.response.StatusCode == http.StatusPartialContent) {
-		dl.cleanUp()
-		if dl.response.StatusCode == http.StatusRequestedRangeNotSatisfiable {
-			panic(DownloadError("remote file changed during download"))
+	if !dl.gotValidFirstResponse {
+		if dl.response.StatusCode == http.StatusOK {
+			dl.acceptFirstResponseHeader(dl.response.Header)
+		} else {
+			dl.cleanUp()
+			if dl.response.StatusCode == http.StatusRequestedRangeNotSatisfiable {
+				panic(DownloadError("remote file changed during download"))
+			}
+			dl.handler.HandleBadHttpResponse(dl.url, dl.response.StatusCode)
+			dl.response = nil
+			dl.inscribeCooldown()
 		}
-		dl.handler.HandleBadHttpResponse(dl.url, dl.response.StatusCode)
-		dl.response = nil
-		dl.inscribeCooldown()
+	} else if dl.response.StatusCode != http.StatusPartialContent {
+		dl.cleanUp()
+		panic(DownloadError("range-request not supported by target host, or connection has been rigged"))
 	}
 }
 
