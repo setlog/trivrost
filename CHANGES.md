@@ -12,6 +12,8 @@
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
 ### Fixes
 * `hasher` will no longer create a directory if a non-existing one is passed as an argument.
+* trivrost will no longer attempt to repeat range requests to a host after it has failed to conformly respond while displaying the confusing message `Taking longer than usual: HTTP Status 200` and will now fail immediately in such cases instead.
+* trivrost will no longer fail to comply with HTTP 2 strictly using lower-case HTTP Header names. This had been caused by methods of `http.Header` still being oriented around HTTP 1 canonical header names due to Go's backwards compatibility promise.
 
 ## 1.4.4 (2020-01-17)
 ### Changes

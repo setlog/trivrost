@@ -41,11 +41,15 @@ func (wc *writeCounter) Write(p []byte) (int, error) {
 	return delta, nil
 }
 
-// Download wraps the retrieval of a resource at a URL using HTTP GET requests and exposes
-// the received data through its implementation of the io.Reader interface.
+// Download wraps the retrieval of a resource at a URL using HTTP GET requests and
+// exposes the received data through its implementation of the io.Reader interface.
+//
 // The Read() method will only return a non-nil error other than io.EOF when the
-// Content-Length of the requested resource changes during Download's attempts
-// to retrieve it. See Download.handler for Download's behavior in other error scenarios.
+// Content-Length of the requested resource changes during Download's attempts to
+// retrieve it or the remote signals that it cannot serve a range-request made in
+// an attempt to resume if the first GET was interrupted.
+//
+// See Download.handler for Download's behavior in other error scenarios.
 type Download struct {
 	url string // The URL of the resource to download.
 
