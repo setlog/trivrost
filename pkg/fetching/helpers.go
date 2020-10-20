@@ -63,9 +63,9 @@ func newRequestWithCancel(ctx context.Context, fromUrl string) (*http.Request, c
 func newRangeRequestWithCancel(ctx context.Context, fromUrl string, firstByte int64, lastByte int64) (*http.Request, context.CancelFunc) {
 	req, cancelFunc := newRequestWithCancel(ctx, fromUrl)
 	if lastByte >= 0 {
-		req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", firstByte, lastByte))
+		req.Header["range"] = []string{fmt.Sprintf("bytes=%d-%d", firstByte, lastByte)}
 	} else {
-		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", firstByte))
+		req.Header["range"] = []string{fmt.Sprintf("bytes=%d-", firstByte)}
 	}
 	return req, cancelFunc
 }

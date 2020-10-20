@@ -41,11 +41,15 @@ func (wc *writeCounter) Write(p []byte) (int, error) {
 	return delta, nil
 }
 
-// Download wraps the retrieval of a resource at a URL using HTTP GET requests and exposes
-// the received data through its implementation of the io.Reader interface.
+// Download wraps the retrieval of a resource at a URL using HTTP GET requests and
+// exposes the received data through its implementation of the io.Reader interface.
+//
 // The Read() method will only return a non-nil error other than io.EOF when the
-// Content-Length of the requested resource changes during Download's attempts
-// to retrieve it. See Download.handler for Download's behavior in other error scenarios.
+// Content-Length of the requested resource changes during Download's attempts to
+// retrieve it or the remote signals that it cannot serve a range-request made in
+// an attempt to resume if the first GET was interrupted.
+//
+// See Download.handler for Download's behavior in other error scenarios.
 type Download struct {
 	url string // The URL of the resource to download.
 
@@ -170,23 +174,28 @@ func (dl *Download) sendRequest(req *http.Request) *http.Response {
 }
 
 func (dl *Download) processResponse() {
-	if !isRangeRequest(dl.request) && dl.response.StatusCode == http.StatusOK {
-		dl.acceptFirstResponseHeader(dl.response.Header)
-	} else if !(isRangeRequest(dl.request) && dl.response.StatusCode == http.StatusPartialContent) {
-		dl.cleanUp()
-		if dl.response.StatusCode == http.StatusRequestedRangeNotSatisfiable {
-			panic(DownloadError("remote file changed during download"))
+	if !dl.gotValidFirstResponse {
+		if dl.response.StatusCode == http.StatusOK {
+			dl.acceptFirstResponseHeader(dl.response.Header)
+		} else {
+			dl.cleanUp()
+			if dl.response.StatusCode == http.StatusRequestedRangeNotSatisfiable {
+				panic(DownloadError("remote file changed during download"))
+			}
+			dl.handler.HandleBadHttpResponse(dl.url, dl.response.StatusCode)
+			dl.response = nil
+			dl.inscribeCooldown()
 		}
-		dl.handler.HandleBadHttpResponse(dl.url, dl.response.StatusCode)
-		dl.response = nil
-		dl.inscribeCooldown()
+	} else if dl.response.StatusCode != http.StatusPartialContent {
+		dl.cleanUp()
+		panic(DownloadError("range-request not supported by target host, or connection has been rigged"))
 	}
 }
 
 func (dl *Download) acceptFirstResponseHeader(header http.Header) {
-	contentLength, err := strconv.ParseInt(header.Get("Content-Length"), 10, 64)
+	contentLength, err := strconv.ParseInt(NewLowercaseHeaders(header).Get("content-length"), 10, 64)
 	if err != nil {
-		log.Printf("Assuming remote file won't change: Could not get Content-Length header from \"%s\": %v.", dl.url, err)
+		log.Printf("Assuming remote file won't change: Could not get content-length header from \"%s\": %v.", dl.url, err)
 		dl.lastByteIndex = -1
 	} else {
 		dl.lastByteIndex = contentLength - 1
@@ -284,5 +293,5 @@ func intMin(a, b int) int {
 }
 
 func isRangeRequest(req *http.Request) bool {
-	return strings.HasPrefix(req.Header.Get("Range"), "bytes=")
+	return strings.HasPrefix(NewLowercaseHeaders(req.Header).Get("range"), "bytes=")
 }
