@@ -10,13 +10,13 @@ require (
 	github.com/go-ole/go-ole v1.2.4
 	github.com/gofrs/flock v0.8.0
 	github.com/mattn/go-ieproxy v0.0.1
-	github.com/prometheus/client_golang v1.8.0
+	github.com/prometheus/client_golang v1.9.0
 	github.com/shirou/gopsutil v2.20.8+incompatible
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.6.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344
-	golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211
+	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e
 )
 
 go 1.13
