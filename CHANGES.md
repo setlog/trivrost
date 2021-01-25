@@ -2,7 +2,7 @@
 
 ## 1.4.6 (2021-01-25)
 ### Fixes
-* Windows binary signing: Update timestamp config to avoid SHA-1 ciphers.
+* Windows binary signing: Use RFC-3161 timestamp server with sha 256 config. SHA-1 ciphers are considered deprecated. Nothing should change for the enduser.
 
 ## 1.4.5 (2021-01-04)
 ### Fixes
