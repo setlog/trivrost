@@ -32,7 +32,7 @@ ifndef VERSIONOK
 endif
 $(info GIT description: '${GITDESC}' (latest master: '${LAUNCHER_VERSION}'), GIT branch '${GITBRANCH}', GIT hash '${GITHASH}')
 
-TIMESTAMP_SERVER = 'http://timestamp.globalsign.com/scripts/timstamp.dll'
+TIMESTAMP_SERVER = 'http://rfc3161timestamp.globalsign.com/advanced'
 
 #
 # Detect OS
