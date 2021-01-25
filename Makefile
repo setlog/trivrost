@@ -150,7 +150,7 @@ ifndef CERT_KEY
 endif
 	$(info Signing windows release files...)
 	echo "$${CERT_FILE}" | base64 -d > ~tmp_launcher_cert
-	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /t ${TIMESTAMP_SERVER} /fd SHA512 "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.exe"
+	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /tr ${TIMESTAMP_SERVER} /td SHA256 /fd SHA512 "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.exe"
 	rm ~tmp_launcher_cert
 endif
 
@@ -166,8 +166,8 @@ ifneq (${OS},windows)
 else
 	$(info Signing windows release files...)
 	echo "$${CERT_FILE}" | base64 -d > ~tmp_launcher_cert
-	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /t ${TIMESTAMP_SERVER} /fd SHA512 "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}_386.msi"
-	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /t ${TIMESTAMP_SERVER} /fd SHA512 "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}_amd64.msi"
+	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /tr ${TIMESTAMP_SERVER} /td SHA256 /fd SHA512 "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}_386.msi"
+	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /tr ${TIMESTAMP_SERVER} /td SHA256 /fd SHA512 "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}_amd64.msi"
 	rm ~tmp_launcher_cert
 endif
 

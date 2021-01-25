@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.4.6 (2021-01-25)
+### Fixes
+* Windows binary signing: Update timestamp config to avoid SHA-1 ciphers.
+
 ## 1.4.5 (2021-01-04)
 ### Fixes
 * Switch timestamp server for signing from Verisign to Globalsign.
