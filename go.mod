@@ -10,7 +10,7 @@ require (
 	github.com/gofrs/flock v0.8.0
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.9.0
-	github.com/shirou/gopsutil v3.20.12+incompatible
+	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/shirou/gopsutil/v3 v3.21.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.7.0
