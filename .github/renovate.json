@@ -2,6 +2,12 @@
   "extends": [
     "config:base"
   ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ],
   "rebaseWhen": "behind-base-branch",
   "ignoreDeps": [
     "golang.org/x/net",
