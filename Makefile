@@ -69,9 +69,9 @@ export LAUNCHER_PROGRAM_EXT
 # See https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html
 .PHONY: build bundle bundle-msi test copy-test-files generate clean sign dist help
 
-build: generate compile compress package  ## Build (default)
-
 # Default target
+build: compile package
+
 compile: generate  ## Compile with go build. Run after make generate.
 ifeq (${OS},windows)
 	# Removing unneeded PNG from Windows binary
