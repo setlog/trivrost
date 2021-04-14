@@ -18,6 +18,10 @@ type Timestamps struct {
 	Bundles          map[string]string `json:"Bundles"`
 }
 
+func createEmptyTimestamps() *Timestamps {
+	return &Timestamps{DeploymentConfig: "", Bundles: map[string]string{}}
+}
+
 func VerifyDeploymentConfigTimestamp(newTimestamp, filePath string) {
 	timestamps := readTimestamps(filePath)
 	timestamps.CheckAndSetDeploymentConfigTimestamp(newTimestamp)
@@ -36,7 +40,7 @@ func readTimestamps(filePath string) *Timestamps {
 		if os.IsNotExist(err) {
 			log.WithFields(log.Fields{"err": err, "filePath": filePath}).Infof("Could not read timestamps " +
 				"because the file does not yet exist: looks like this is the first run of the launcher.")
-			return &Timestamps{DeploymentConfig: "", Bundles: map[string]string{}}
+			return createEmptyTimestamps()
 		}
 		panic(err)
 	}
@@ -64,7 +68,8 @@ func ReadTimestampsFromReader(reader io.Reader) *Timestamps {
 	var timestamps Timestamps
 	err = json.Unmarshal(bytes, &timestamps)
 	if err != nil {
-		panic(fmt.Sprintf("Could not unmarshal timestamps `%s`: %v", string(bytes), err))
+		log.Warnf("Ignoring timestamps: Could not unmarshal timestamps `%s`: %v", string(bytes), err)
+		return createEmptyTimestamps()
 	}
 	return &timestamps
 }
