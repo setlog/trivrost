@@ -13,9 +13,9 @@ VALIDATOR_BINARY        := validator
 SIGNER_BINARY           := signer
 
 # allow custom program name
-LAUNCHER_PROGRAM_NAME   := $(shell GO111MODULE=on go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BinaryName)
+LAUNCHER_PROGRAM_NAME   := $(shell go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BinaryName)
 LAUNCHER_PROGRAM_EXT    := 
-LAUNCHER_BRANDING_NAME  := $(shell GO111MODULE=on go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BrandingName)
+LAUNCHER_BRANDING_NAME  := $(shell go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BrandingName)
 MSI_PREFIX              := ${LAUNCHER_PROGRAM_NAME}
 
 GITDESC                 := $(shell git describe --tags 2> /dev/null || echo unavailable)
@@ -57,7 +57,6 @@ endif
 $(info Detected uname-id '${OS_UNAME}' as OS '${OS}')
 
 # Globally enable go modules
-export GO111MODULE=on
 export GOOS=${OS}
 export LAUNCHER_PROGRAM_NAME
 export LAUNCHER_PROGRAM_EXT
@@ -213,7 +212,7 @@ copy-test-files: ## Copy example resources into resource directory
 	cp examples/defaulticon.ico cmd/launcher/resources/icon.ico
 
 generate:        ## Run go generate
-	GO111MODULE=off go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+	go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 	go generate -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
 
 clean:           ## Clean generated files
