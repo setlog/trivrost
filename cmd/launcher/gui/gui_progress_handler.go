@@ -75,11 +75,11 @@ func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, er
 	handler.problemUrl = fromURL
 
 	if strings.Contains(err.Error(), "x509: ") {
-		NotifyProblem("Certificate verification problem", false)
-	} else if strings.Contains(err.Error(), "timed out") {
-		NotifyProblem("Timeout reaching server", false)
+		NotifyProblem("Certificate (X.509) problem", false)
+	} else if strings.Contains(err.Error(), "dial tcp: lookup") && strings.Contains(err.Error(), "no such host") {
+		NotifyProblem("Unable to resolve hostname", false)
 	} else {
-		NotifyProblem("Problems reaching server", false)
+		NotifyProblem("Connection problem", false)
 	}
 }
 

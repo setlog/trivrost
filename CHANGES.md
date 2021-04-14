@@ -14,6 +14,7 @@
 * `hasher` will no longer create a directory if a non-existing one is passed as an argument.
 * trivrost will no longer attempt to repeat range requests to a host after it has failed to conformly respond while displaying the confusing message `Taking longer than usual: HTTP Status 200` and will now fail immediately in such cases instead.
 * trivrost will no longer fail to comply with HTTP 2 strictly using lower-case HTTP Header names. This had been caused by methods of `http.Header` still being oriented around HTTP 1 canonical header names due to Go's backwards compatibility promise.
+* Instead of always showing 'Cannot reach server' to the user, show more precise/useful messages on connection issues.
 
 ## 1.4.6 (2021-01-25)
 ### Fixes
