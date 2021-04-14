@@ -24,6 +24,12 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y libgtk-3-dev
+      - name: Install UPX (Linux)
+        if: matrix.platform == 'ubuntu-18.04'
+        run: sudo apt-get update && sudo apt-get install upx-ucl
+      - name: Install UPX (Windows)
+        if: matrix.platform == 'windows-2019'
+        run: choco install upx -y
       - name: Install goversioninfo
         shell: bash
         run: |

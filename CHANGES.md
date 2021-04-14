@@ -2,6 +2,8 @@
 
 ## TBD (TBD)
 ### Changes
+* DWARF symbols are now stripped from the trivrost binary to reduce file size. This can save a few bytes on some platforms.
+* The binary is now compressed with UPX when using `make compress`. Reduces the final filesystem to under 50%.
 * Shorter log-output for proxy detection. Reduces average size of the log output by 5–15%.
 * Shorter log-output for HTTP errors, reduces size of log output by a few percent.
 * Update dependencies to recent versions: gopsutils, testify, gojsonschema, logrus, prometheus/client_golang, go_ieproxy, fatih/color, golang/x/sys, golang/x/net

@@ -23,7 +23,7 @@ GITDESC                 := $(shell git describe --tags 2> /dev/null || echo unav
 LAUNCHER_VERSION        := $(shell git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2> /dev/null || echo unavailable)
 GITBRANCH               := $(shell git symbolic-ref -q --short HEAD || echo unknown)
 GITHASH                 := $(shell git rev-parse --short=8 --verify HEAD || echo unknown)
-LDFLAGS                 := -s -X main.gitDescription=${GITDESC} -X main.gitBranch=${GITBRANCH} -X main.gitHash=${GITHASH} -X "github.com/setlog/trivrost/cmd/launcher/launcher.buildTime=$(shell date -u "+%Y-%m-%d %H:%M:%S UTC")"
+LDFLAGS                 := -s -w -X main.gitDescription=${GITDESC} -X main.gitBranch=${GITBRANCH} -X main.gitHash=${GITHASH} -X "github.com/setlog/trivrost/cmd/launcher/launcher.buildTime=$(shell date -u "+%Y-%m-%d %H:%M:%S UTC")"
 
 # Assume version is part of the tag. If not, default to v0.0.0
 VERSIONOK := $(shell echo -n "${LAUNCHER_VERSION}" | grep -E ^v[0-9]+\.[0-9]+\.[0-9]+$$ && echo ok)
@@ -68,13 +68,21 @@ export LAUNCHER_PROGRAM_EXT
 .PHONY: build bundle bundle-msi test copy-test-files generate clean sign dist help
 
 # Default target
-build: generate  ## Build (default)
+build: compile package
+
+compile: generate  ## Compile with go build. Run after make generate.
 ifeq (${OS},windows)
 	# Removing unneeded PNG from Windows binary
 	rm cmd/launcher/resources/icon.png.gen.go
 endif
 	# See https://github.com/golang/go/issues/18400#issuecomment-270414574 for why -installsuffix is needed.
 	go build -o "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+	$(info # compile finished)
+
+compress:  ## Compress compiled binary with UPX. Needs to run after make compile, but before make sign.
+	upx "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}"
+
+package:
 ifeq (${OS},darwin)
 	# Mac bundle is special
 	mkdir -p "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/MacOS"
@@ -83,7 +91,6 @@ ifeq (${OS},darwin)
 	mkdir -p "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources"
 	if [ -f cmd/launcher/resources/icon.icns ]; then cp cmd/launcher/resources/icon.icns "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources/icon.icns"; fi
 endif
-	$(info # make build finished)
 
 bundle:          ## Bundle OS-specific files. Call after signing
 	mkdir -p "${RELEASE_FILES_DIR}/${OS}"
