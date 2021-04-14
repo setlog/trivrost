@@ -1,43 +1,43 @@
 {
-    "Timestamp": "<TIMESTAMP>",
-    "Bundles": [
-        {
-            "BundleInfoURL": "https://example.com/testapp/32-bit/bundleinfo.json",
-            "LocalDirectory": "app",
-            "TargetPlatforms": [ "386" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/testapp/64-bit/bundleinfo.json",
-            "LocalDirectory": "app",
-            "TargetPlatforms": [ "windows-amd64" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/testapp/resources-bundleinfo.json",
-            "BaseURL": "https://media.example.com/testapp-pictures/",
-            "LocalDirectory": "pictures"
-        }
-    ],
-    "Execution": {
-        "Commands": [
-            {
-                "Name": "java\\bin\\javaw",
-                "Arguments": [ "-jar", "foo", "-special-win-32-bit-parameter", "-Xm1024M" ],
-                "Env": {
-                    "NEW_ENV": "New env variable.",
-                    "OMIT_ENV": null
-                },
-                "TargetPlatforms": [ "windows-386" ]
-            },
-            {
-                "Name": "java/bin/java",
-                "Arguments": [ "-jar", "-Xm1024M" ],
-                "Env": {
-                    "NEW_ENV": "New env variable.",
-                    "OMIT_ENV": null
-                },
-                "TargetPlatforms": [ "linux", "darwin" ]
-            }
-        ],
-        "LingerTimeMilliseconds": 800
+  "Timestamp": "<TIMESTAMP>",
+  "Bundles": [
+    {
+      "BundleInfoURL": "https://example.com/testapp/32-bit/bundleinfo.json",
+      "LocalDirectory": "app",
+      "TargetPlatforms": [ "386" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/testapp/64-bit/bundleinfo.json",
+      "LocalDirectory": "app",
+      "TargetPlatforms": [ "windows-amd64" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/testapp/resources-bundleinfo.json",
+      "BaseURL": "https://media.example.com/testapp-pictures/",
+      "LocalDirectory": "pictures"
     }
+  ],
+  "Execution": {
+    "Commands": [
+      {
+        "Name": "java\\bin\\javaw",
+        "Arguments": [ "-jar", "foo", "-special-win-32-bit-parameter", "-Xm1024M" ],
+        "Env": {
+          "NEW_ENV": "New env variable.",
+          "OMIT_ENV": null
+        },
+        "TargetPlatforms": [ "windows-386" ]
+      },
+      {
+        "Name": "java/bin/java",
+        "Arguments": [ "-jar", "-Xm1024M" ],
+        "Env": {
+          "NEW_ENV": "New env variable.",
+          "OMIT_ENV": null
+        },
+        "TargetPlatforms": [ "linux", "darwin" ]
+      }
+    ],
+    "LingerTimeMilliseconds": 800
+  }
 }

@@ -1,73 +1,73 @@
 {
-    "Timestamp": "2019-02-07 14:53:17",
-    "LauncherUpdate": [
-        {
-            "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
-            "TargetPlatforms": [ "linux" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/mac/launcher/bundleinfo.json",
-            "TargetPlatforms": [ "darwin" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/linux/launcher/bundleinfo.json",
-            "TargetPlatforms": [ "windows" ]
-        }
-    ],
-    "Bundles": [
-        {
-            "BundleInfoURL": "https://example.com/testapp/32-bit/bundleinfo.json",
-            "LocalDirectory": "app",
-            "TargetPlatforms": [ "386" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/testapp/64-bit/bundleinfo.json",
-            "LocalDirectory": "app",
-            "TargetPlatforms": [ "amd64" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/java/linux/bundleinfo.json",
-            "LocalDirectory": "java",
-            "TargetPlatforms": [ "linux" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/java/mac/bundleinfo.json",
-            "LocalDirectory": "java",
-            "TargetPlatforms": [ "darwin" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/java/windows/bundleinfo.json",
-            "LocalDirectory": "java",
-            "TargetPlatforms": [ "windows" ],
-            "Tags": [ "msi" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/testapp/resources-bundleinfo.json",
-            "BaseURL": "https://media.example.com/testapp-pictures/",
-            "LocalDirectory": "pictures"
-        }
-    ],
-    "Execution": {
-        "Commands": [
-            {
-                "Name": "java\\bin\\javaw",
-                "Arguments": [ "-Xm1024M", "-jar", "foo.jar" ],
-                "Env": {
-                    "NEW_ENV": "New env variable.",
-                    "OMIT_ENV": null
-                },
-                "TargetPlatforms": [ "windows-386" ]
-            },
-            {
-                "Name": "java/bin/java",
-                "Arguments": [ "-Xm1024M", "-jar", "foo.jar" ],
-                "Env": {
-                    "NEW_ENV": "New env variable.",
-                    "OMIT_ENV": null
-                },
-                "TargetPlatforms": [ "linux", "darwin" ]
-            }
-        ],
-        "LingerTimeMilliseconds": 800
+  "Timestamp": "2019-02-07 14:53:17",
+  "LauncherUpdate": [
+    {
+      "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
+      "TargetPlatforms": [ "linux" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/mac/launcher/bundleinfo.json",
+      "TargetPlatforms": [ "darwin" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/linux/launcher/bundleinfo.json",
+      "TargetPlatforms": [ "windows" ]
     }
+  ],
+  "Bundles": [
+    {
+      "BundleInfoURL": "https://example.com/testapp/32-bit/bundleinfo.json",
+      "LocalDirectory": "app",
+      "TargetPlatforms": [ "386" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/testapp/64-bit/bundleinfo.json",
+      "LocalDirectory": "app",
+      "TargetPlatforms": [ "amd64" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/java/linux/bundleinfo.json",
+      "LocalDirectory": "java",
+      "TargetPlatforms": [ "linux" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/java/mac/bundleinfo.json",
+      "LocalDirectory": "java",
+      "TargetPlatforms": [ "darwin" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/java/windows/bundleinfo.json",
+      "LocalDirectory": "java",
+      "TargetPlatforms": [ "windows" ],
+      "Tags": [ "msi" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/testapp/resources-bundleinfo.json",
+      "BaseURL": "https://media.example.com/testapp-pictures/",
+      "LocalDirectory": "pictures"
+    }
+  ],
+  "Execution": {
+    "Commands": [
+      {
+        "Name": "java\\bin\\javaw",
+        "Arguments": [ "-Xm1024M", "-jar", "foo.jar" ],
+        "Env": {
+          "NEW_ENV": "New env variable.",
+          "OMIT_ENV": null
+        },
+        "TargetPlatforms": [ "windows-386" ]
+      },
+      {
+        "Name": "java/bin/java",
+        "Arguments": [ "-Xm1024M", "-jar", "foo.jar" ],
+        "Env": {
+          "NEW_ENV": "New env variable.",
+          "OMIT_ENV": null
+        },
+        "TargetPlatforms": [ "linux", "darwin" ]
+      }
+    ],
+    "LingerTimeMilliseconds": 800
+  }
 }
