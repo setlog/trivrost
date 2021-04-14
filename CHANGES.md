@@ -15,6 +15,10 @@
 * trivrost will no longer attempt to repeat range requests to a host after it has failed to conformly respond while displaying the confusing message `Taking longer than usual: HTTP Status 200` and will now fail immediately in such cases instead.
 * trivrost will no longer fail to comply with HTTP 2 strictly using lower-case HTTP Header names. This had been caused by methods of `http.Header` still being oriented around HTTP 1 canonical header names due to Go's backwards compatibility promise.
 
+## 1.4.6 (2021-01-25)
+### Fixes
+* Windows binary signing: Use RFC-3161 timestamp server with sha 256 config. SHA-1 ciphers are considered deprecated. Nothing should change for the enduser.
+
 ## 1.4.5 (2021-01-04)
 ### Fixes
 * Switch timestamp server for signing from Verisign to Globalsign.
