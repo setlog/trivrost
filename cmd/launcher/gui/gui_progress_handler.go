@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"net/http"
@@ -72,7 +73,14 @@ func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, er
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
-	NotifyProblem("Cannot reach server", false)
+
+	if strings.Contains(err.Error(), "x509: ") {
+		NotifyProblem("Certificate verification problem", false)
+	} else if strings.Contains(err.Error(), "timed out") {
+		NotifyProblem("Timeout reaching server", false)
+	} else {
+		NotifyProblem("Problems reaching server", false)
+	}
 }
 
 func (handler *GuiDownloadProgressHandler) HandleBadHttpResponse(fromURL string, code int) {
