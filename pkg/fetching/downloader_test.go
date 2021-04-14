@@ -39,7 +39,7 @@ func (handler *ErrorRecordingHandler) HandleBadHttpResponse(fromURL string, code
 	handler.ErrChan <- fmt.Errorf("HTTP %d: %s", code, http.StatusText(code))
 }
 
-func (handler *ErrorRecordingHandler) HandleReadError(fromURL string, err error) {
+func (handler *ErrorRecordingHandler) HandleReadError(fromURL string, err error, receivedByteCount int64) {
 	handler.ErrChan <- err
 }
 
@@ -127,7 +127,7 @@ func CreateDummyEnvironment(t *testing.T, dataLength, failEvery int) *DummyEnvir
 	de.DoForClientFunc = func(client *http.Client, req *http.Request) (response *http.Response, err error) {
 		response = &http.Response{StatusCode: 200, Header: make(http.Header)}
 		var rangeStart, rangeEnd int64 = 0, int64(dataLength - 1)
-		requestedRange := req.Header.Get("Range")
+		requestedRange := NewLowercaseHeaders(req.Header).Get("range")
 		if requestedRange != "" {
 			rangeStart, rangeEnd, err = ParseRange(requestedRange, rangeEnd)
 			if err != nil {
@@ -135,12 +135,12 @@ func CreateDummyEnvironment(t *testing.T, dataLength, failEvery int) *DummyEnvir
 				return response, nil
 			}
 			response.StatusCode = http.StatusPartialContent
-			response.Header.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", rangeStart, rangeEnd, dataLength))
+			response.Header["content-range"] = []string{fmt.Sprintf("bytes %d-%d/%d", rangeStart, rangeEnd, dataLength)}
 		}
 		if !de.OmitContentLength {
-			response.Header.Set("Content-Length", fmt.Sprintf("%d", rangeEnd-rangeStart+1))
+			response.Header["content-length"] = []string{fmt.Sprintf("%d", rangeEnd-rangeStart+1)}
 		}
-		response.Header.Set("ETag", hex.EncodeToString(de.Data))
+		response.Header["etag"] = []string{hex.EncodeToString(de.Data)}
 		response.Body = &RiggedReader{Reader: bytes.NewReader(de.Data[rangeStart : rangeEnd+1]), failEvery: failEvery, ctx: req.Context()}
 		return response, nil
 	}

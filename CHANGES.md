@@ -1,5 +1,20 @@
 # Release-Changelog
 
+## TBD (TBD)
+### Changes
+* Shorter log-output for proxy detection. Reduces average size of the log output by 5–15%.
+* Shorter log-output for HTTP errors, reduces size of log output by a few percent.
+* Update dependencies to recent versions: gopsutils, testify, gojsonschema, logrus, prometheus/client_golang, go_ieproxy, fatih/color, golang/x/sys, golang/x/net
+* Do not hide the download speed label, even if the speed is zero.
+* The download-speed label now shows a 3 second average.
+* `hasher` will no longer blindly overwrite an existing bundleinfo.json but instead error out.
+### Features
+* trivrost will log the progress of downloads if the connection was interrupted for any reason.
+### Fixes
+* `hasher` will no longer create a directory if a non-existing one is passed as an argument.
+* trivrost will no longer attempt to repeat range requests to a host after it has failed to conformly respond while displaying the confusing message `Taking longer than usual: HTTP Status 200` and will now fail immediately in such cases instead.
+* trivrost will no longer fail to comply with HTTP 2 strictly using lower-case HTTP Header names. This had been caused by methods of `http.Header` still being oriented around HTTP 1 canonical header names due to Go's backwards compatibility promise.
+
 ## 1.4.6 (2021-01-25)
 ### Fixes
 * Windows binary signing: Use RFC-3161 timestamp server with sha 256 config. SHA-1 ciphers are considered deprecated. Nothing should change for the enduser.
@@ -38,7 +53,7 @@
 
 ## 1.3.5 (2019-11-11)
 ### Fixes
-* Ignore `--psn_X_YYYYY` arugment which is appended by MacOS to the command line arguments when the programm was launched through a Gatekeeper context. Regression found in v1.3.2, v1.3.3, v1.3.4.
+* Ignore `--psn_X_YYYYY` argument which is appended by MacOS to the command line arguments when the programm was launched through a Gatekeeper context. Regression found in v1.3.2, v1.3.3, v1.3.4.
 
 ## 1.3.4 (2019-10-29)
 ### Fixes

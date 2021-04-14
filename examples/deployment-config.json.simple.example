@@ -1,26 +1,26 @@
 {
-    "Timestamp": "2019-02-07 14:53:17",
-    "LauncherUpdate": [
-        {
-            "BundleInfoURL": "https://example.com/update/launcher/windows/bundleinfo.json"
-        }
-    ],
-    "Bundles": [
-        {
-            "BundleInfoURL": "https://example.com/update/java_testapp/bundleinfo.json",
-            "LocalDirectory": "java_testapp"
-        },
-        {
-            "BundleInfoURL": "https://java-update.example.com/windows/amd64/aoj-jdk-11.0.1/bundleinfo.json",
-            "LocalDirectory": "java"
-        }
-    ],
-    "Execution": {
-        "Commands": [
-            {
-                "Name": "java/bin/java",
-                "Arguments": [ "-Xm1024M", "-jar", "foo.ar" ]
-            }
-        ]
+  "Timestamp": "2019-02-07 14:53:17",
+  "LauncherUpdate": [
+    {
+      "BundleInfoURL": "https://example.com/update/launcher/windows/bundleinfo.json"
     }
+  ],
+  "Bundles": [
+    {
+      "BundleInfoURL": "https://example.com/update/java_testapp/bundleinfo.json",
+      "LocalDirectory": "java_testapp"
+    },
+    {
+      "BundleInfoURL": "https://java-update.example.com/windows/amd64/aoj-jdk-11.0.1/bundleinfo.json",
+      "LocalDirectory": "java"
+    }
+  ],
+  "Execution": {
+    "Commands": [
+      {
+        "Name": "java/bin/java",
+        "Arguments": [ "-Xm1024M", "-jar", "foo.ar" ]
+      }
+    ]
+  }
 }

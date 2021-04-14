@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/setlog/trivrost/pkg/misc"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/sys/windows"
 )
 

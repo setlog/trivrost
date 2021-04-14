@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/setlog/trivrost/pkg/system"
+	log "github.com/sirupsen/logrus"
 )
 
 func readProcessSignatureListFile(filePath string) (procSigs []system.ProcessSignature) {

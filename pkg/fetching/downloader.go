@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -18,8 +19,6 @@ import (
 	"git.sr.ht/~tslocum/preallocate"
 	"github.com/setlog/trivrost/pkg/misc"
 	"github.com/setlog/trivrost/pkg/signatures"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/system"
@@ -54,7 +53,7 @@ func (downloader *Downloader) DownloadSignedResources(urls []string, keys []*rsa
 	for _, url := range urls {
 		fileMapWithSignatures[url] = &config.FileInfo{}
 		if strings.HasPrefix(url, "file://") {
-			log.Warnf("Skipping signature validation for resource \"%s\" because it uses the \"file://\"-scheme.", url)
+			log.Printf("Skipping signature validation for resource \"%s\" because it uses the \"file://\"-scheme.", url)
 		} else {
 			fileMapWithSignatures[url+".signature"] = &config.FileInfo{}
 		}
@@ -82,7 +81,7 @@ func (downloader *Downloader) DownloadBytes(fromURL string) (data []byte) {
 		dl := downloader.newDownload(fromURL)
 		data, err = ioutil.ReadAll(dl)
 		if err != nil {
-			log.Warnf("Download of \"%s\" failed: %v", fromURL, err)
+			log.Printf("Download of \"%s\" failed: %v", fromURL, err)
 		}
 		if downloader.ctx.Err() != nil {
 			panic(downloader.ctx.Err())
@@ -259,7 +258,7 @@ func updateFile(dl *Download, expectedFileInfo *config.FileInfo, localFilePath s
 	}
 	defer system.CleanUpFileOperation(file, &returnError)
 	if err = preallocate.File(file, expectedFileInfo.Size); err != nil { // Important: Screws up royally on files opened with the os.O_APPEND-flag.
-		log.Warnf("Could not preallocate file \"%s\" with %d bytes: %v", localFilePath, expectedFileInfo.Size, err)
+		log.Printf("Could not preallocate file \"%s\" with %d bytes: %v", localFilePath, expectedFileInfo.Size, err)
 	}
 	n, dlFileSha, err := ioHashingCopy(dl.ctx, file, dl)
 	if err != nil {
