@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"net/http"
@@ -72,7 +73,14 @@ func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, er
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
-	NotifyProblem("Cannot reach server", false)
+
+	if strings.Contains(err.Error(), "x509: ") {
+		NotifyProblem("Certificate (X.509) problem", false)
+	} else if strings.Contains(err.Error(), "dial tcp: lookup") && strings.Contains(err.Error(), "no such host") {
+		NotifyProblem("Unable to resolve hostname", false)
+	} else {
+		NotifyProblem("Connection problem", false)
+	}
 }
 
 func (handler *GuiDownloadProgressHandler) HandleBadHttpResponse(fromURL string, code int) {
