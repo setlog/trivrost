@@ -47,13 +47,16 @@ func mustHashDirectory(uniqueBundleName, pathToHash, hashesFile string) {
 		log.Panicf("\"%s\" must be a directory.", pathToHash)
 	}
 	_, checkErr := os.Stat(filepath.Join(pathToHash, bundlefilename))
-	if checkErr == nil || os.IsExist(checkErr)  {
+	if checkErr == nil || os.IsExist(checkErr) {
 		log.Panicf("Found existing \"%s\", aborting!", filepath.Join(pathToHash, bundlefilename))
 	}
 	bundleInfo := &config.BundleInfo{
 		BundleFiles:      hashing.MustHash(context.Background(), pathToHash),
 		Timestamp:        time.Now().UTC().Format(timeFormat),
 		UniqueBundleName: uniqueBundleName,
+	}
+	if len(bundleInfo.BundleFiles) == 0 {
+		log.Panicf("No files to hash at %v", pathToHash)
 	}
 	config.WriteInfo(bundleInfo, hashesFile)
 }
