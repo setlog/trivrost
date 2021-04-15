@@ -264,7 +264,7 @@ func (dl *Download) waitCooldown() {
 }
 
 func (dl *Download) inscribeCooldown() {
-	cooldownIntervalOptions := []time.Duration{1, 1, 2, 3, 5, 8, 13}
+	cooldownIntervalOptions := []time.Duration{1, 2, 3, 5, 8, 13, 21}
 	cooldownOptionIndex := intMin(dl.cooldownStacks, len(cooldownIntervalOptions)-1)
 	cooldownDuration := time.Second * cooldownIntervalOptions[cooldownOptionIndex]
 
