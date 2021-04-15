@@ -1,3 +1,8 @@
+# Reporting security issues
+In case you discover a security issue, please use this contact for reporting it privately:
+
+Setlog team SWAT <swat(#at)setlog.com>
+
 # Security of trivrost
 To secure trivrost, you should only use it via https. However, to increase the security the deployment-config and the bundle info files have to be digitally signed. This way, every download is cryptographically secured. Furthermore, the deployment-config and the bundle info files must contain a timestamp to further strengthen the security.
 
