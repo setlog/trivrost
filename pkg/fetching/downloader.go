@@ -92,34 +92,6 @@ func (downloader *Downloader) DownloadSignedResources(urls []string, keys []*rsa
 	return validatedResources, nil
 }
 
-func (downloader *Downloader) DownloadBytes(fromURL string) (data []byte) {
-	success := false
-	var err error
-	for !success {
-		dl := downloader.newDownload(fromURL)
-		data, err = ioutil.ReadAll(dl)
-		if err != nil {
-			log.Printf("Download of \"%s\" failed: %v", fromURL, err)
-		}
-		if downloader.ctx.Err() != nil {
-			panic(downloader.ctx.Err())
-		}
-		success = err == nil
-	}
-	return
-}
-
-func (downloader *Downloader) newDownload(resourceUrl string) *Download {
-	return &Download{
-		url:        resourceUrl,
-		client:     downloader.client,
-		ctx:        downloader.ctx,
-		handler:    downloader.handler,
-		workerId:   0,
-		downloader: downloader,
-	}
-}
-
 func (downloader *Downloader) MustDownloadToTempDirectory(baseUrl string, fileMap config.FileInfoMap, localDirPath string) (tempDirectoryPath string) {
 	reachedEndOfFunction := false // https://stackoverflow.com/a/34851179/10513183
 	tempDirectoryPath = system.MustMakeTempDirectory(localDirPath)
@@ -219,6 +191,7 @@ func (downloader *Downloader) runDownloadWorkers(ctx context.Context, cancelFunc
 			break
 		case workerId := <-availableWorkerIds:
 			dl := NewDownloadForConcurrentUse(ctx, url, downloader.client, downloader.handler, workerId)
+			dl.downloader = downloader
 			go downloadWorker(dl, availableWorkerIds, allWorkersDoneCond, workerErrChan, processDownload)
 		}
 	}
