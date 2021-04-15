@@ -36,5 +36,4 @@ jobs:
           make tools
       - name: Test
         shell: bash
-        run: |
-          make test
+        run: make test
