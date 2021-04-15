@@ -80,6 +80,9 @@ type Download struct {
 
 	response       *http.Response
 	responseReader io.Reader
+
+	// Communicate some TLS information to the downloader which is managing this download.
+	downloader *Downloader
 }
 
 func NewDownload(ctx context.Context, resourceUrl string) *Download {
@@ -139,7 +142,7 @@ func (dl *Download) Close() error {
 func (dl *Download) readDownload(p []byte) (bytesReadCount int, err error) {
 	if dl.response == nil {
 		dl.request, dl.cancelRequest = dl.createRequest()
-		dl.response = dl.sendRequest(dl.request)
+		dl.sendRequest(dl.request)
 		if dl.response == nil {
 			return 0, nil
 		}
@@ -159,18 +162,22 @@ func (dl *Download) createRequest() (*http.Request, context.CancelFunc) {
 	return newRangeRequestWithCancel(dl.ctx, dl.url, dl.firstByteIndex, dl.lastByteIndex)
 }
 
-func (dl *Download) sendRequest(req *http.Request) *http.Response {
+func (dl *Download) sendRequest(req *http.Request) {
 	resp, err := DoForClientFunc(dl.client, req)
 	if err != nil {
 		dl.cleanUp()
 		dl.handler.HandleHttpGetError(dl.url, err)
+		dl.response = nil
 		dl.inscribeCooldown()
 	} else {
+		dl.response = resp
+		if dl.downloader != nil {
+			dl.downloader.downloadInitiatedSuccessfully(dl)
+		}
 		counter := &writeCounter{counted: uint64(dl.firstByteIndex), url: dl.url, workerId: dl.workerId, handler: dl.handler}
 		timeoutingBodyReader := &TimeoutingReader{Reader: resp.Body, Timeout: defaultTimeout * 30}
 		dl.responseReader = io.TeeReader(timeoutingBodyReader, counter)
 	}
-	return resp
 }
 
 func (dl *Download) processResponse() {

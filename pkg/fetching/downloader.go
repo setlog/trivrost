@@ -3,6 +3,7 @@ package fetching
 import (
 	"context"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -31,13 +32,30 @@ const MaxConcurrentDownloads = 5
 // Downloader has helper functions for common use cases of Download, such as writing a resource to a file while downloading it,
 // downloading multiple resources in parallel and verifying the hashsum or signature of downloading resources.
 type Downloader struct {
-	handler DownloadProgressHandler
-	client  *http.Client
-	ctx     context.Context
+	handler          DownloadProgressHandler
+	client           *http.Client
+	ctx              context.Context
+	seenFingerprints map[string]bool
 }
 
 func NewDownloader(ctx context.Context, handler DownloadProgressHandler) *Downloader {
-	return &Downloader{handler: handler, client: MakeClient(), ctx: ctx}
+	return &Downloader{handler: handler, client: MakeClient(), ctx: ctx, seenFingerprints: make(map[string]bool)}
+}
+
+func (downloader *Downloader) downloadInitiatedSuccessfully(dl *Download) {
+	if dl.response.TLS == nil {
+		return
+	}
+	if len(dl.response.TLS.PeerCertificates) == 0 {
+		return
+	}
+	cert := dl.response.TLS.PeerCertificates[0]
+	sha1Sum := sha1.Sum(cert.Raw)
+	sha1SumHex := hex.EncodeToString(sha1Sum[:])
+	if _, ok := downloader.seenFingerprints[sha1SumHex]; !ok {
+		downloader.seenFingerprints[sha1SumHex] = true
+		log.Printf("Seeing new fingerprint %s (sha1) for host %v", sha1SumHex, dl.request.Host)
+	}
 }
 
 func (downloader *Downloader) DownloadSignedResource(fromURL string, keys []*rsa.PublicKey) ([]byte, error) {
@@ -93,11 +111,12 @@ func (downloader *Downloader) DownloadBytes(fromURL string) (data []byte) {
 
 func (downloader *Downloader) newDownload(resourceUrl string) *Download {
 	return &Download{
-		url:      resourceUrl,
-		client:   downloader.client,
-		ctx:      downloader.ctx,
-		handler:  downloader.handler,
-		workerId: 0,
+		url:        resourceUrl,
+		client:     downloader.client,
+		ctx:        downloader.ctx,
+		handler:    downloader.handler,
+		workerId:   0,
+		downloader: downloader,
 	}
 }
 

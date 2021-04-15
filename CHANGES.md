@@ -2,6 +2,7 @@
 
 ## TBD (TBD)
 ### Changes
+* Every TLS Certificate fingerprint will be logged once with the host name it has first been seen on.
 * DWARF symbols are now stripped from the trivrost binary to reduce file size. This can save a few bytes on some platforms.
 * The binary is now compressed with UPX when using `make compress`. Reduces the final filesize to less than 50%.
 * Shorter log-output for proxy detection. Reduces average size of the log output by 5–15%.
