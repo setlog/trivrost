@@ -7,7 +7,7 @@ import (
 
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/setlog/trivrost/pkg/logging"
 )
 
 // Implements fetching.DownloadProgressHandler
@@ -16,10 +16,11 @@ type GuiDownloadProgressHandler struct {
 	progressAccumulator    uint64
 	ongoingProgressBuckets []uint64
 	problemUrl             string
+	log                    *logging.LogLimiter
 }
 
 func NewGuiDownloadProgressHandler(bucketCount int) *GuiDownloadProgressHandler {
-	return &GuiDownloadProgressHandler{progressMutex: &sync.RWMutex{}, ongoingProgressBuckets: make([]uint64, bucketCount)}
+	return &GuiDownloadProgressHandler{progressMutex: &sync.RWMutex{}, ongoingProgressBuckets: make([]uint64, bucketCount), log: logging.NewLogLimiter(5)}
 }
 
 func (handler *GuiDownloadProgressHandler) ResetProgress() {
@@ -61,7 +62,7 @@ func (handler *GuiDownloadProgressHandler) HandleFinishDownload(fromURL string, 
 }
 
 func (handler *GuiDownloadProgressHandler) HandleFailDownload(fromURL string, workerId int, err error) {
-	log.Errorf("GET %s failed: %v", fromURL, err)
+	handler.log.Errorf("GET %s failed: %v", fromURL, err)
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
@@ -69,7 +70,7 @@ func (handler *GuiDownloadProgressHandler) HandleFailDownload(fromURL string, wo
 }
 
 func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, err error) {
-	log.Warnf("GET %s could not start: %v", fromURL, err)
+	handler.log.Warnf("GET %s could not start: %v", fromURL, err)
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
@@ -84,7 +85,7 @@ func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, er
 }
 
 func (handler *GuiDownloadProgressHandler) HandleBadHttpResponse(fromURL string, code int) {
-	log.Warnf("GET %s, error %d: %s", fromURL, code, http.StatusText(code))
+	handler.log.Warnf("GET %s, error %d: %s", fromURL, code, http.StatusText(code))
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
@@ -92,7 +93,7 @@ func (handler *GuiDownloadProgressHandler) HandleBadHttpResponse(fromURL string,
 }
 
 func (handler *GuiDownloadProgressHandler) HandleReadError(fromURL string, err error, receivedByteCount int64) {
-	log.Warnf("GET %s interrupted after receiving %d bytes: %v.", fromURL, receivedByteCount, err)
+	handler.log.Warnf("GET %s interrupted after receiving %d bytes: %v.", fromURL, receivedByteCount, err)
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL

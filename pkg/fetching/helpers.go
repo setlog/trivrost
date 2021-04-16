@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/mattn/go-ieproxy"
-	log "github.com/sirupsen/logrus"
+	"github.com/setlog/trivrost/pkg/logging"
 )
 
 func MakeClient() *http.Client {
@@ -35,6 +35,7 @@ func MakeClient() *http.Client {
 
 func GetProxyLoggingFunc() func(req *http.Request) (*url.URL, error) {
 	proxyFunc := ieproxy.GetProxyFunc()
+	log := logging.NewLogLimiter(5)
 	return func(req *http.Request) (*url.URL, error) {
 		proxyURL, err := proxyFunc(req)
 		if err != nil {
