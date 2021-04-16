@@ -1,26 +1,26 @@
 # Release-Changelog
 
 ## TBD (TBD)
-### Changes
-* Every TLS Certificate fingerprint will be logged once with the host name it has first been seen on.
-* DWARF symbols are now stripped from the trivrost binary to reduce file size. This can save a few bytes on some platforms.
-* The binary is now compressed with UPX when using `make compress`. Reduces the final filesize to less than 50%.
-* Shorter log-output for proxy detection. Reduces average size of the log output by 5–15%.
-* Shorter log-output for HTTP errors, reduces size of log output by a few percent.
-* Update dependencies to recent versions: gopsutils, testify, gojsonschema, logrus, prometheus/client_golang, go_ieproxy, fatih/color, golang/x/sys, golang/x/net
-* Do not hide the download speed label, even if the speed is zero.
-* The download-speed label now shows a 3 second average.
-* The same download-related log messages will now be printed at most 5 times (with information about this limit in the last message).
-* `hasher` will no longer blindly overwrite an existing bundleinfo.json but instead error out.
-* `hasher` will now exit with an error when the `pathToHash` has no files to hash.
-* `timestamps.json` is ignored, if it is corrupt.
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
+* The binary can now be compressed with UPX when using `make compress`. Reduces the final filesize to less than 50%.
 ### Fixes
-* `hasher` will no longer create a directory if a non-existing one is passed as an argument.
 * trivrost will no longer attempt to repeat range requests to a host after it has failed to conformly respond while displaying the confusing message `Taking longer than usual: HTTP Status 200` and will now fail immediately in such cases instead.
 * trivrost will no longer fail to comply with HTTP 2 strictly using lower-case HTTP Header names. This had been caused by methods of `http.Header` still being oriented around HTTP 1 canonical header names due to Go's backwards compatibility promise.
 * Instead of always showing 'Cannot reach server' to the user, show more precise/useful messages on connection issues.
+* `hasher` will no longer blindly overwrite an existing bundle info file but instead error out.
+* `hasher` will no longer create a directory if a non-existing one is passed as an argument.
+* `hasher` will now exit with an error when the `pathToHash` has no files to hash.
+* `timestamps.json` is ignored, if it is corrupt and no longer prevents trivrost from starting.
+### Changes
+* Update dependencies to recent versions: gopsutils, testify, gojsonschema, logrus, prometheus/client_golang, go_ieproxy, fatih/color, golang/x/sys, golang/x/net
+* DWARF symbols are now stripped from the trivrost binary to reduce file size. This can save a few bytes on some platforms.
+* Every TLS Certificate fingerprint will be logged once with the host name it has first been seen on.
+* Shorter log-output for proxy detection. Reduces average size of the log output by 5–15%.
+* Shorter log-output for HTTP errors, reduces size of log output by a few percent.
+* Do not hide the download speed label, even if the speed is zero.
+* The download-speed label now shows a three seconds average.
+* The same download-related log messages will now be printed at most 5 times (with information about this limit in the last message).
 
 ## 1.4.6 (2021-01-25)
 ### Fixes
