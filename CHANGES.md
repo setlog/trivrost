@@ -10,6 +10,7 @@
 * Update dependencies to recent versions: gopsutils, testify, gojsonschema, logrus, prometheus/client_golang, go_ieproxy, fatih/color, golang/x/sys, golang/x/net
 * Do not hide the download speed label, even if the speed is zero.
 * The download-speed label now shows a 3 second average.
+* The same download-related log messages will now be printed at most 5 times (with information about this limit in the last message).
 * `hasher` will no longer blindly overwrite an existing bundleinfo.json but instead error out.
 * `hasher` will now exit with an error when the `pathToHash` has no files to hash.
 ### Features
