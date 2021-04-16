@@ -72,11 +72,11 @@ type Download struct {
 	firstByteIndex        int64
 	lastByteIndex         int64
 
-	client         *http.Client
-	request        *http.Request
-	cancelRequest  context.CancelFunc
-	cooldownTime   time.Time
-	cooldownStacks int
+	client        *http.Client
+	request       *http.Request
+	cancelRequest context.CancelFunc
+	cooldownTime  time.Time
+	cooldownIndex int
 
 	response       *http.Response
 	responseReader io.Reader
@@ -261,7 +261,7 @@ func (dl *Download) cleanUp() {
 
 func (dl *Download) waitCooldown() {
 	now := time.Now()
-	if dl.cooldownStacks > 0 && dl.cooldownTime.After(now) {
+	if dl.cooldownIndex > 0 && dl.cooldownTime.After(now) {
 		select {
 		case <-time.NewTimer(dl.cooldownTime.Sub(now)).C:
 		case <-dl.ctx.Done():
@@ -272,8 +272,7 @@ func (dl *Download) waitCooldown() {
 
 func (dl *Download) inscribeCooldown() {
 	cooldownIntervalOptions := []time.Duration{1, 1, 2, 3, 5, 8, 13}
-	cooldownOptionIndex := intMin(dl.cooldownStacks, len(cooldownIntervalOptions)-1)
-	cooldownDuration := time.Second * cooldownIntervalOptions[cooldownOptionIndex]
+	cooldownDuration := time.Second * cooldownIntervalOptions[dl.cooldownIndex]
 
 	p := make([]byte, 1)
 	_, err := rand.Read(p)
@@ -285,11 +284,11 @@ func (dl *Download) inscribeCooldown() {
 	}
 
 	dl.cooldownTime = time.Now().Add(cooldownDuration)
-	dl.cooldownStacks++
+	dl.cooldownIndex = intMin(dl.cooldownIndex+1, len(cooldownIntervalOptions)-1)
 }
 
 func (dl *Download) resetCooldown() {
-	dl.cooldownStacks = 0
+	dl.cooldownIndex = 0
 }
 
 func intMin(a, b int) int {
