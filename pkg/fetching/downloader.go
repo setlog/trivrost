@@ -35,11 +35,11 @@ type Downloader struct {
 	handler          DownloadProgressHandler
 	client           *http.Client
 	ctx              context.Context
-	seenFingerprints map[string]bool
+	seenFingerprints *sync.Map
 }
 
 func NewDownloader(ctx context.Context, handler DownloadProgressHandler) *Downloader {
-	return &Downloader{handler: handler, client: MakeClient(), ctx: ctx, seenFingerprints: make(map[string]bool)}
+	return &Downloader{handler: handler, client: MakeClient(), ctx: ctx, seenFingerprints: &sync.Map{}}
 }
 
 func (downloader *Downloader) downloadInitiatedSuccessfully(dl *Download) {
@@ -52,8 +52,7 @@ func (downloader *Downloader) downloadInitiatedSuccessfully(dl *Download) {
 	cert := dl.response.TLS.PeerCertificates[0]
 	sha1Sum := sha1.Sum(cert.Raw)
 	sha1SumHex := hex.EncodeToString(sha1Sum[:])
-	if _, ok := downloader.seenFingerprints[sha1SumHex]; !ok {
-		downloader.seenFingerprints[sha1SumHex] = true
+	if _, loaded := downloader.seenFingerprints.LoadOrStore(sha1SumHex, true); !loaded {
 		log.Printf("Seeing new fingerprint %s (sha1) for host %v", sha1SumHex, dl.request.Host)
 	}
 }
