@@ -12,6 +12,7 @@
 * The download-speed label now shows a 3 second average.
 * `hasher` will no longer blindly overwrite an existing bundleinfo.json but instead error out.
 * `hasher` will now exit with an error when the `pathToHash` has no files to hash.
+* `timestamps.json` is ignored, if it is corrupt.
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
 ### Fixes
