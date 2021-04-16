@@ -1,8 +1,10 @@
 # deployment-config
+
 The deployment-config is a JSON-file which is supposed to be hosted on a webserver operated by you and downloaded by trivrost every time it starts. Its filename typically is `deployment-config.json`.
 
 ## Fields
-* **`Timestamp`** (string): A timestamp in the form `YYYY-MM-DD HH:mm:SS` which indicates when the deployment-config was last changed. This field protects trivrost against attacks. See [security.md](security.md) for more information.
+
+* **`Timestamp`** (string): A timestamp in the form `YYYY-MM-DD HH:mm:SS` which indicates when the deployment-config was last changed. This field protects trivrost against attacks. A utility script `script/insert_timestamp` is provided, which replaces a placeholder with a current timestamp. It can be called like this: `insert_timestamp "<TIMESTAMP>" …/deployment-config.json`. See [security.md](security.md) for more information.
 * **`LauncherUpdate`** (array): An array of objects which define bundle configurations for how trivrost updates itself. When trivrost runs, this list must boil down to either one single configuration, or no configurations, through filtering by `TargetPlatforms`.
   * **`BundleInfoURL`**, **`BaseURL`**, **`TargetPlatforms`**: See [Common fields](#Common-fields) below.
 * **`Bundles`** (array): An array of objects which define the bundles which trivrost should download and keep up to date.

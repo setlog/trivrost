@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/mattn/go-ieproxy"
-	log "github.com/sirupsen/logrus"
+	"github.com/setlog/trivrost/pkg/logging"
 )
 
 func MakeClient() *http.Client {
@@ -35,12 +35,17 @@ func MakeClient() *http.Client {
 
 func GetProxyLoggingFunc() func(req *http.Request) (*url.URL, error) {
 	proxyFunc := ieproxy.GetProxyFunc()
+	log := logging.NewLogLimiter(5)
 	return func(req *http.Request) (*url.URL, error) {
 		proxyURL, err := proxyFunc(req)
 		if err != nil {
 			log.Warnf("Getting proxy for URL %v failed: %v", req.URL, err)
 		} else {
-			log.Infof("Proxy for request with URL %v determined proxy URL %v.", req.URL, proxyURL)
+			if proxyURL == nil {
+				log.Infof("GET %v (direct).", req.URL)
+			} else {
+				log.Infof("GET %v (proxy: %v).", req.URL, proxyURL)
+			}
 		}
 		return proxyURL, err
 	}
@@ -59,9 +64,9 @@ func newRequestWithCancel(ctx context.Context, fromUrl string) (*http.Request, c
 func newRangeRequestWithCancel(ctx context.Context, fromUrl string, firstByte int64, lastByte int64) (*http.Request, context.CancelFunc) {
 	req, cancelFunc := newRequestWithCancel(ctx, fromUrl)
 	if lastByte >= 0 {
-		req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", firstByte, lastByte))
+		req.Header["range"] = []string{fmt.Sprintf("bytes=%d-%d", firstByte, lastByte)}
 	} else {
-		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", firstByte))
+		req.Header["range"] = []string{fmt.Sprintf("bytes=%d-", firstByte)}
 	}
 	return req, cancelFunc
 }

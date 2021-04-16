@@ -49,7 +49,7 @@ func downloadBundles(deploymentConfig *config.DeploymentConfig, outDirPath strin
 	if err != nil {
 		fatalf("%v", err)
 	}
-	updater := bundle.NewUpdaterWithDeploymentConfig(context.Background(), deploymentConfig, &fetching.ConsoleDownloadPogressHandler{}, resources.PublicRsaKeys)
+	updater := bundle.NewUpdaterWithDeploymentConfig(context.Background(), deploymentConfig, &fetching.ConsoleDownloadProgressHandler{}, resources.PublicRsaKeys)
 	for _, bundle := range deploymentConfig.Bundles {
 		if shouldDownloadBundle(bundle.Tags, tags) {
 			log.Infof("Starting download of bundle %s", bundle.BaseURL)

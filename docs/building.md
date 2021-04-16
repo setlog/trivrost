@@ -11,6 +11,7 @@ In this document, we will focus on how to get the project to build, i.e. success
 - [`go`](https://golang.org/) >= v1.13
 - [`goversioninfo`](https://github.com/josephspurrier/goversioninfo) (Make sure to add `$GOPATH/bin` to your `$PATH`)
 - [`make`](https://superuser.com/questions/352000/whats-a-good-way-to-install-build-essentials-all-common-useful-commands-on)
+- [`upx`](https://upx.github.io/)
 - `libgtk-3-dev`
 
 ## Building
@@ -26,6 +27,7 @@ In this document, we will focus on how to get the project to build, i.e. success
 - [`git`](https://git-scm.com/)
 - [`go`](https://golang.org/) >= v1.13
 - [`goversioninfo`](https://github.com/josephspurrier/goversioninfo) (Make sure to add `%GOPATH%\bin` to your `%PATH%`)
+- [`upx`](https://upx.github.io/)
 
 ## Further instructions
 1. Install [mingw-w64](https://mingw-w64.org) (specifically the [Mingw-builds](https://mingw-w64.org/doku.php/download/mingw-builds) package) as a recent GCC-compatible compiler.

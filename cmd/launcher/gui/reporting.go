@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/setlog/trivrost/pkg/misc"
 
 	"github.com/setlog/trivrost/cmd/launcher/places"
+	"github.com/setlog/trivrost/cmd/launcher/resources"
 	"github.com/setlog/trivrost/pkg/logging"
 
 	"github.com/setlog/trivrost/pkg/system"
@@ -37,9 +37,9 @@ func PanicInformatively(r interface{}, launcherFlags *flags.LauncherFlags) {
 func getPanicMessage(r interface{}) string {
 	message := "Something went wrong. The program will now close."
 
-	userError, ok := r.(misc.IUserError)
+	userError, ok := r.(*misc.UserError)
 	if ok && !misc.IsNil(userError) {
-		message = userError.UserError()
+		message = userError.Message()
 	}
 
 	fileSystemError, ok := r.(*system.FileSystemError)
@@ -48,20 +48,16 @@ func getPanicMessage(r interface{}) string {
 			message = "Error: Insufficient permissions to write files in your own user directory. " +
 				"Please contact your system administrator and verify that you have full access to your user directory."
 		} else {
-			message = fmt.Sprintf("Error: Your machine's file system denied a required operation. The error received was: %v", fileSystemError.Unwrap())
+			message = fmt.Sprintf("Error: Your machine's file system denied a required operation. The error received was: %v.", fileSystemError.Unwrap())
 		}
-	}
-
-	if !strings.HasSuffix(message, ".") && !strings.HasSuffix(message, "!") && !strings.HasSuffix(message, "?") {
-		message += "."
 	}
 
 	return message
 }
 
 func presentError(message string, dismissGuiPrompts bool) {
-	if BlockingDialog("Error", fmt.Sprintf("%s\n\nYou can find technical information in the log files under\n%s\n",
-		message, places.GetAppLogFolderPath()), []string{"Open log folder and close", "Close"}, 1, dismissGuiPrompts) == 0 {
+	if BlockingDialog("Error", fmt.Sprintf("%s\n\nThis problem prevents %s from launching.\nYou can find additional information in the log files under\n%s\n",
+		message, resources.LauncherConfig.BrandingName, places.GetAppLogFolderPath()), []string{"Open log folder and close", "Close"}, 1, dismissGuiPrompts) == 0 {
 		showLogFolder()
 	}
 }

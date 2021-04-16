@@ -41,11 +41,15 @@ func (wc *writeCounter) Write(p []byte) (int, error) {
 	return delta, nil
 }
 
-// Download wraps the retrieval of a resource at a URL using HTTP GET requests and exposes
-// the received data through its implementation of the io.Reader interface.
+// Download wraps the retrieval of a resource at a URL using HTTP GET requests and
+// exposes the received data through its implementation of the io.Reader interface.
+//
 // The Read() method will only return a non-nil error other than io.EOF when the
-// Content-Length of the requested resource changes during Download's attempts
-// to retrieve it. See Download.handler for Download's behavior in other error scenarios.
+// Content-Length of the requested resource changes during Download's attempts to
+// retrieve it or the remote signals that it cannot serve a range-request made in
+// an attempt to resume if the first GET was interrupted.
+//
+// See Download.handler for Download's behavior in other error scenarios.
 type Download struct {
 	url string // The URL of the resource to download.
 
@@ -68,14 +72,17 @@ type Download struct {
 	firstByteIndex        int64
 	lastByteIndex         int64
 
-	client         *http.Client
-	request        *http.Request
-	cancelRequest  context.CancelFunc
-	cooldownTime   time.Time
-	cooldownStacks int
+	client        *http.Client
+	request       *http.Request
+	cancelRequest context.CancelFunc
+	cooldownTime  time.Time
+	cooldownIndex int
 
 	response       *http.Response
 	responseReader io.Reader
+
+	// Communicate some TLS information to the downloader which is managing this download.
+	downloader *Downloader
 }
 
 func NewDownload(ctx context.Context, resourceUrl string) *Download {
@@ -135,7 +142,7 @@ func (dl *Download) Close() error {
 func (dl *Download) readDownload(p []byte) (bytesReadCount int, err error) {
 	if dl.response == nil {
 		dl.request, dl.cancelRequest = dl.createRequest()
-		dl.response = dl.sendRequest(dl.request)
+		dl.sendRequest(dl.request)
 		if dl.response == nil {
 			return 0, nil
 		}
@@ -155,38 +162,47 @@ func (dl *Download) createRequest() (*http.Request, context.CancelFunc) {
 	return newRangeRequestWithCancel(dl.ctx, dl.url, dl.firstByteIndex, dl.lastByteIndex)
 }
 
-func (dl *Download) sendRequest(req *http.Request) *http.Response {
+func (dl *Download) sendRequest(req *http.Request) {
 	resp, err := DoForClientFunc(dl.client, req)
 	if err != nil {
 		dl.cleanUp()
 		dl.handler.HandleHttpGetError(dl.url, err)
+		dl.response = nil
 		dl.inscribeCooldown()
 	} else {
+		dl.response = resp
+		if dl.downloader != nil {
+			dl.downloader.downloadInitiatedSuccessfully(dl)
+		}
 		counter := &writeCounter{counted: uint64(dl.firstByteIndex), url: dl.url, workerId: dl.workerId, handler: dl.handler}
 		timeoutingBodyReader := &TimeoutingReader{Reader: resp.Body, Timeout: defaultTimeout * 30}
 		dl.responseReader = io.TeeReader(timeoutingBodyReader, counter)
 	}
-	return resp
 }
 
 func (dl *Download) processResponse() {
-	if !isRangeRequest(dl.request) && dl.response.StatusCode == http.StatusOK {
-		dl.acceptFirstResponseHeader(dl.response.Header)
-	} else if !(isRangeRequest(dl.request) && dl.response.StatusCode == http.StatusPartialContent) {
-		dl.cleanUp()
-		if dl.response.StatusCode == http.StatusRequestedRangeNotSatisfiable {
-			panic(DownloadError("remote file changed during download"))
+	if !dl.gotValidFirstResponse {
+		if dl.response.StatusCode == http.StatusOK {
+			dl.acceptFirstResponseHeader(dl.response.Header)
+		} else {
+			dl.cleanUp()
+			if dl.response.StatusCode == http.StatusRequestedRangeNotSatisfiable {
+				panic(DownloadError("remote file changed during download"))
+			}
+			dl.handler.HandleBadHttpResponse(dl.url, dl.response.StatusCode)
+			dl.response = nil
+			dl.inscribeCooldown()
 		}
-		dl.handler.HandleBadHttpResponse(dl.url, dl.response.StatusCode)
-		dl.response = nil
-		dl.inscribeCooldown()
+	} else if dl.response.StatusCode != http.StatusPartialContent {
+		dl.cleanUp()
+		panic(DownloadError("range-request not supported by target host, or connection has been rigged"))
 	}
 }
 
 func (dl *Download) acceptFirstResponseHeader(header http.Header) {
-	contentLength, err := strconv.ParseInt(header.Get("Content-Length"), 10, 64)
+	contentLength, err := strconv.ParseInt(NewLowercaseHeaders(header).Get("content-length"), 10, 64)
 	if err != nil {
-		log.Printf("Assuming remote file won't change: Could not get Content-Length header from \"%s\": %v.", dl.url, err)
+		log.Printf("Assuming remote file won't change: Could not get content-length header from \"%s\": %v.", dl.url, err)
 		dl.lastByteIndex = -1
 	} else {
 		dl.lastByteIndex = contentLength - 1
@@ -204,7 +220,7 @@ func (dl *Download) readFromResponse(p []byte) (n int, err error) {
 		dl.cleanUp() // Note: https://github.com/golang/go/issues/26095#issuecomment-400903313
 		dl.response = nil
 		if err != io.EOF { // Network failures are temporary. Keep trying until it works.
-			dl.handler.HandleReadError(dl.url, err)
+			dl.handler.HandleReadError(dl.url, err, dl.firstByteIndex)
 			return n, nil
 		}
 		if (dl.lastByteIndex >= 0) && (dl.firstByteIndex < dl.lastByteIndex+1) {
@@ -245,7 +261,7 @@ func (dl *Download) cleanUp() {
 
 func (dl *Download) waitCooldown() {
 	now := time.Now()
-	if dl.cooldownStacks > 0 && dl.cooldownTime.After(now) {
+	if dl.cooldownIndex > 0 && dl.cooldownTime.After(now) {
 		select {
 		case <-time.NewTimer(dl.cooldownTime.Sub(now)).C:
 		case <-dl.ctx.Done():
@@ -256,8 +272,7 @@ func (dl *Download) waitCooldown() {
 
 func (dl *Download) inscribeCooldown() {
 	cooldownIntervalOptions := []time.Duration{1, 1, 2, 3, 5, 8, 13}
-	cooldownOptionIndex := intMin(dl.cooldownStacks, len(cooldownIntervalOptions)-1)
-	cooldownDuration := time.Second * cooldownIntervalOptions[cooldownOptionIndex]
+	cooldownDuration := time.Second * cooldownIntervalOptions[dl.cooldownIndex]
 
 	p := make([]byte, 1)
 	_, err := rand.Read(p)
@@ -269,11 +284,11 @@ func (dl *Download) inscribeCooldown() {
 	}
 
 	dl.cooldownTime = time.Now().Add(cooldownDuration)
-	dl.cooldownStacks++
+	dl.cooldownIndex = intMin(dl.cooldownIndex+1, len(cooldownIntervalOptions)-1)
 }
 
 func (dl *Download) resetCooldown() {
-	dl.cooldownStacks = 0
+	dl.cooldownIndex = 0
 }
 
 func intMin(a, b int) int {
@@ -284,5 +299,5 @@ func intMin(a, b int) int {
 }
 
 func isRangeRequest(req *http.Request) bool {
-	return strings.HasPrefix(req.Header.Get("Range"), "bytes=")
+	return strings.HasPrefix(NewLowercaseHeaders(req.Header).Get("range"), "bytes=")
 }

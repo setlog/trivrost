@@ -27,11 +27,6 @@ func (u *Updater) DetermineBundleRequirements(userBundlesFolderPath, systemBundl
 	u.determineBundleChanges()
 }
 
-func (u *Updater) InstallBundleUpdates() {
-	log.Infof("Downloading bundle updates.")
-	u.installBundleUpdates()
-}
-
 func (u *Updater) determineLocalBundleVersions() {
 	u.announceStatus(DetermineLocalBundleVersions, 200)
 	for _, bundleConfig := range u.deploymentConfig.Bundles {
@@ -115,6 +110,11 @@ func (u *Updater) RetrieveBundleInfo(fromURL string, publicKeys []*rsa.PublicKey
 	return info, hex.EncodeToString(shaBytes[:])
 }
 
+func (u *Updater) InstallBundleUpdates() {
+	log.Infof("Downloading bundle updates.")
+	u.installBundleUpdates()
+}
+
 func (u *Updater) installBundleUpdates() {
 	u.announceStatus(DownloadBundleFiles, countUpdatesBytes(u.bundleUpdateInfos))
 	for _, bundleUpdateConfig := range u.bundleUpdateInfos {
@@ -143,7 +143,7 @@ func applyBundleUpdate(fileMap config.FileInfoMap, fromPath, toPath string) {
 }
 
 func deleteChangedFiles(fileMap config.FileInfoMap, localDirPath string) {
-	log.Infof("Deleting %d files, %d of which will be updated in \"%s\".", len(fileMap), uint64(len(fileMap))-fileMap.DeleteFileCount(), localDirPath)
+	log.Infof("If existing, removing %d files from previous bundle and adding/upating %d files in \"%s\".", len(fileMap), uint64(len(fileMap))-fileMap.DeleteFileCount(), localDirPath)
 	for filePath := range fileMap {
 		system.MustRemoveFile(filepath.Join(localDirPath, filePath))
 	}

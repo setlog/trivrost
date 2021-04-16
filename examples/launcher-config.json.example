@@ -1,17 +1,17 @@
 {
-    "DeploymentConfigURL": "https://example.com/launcher/config.json",
-    
-    "VendorName": "example_company",
-    "ProductName": "example_product",
-    "BinaryName": "launcher-dev",
-    
-    "BrandingName": "Very Good Product",
-    "BrandingNameShort": "Very Good Prod",
-    "ReverseDnsProductId": "com.example.product",
-    "ProductVersion": {
-        "Major": 1,
-        "Minor": 0,
-        "Patch": 0,
-        "Build": 0
-    }
+  "DeploymentConfigURL": "https://example.com/launcher/config.json",
+
+  "VendorName": "example_company",
+  "ProductName": "example_product",
+  "BinaryName": "launcher-dev",
+
+  "BrandingName": "Very Good Product",
+  "BrandingNameShort": "Very Good Prod",
+  "ReverseDnsProductId": "com.example.product",
+  "ProductVersion": {
+    "Major": 1,
+    "Minor": 0,
+    "Patch": 0,
+    "Build": 0
+  }
 }

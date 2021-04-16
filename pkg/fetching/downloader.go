@@ -3,11 +3,13 @@ package fetching
 import (
 	"context"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -18,8 +20,6 @@ import (
 	"git.sr.ht/~tslocum/preallocate"
 	"github.com/setlog/trivrost/pkg/misc"
 	"github.com/setlog/trivrost/pkg/signatures"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/system"
@@ -32,13 +32,29 @@ const MaxConcurrentDownloads = 5
 // Downloader has helper functions for common use cases of Download, such as writing a resource to a file while downloading it,
 // downloading multiple resources in parallel and verifying the hashsum or signature of downloading resources.
 type Downloader struct {
-	handler DownloadProgressHandler
-	client  *http.Client
-	ctx     context.Context
+	handler          DownloadProgressHandler
+	client           *http.Client
+	ctx              context.Context
+	seenFingerprints *sync.Map
 }
 
 func NewDownloader(ctx context.Context, handler DownloadProgressHandler) *Downloader {
-	return &Downloader{handler: handler, client: MakeClient(), ctx: ctx}
+	return &Downloader{handler: handler, client: MakeClient(), ctx: ctx, seenFingerprints: &sync.Map{}}
+}
+
+func (downloader *Downloader) downloadInitiatedSuccessfully(dl *Download) {
+	if dl.response.TLS == nil {
+		return
+	}
+	if len(dl.response.TLS.PeerCertificates) == 0 {
+		return
+	}
+	cert := dl.response.TLS.PeerCertificates[0]
+	sha1Sum := sha1.Sum(cert.Raw)
+	sha1SumHex := hex.EncodeToString(sha1Sum[:])
+	if _, loaded := downloader.seenFingerprints.LoadOrStore(sha1SumHex, true); !loaded {
+		log.Printf("Seeing new fingerprint %s (sha1) for host %v", sha1SumHex, dl.request.Host)
+	}
 }
 
 func (downloader *Downloader) DownloadSignedResource(fromURL string, keys []*rsa.PublicKey) ([]byte, error) {
@@ -54,7 +70,7 @@ func (downloader *Downloader) DownloadSignedResources(urls []string, keys []*rsa
 	for _, url := range urls {
 		fileMapWithSignatures[url] = &config.FileInfo{}
 		if strings.HasPrefix(url, "file://") {
-			log.Warnf("Skipping signature validation for resource \"%s\" because it uses the \"file://\"-scheme.", url)
+			log.Printf("Skipping signature validation for resource \"%s\" because it uses the \"file://\"-scheme.", url)
 		} else {
 			fileMapWithSignatures[url+".signature"] = &config.FileInfo{}
 		}
@@ -73,33 +89,6 @@ func (downloader *Downloader) DownloadSignedResources(urls []string, keys []*rsa
 		validatedResources[url] = fileData[url]
 	}
 	return validatedResources, nil
-}
-
-func (downloader *Downloader) DownloadBytes(fromURL string) (data []byte) {
-	success := false
-	var err error
-	for !success {
-		dl := downloader.newDownload(fromURL)
-		data, err = ioutil.ReadAll(dl)
-		if err != nil {
-			log.Warnf("Download of \"%s\" failed: %v", fromURL, err)
-		}
-		if downloader.ctx.Err() != nil {
-			panic(downloader.ctx.Err())
-		}
-		success = err == nil
-	}
-	return
-}
-
-func (downloader *Downloader) newDownload(resourceUrl string) *Download {
-	return &Download{
-		url:      resourceUrl,
-		client:   downloader.client,
-		ctx:      downloader.ctx,
-		handler:  downloader.handler,
-		workerId: 0,
-	}
 }
 
 func (downloader *Downloader) MustDownloadToTempDirectory(baseUrl string, fileMap config.FileInfoMap, localDirPath string) (tempDirectoryPath string) {
@@ -201,6 +190,7 @@ func (downloader *Downloader) runDownloadWorkers(ctx context.Context, cancelFunc
 			break
 		case workerId := <-availableWorkerIds:
 			dl := NewDownloadForConcurrentUse(ctx, url, downloader.client, downloader.handler, workerId)
+			dl.downloader = downloader
 			go downloadWorker(dl, availableWorkerIds, allWorkersDoneCond, workerErrChan, processDownload)
 		}
 	}
@@ -259,7 +249,7 @@ func updateFile(dl *Download, expectedFileInfo *config.FileInfo, localFilePath s
 	}
 	defer system.CleanUpFileOperation(file, &returnError)
 	if err = preallocate.File(file, expectedFileInfo.Size); err != nil { // Important: Screws up royally on files opened with the os.O_APPEND-flag.
-		log.Warnf("Could not preallocate file \"%s\" with %d bytes: %v", localFilePath, expectedFileInfo.Size, err)
+		log.Printf("Could not preallocate file \"%s\" with %d bytes: %v", localFilePath, expectedFileInfo.Size, err)
 	}
 	n, dlFileSha, err := ioHashingCopy(dl.ctx, file, dl)
 	if err != nil {

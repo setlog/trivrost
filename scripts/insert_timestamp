@@ -3,12 +3,12 @@
 PLACEHOLDER=$1
 FILES="${@:2}"
 
-function printInputError {
+function printInputError() {
   echo "Usage: $0 PLACEHOLDER FILE…" >&2
   exit 1
 }
 
-function timestamp {
+function timestamp() {
   date -u +"%Y-%m-%d %H:%M:%S"
 }
 

@@ -1,56 +1,56 @@
 {
-    "Timestamp": "2019-02-07 14:53:17",
-    "QuantumFoo": 42,
-    "LauncherUpdate": [
-        {
-            "FooFactor": 3000,
-            "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
-            "TargetPlatforms": [ "linux" ]
-        }
-    ],
-    "Bundles": [
-        {
-            "BundleInfoURL": "https://example.com/testapp/32-bit/bundleinfo.json",
-            "LocalDirectory": "app",
-            "AccessibilityFlags": [ "Achromatopsia", "Deafness" ],
-            "TargetPlatforms": [ "386" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/testapp/64-bit/bundleinfo.json",
-            "LocalDirectory": "abe",
-            "TargetPlatforms": [ "amd64" ]
-        },
-        {
-            "BundleInfoURL": "https://example.com/testapp/resources-bundleinfo.json",
-            "BaseURL": "https://media.example.com/testapp-pictures/",
-            "LicenseURL": "https://example.com/testapp/LICENSE",
-            "LocalDirectory": "pictures"
-        }
-    ],
-    "Execution": {
-        "Commands": [
-            {
-                "Name": "java\\bin\\javaw",
-                "Arguments": [ "-jar", "foo", "-special-win-32-bit-parameter", "-Xm1024M" ],
-                "SystemProcessAttribues": {
-                    "Foo": "Bar"
-                },
-                "Env": {
-                    "NEW_ENV": "New env variable.",
-                    "OMIT_ENV": null
-                },
-                "TargetPlatforms": [ "windows-386" ]
-            },
-            {
-                "Name": "java/bin/java",
-                "Arguments": [ "-jar", "-Xm1024M" ],
-                "Env": {
-                    "NEW_ENV": "New env variable.",
-                    "OMIT_ENV": null
-                },
-                "TargetPlatforms": [ "linux", "darwin" ]
-            }
-        ],
-        "LingerTimeMilliseconds": 800
+  "Timestamp": "2019-02-07 14:53:17",
+  "QuantumFoo": 42,
+  "LauncherUpdate": [
+    {
+      "FooFactor": 3000,
+      "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",
+      "TargetPlatforms": [ "linux" ]
     }
+  ],
+  "Bundles": [
+    {
+      "BundleInfoURL": "https://example.com/testapp/32-bit/bundleinfo.json",
+      "LocalDirectory": "app",
+      "AccessibilityFlags": [ "Achromatopsia", "Deafness" ],
+      "TargetPlatforms": [ "386" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/testapp/64-bit/bundleinfo.json",
+      "LocalDirectory": "abe",
+      "TargetPlatforms": [ "amd64" ]
+    },
+    {
+      "BundleInfoURL": "https://example.com/testapp/resources-bundleinfo.json",
+      "BaseURL": "https://media.example.com/testapp-pictures/",
+      "LicenseURL": "https://example.com/testapp/LICENSE",
+      "LocalDirectory": "pictures"
+    }
+  ],
+  "Execution": {
+    "Commands": [
+      {
+        "Name": "java\\bin\\javaw",
+        "Arguments": [ "-jar", "foo", "-special-win-32-bit-parameter", "-Xm1024M" ],
+        "SystemProcessAttribues": {
+          "Foo": "Bar"
+        },
+        "Env": {
+          "NEW_ENV": "New env variable.",
+          "OMIT_ENV": null
+        },
+        "TargetPlatforms": [ "windows-386" ]
+      },
+      {
+        "Name": "java/bin/java",
+        "Arguments": [ "-jar", "-Xm1024M" ],
+        "Env": {
+          "NEW_ENV": "New env variable.",
+          "OMIT_ENV": null
+        },
+        "TargetPlatforms": [ "linux", "darwin" ]
+      }
+    ],
+    "LingerTimeMilliseconds": 800
+  }
 }

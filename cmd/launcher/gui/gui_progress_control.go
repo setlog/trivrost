@@ -10,6 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const barUpdateInterval = time.Millisecond * 100
+const labelUpdateInterval = time.Second * 1
+const titleUpdateInterval = time.Millisecond * 500
+
 // ProgressFunc should be set to a function which reports the progress of the given stage.
 var ProgressFunc = func(s Stage) uint64 {
 	return 0
@@ -23,11 +27,10 @@ func SetStage(s Stage, progressTarget uint64) {
 	ui.QueueMain(func() {
 		isStateChange := panelDownloadStatus.stage.IsWaitingStage() != s.IsWaitingStage()
 		panelDownloadStatus.stage = s
-		panelDownloadStatus.progressCurrent = 0
-		panelDownloadStatus.progressPrevious = 0
+		panelDownloadStatus.progressMovingAverage.Reset()
 		panelDownloadStatus.progressTarget = progressTarget
 		panelDownloadStatus.labelStage.SetText(s.getText())
-		barProgress, percentage := calculateProgress(panelDownloadStatus.stage, panelDownloadStatus.progressCurrent, panelDownloadStatus.progressTarget)
+		barProgress, percentage := calculateProgress(panelDownloadStatus.stage, panelDownloadStatus.progressMovingAverage.Total(), panelDownloadStatus.progressTarget)
 		window.SetTitle(fmt.Sprintf("[%.1f%%] %s", percentage, windowTitle))
 		panelDownloadStatus.currentProblemMessage = ""
 		panelDownloadStatus.labelStatus.SetText("")
@@ -67,9 +70,6 @@ func calculateProgress(s Stage, current, total uint64) (barProgress int, percent
 }
 
 func updateProgressPeriodically(ctx context.Context) {
-	const barUpdateInterval = time.Millisecond * 100
-	const labelUpdateInterval = time.Second
-	const titleUpdateInterval = time.Millisecond * 500
 	barTimer := time.NewTimer(barUpdateInterval)
 	labelTimer := time.NewTimer(labelUpdateInterval)
 	titleTimer := time.NewTimer(titleUpdateInterval)
@@ -132,13 +132,12 @@ func updateProgressLabel() {
 	defer uiShutdownMutex.Unlock()
 	if !didQuit {
 		ui.QueueMain(func() {
-			panelDownloadStatus.progressPrevious = panelDownloadStatus.progressCurrent
-			panelDownloadStatus.progressCurrent = ProgressFunc(panelDownloadStatus.stage)
+			panelDownloadStatus.progressMovingAverage.TakeSample()
+			average := panelDownloadStatus.progressMovingAverage.AveragePerSecondDelta()
 
-			delta := panelDownloadStatus.progressCurrent - panelDownloadStatus.progressPrevious
 			var message string
-			if panelDownloadStatus.stage.IsDownloadStage() && delta > 0 {
-				message = fmt.Sprintf("Downloading at %s. ", rateString(delta))
+			if panelDownloadStatus.stage.IsDownloadStage() {
+				message = fmt.Sprintf("Downloading at %s. ", rateString(average))
 			}
 			if panelDownloadStatus.currentProblemMessage != "" {
 				message += fmt.Sprintf("(%s)", panelDownloadStatus.currentProblemMessage)
@@ -161,17 +160,17 @@ func updateWindowTitle() {
 	}
 }
 
-func rateString(rate uint64) string {
+func rateString(rate float64) string {
 	if rate < 1000 {
-		return fmt.Sprintf("%d B/s", rate)
+		return fmt.Sprintf("%.0f B/s", rate)
 	} else if rate < 1024*10 {
-		return fmt.Sprintf("%.2f KiB/s", float64(rate)/1024)
+		return fmt.Sprintf("%.2f KiB/s", rate/1024)
 	} else if rate < 1024*100 {
-		return fmt.Sprintf("%.1f KiB/s", float64(rate)/1024)
+		return fmt.Sprintf("%.1f KiB/s", rate/1024)
 	} else if rate < 1024*1000 {
-		return fmt.Sprintf("%d KiB/s", rate/1024)
+		return fmt.Sprintf("%.0f KiB/s", rate/1024)
 	} else if rate < 1024*1024*10 {
-		return fmt.Sprintf("%.2f MiB/s", float64(rate)/(1024*1024))
+		return fmt.Sprintf("%.2f MiB/s", rate/(1024*1024))
 	}
-	return fmt.Sprintf("%.1f MiB/s", float64(rate)/(1024*1024))
+	return fmt.Sprintf("%.1f MiB/s", rate/(1024*1024))
 }

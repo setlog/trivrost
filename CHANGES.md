@@ -1,5 +1,35 @@
 # Release-Changelog
 
+## 1.5.0-rc0 (2021-04-16)
+### Features
+* trivrost will log the progress of downloads if the connection was interrupted for any reason.
+* The binary can now be compressed with UPX when using `make compress`. Reduces the final filesize to less than 50%.
+### Fixes
+* trivrost will no longer attempt to repeat range requests to a host after it has failed to conformly respond while displaying the confusing message `Taking longer than usual: HTTP Status 200` and will now fail immediately in such cases instead.
+* trivrost will no longer fail to comply with HTTP 2 strictly using lower-case HTTP Header names. This had been caused by methods of `http.Header` still being oriented around HTTP 1 canonical header names due to Go's backwards compatibility promise.
+* Instead of always showing 'Cannot reach server' to the user, show more precise/useful messages on connection issues.
+* `hasher` will no longer blindly overwrite an existing bundle info file but instead error out.
+* `hasher` will no longer create a directory if a non-existing one is passed as an argument.
+* `hasher` will now exit with an error when the `pathToHash` has no files to hash.
+* `timestamps.json` is ignored, if it is corrupt and no longer prevents trivrost from starting.
+### Changes
+* Update dependencies to recent versions: gopsutils, testify, gojsonschema, logrus, prometheus/client_golang, go_ieproxy, fatih/color, golang/x/sys, golang/x/net
+* DWARF symbols are now stripped from the trivrost binary to reduce file size. This can save a few bytes on some platforms.
+* Every TLS Certificate fingerprint will be logged once with the host name it has first been seen on.
+* Shorter log-output for proxy detection. Reduces average size of the log output by 5–15%.
+* Shorter log-output for HTTP errors, reduces size of log output by a few percent.
+* Do not hide the download speed label, even if the speed is zero.
+* The download-speed label now shows a three seconds average.
+* The same download-related log messages will now be printed at most 5 times (with information about this limit in the last message).
+
+## 1.4.6 (2021-01-25)
+### Fixes
+* Windows binary signing: Use RFC-3161 timestamp server with sha 256 config. SHA-1 ciphers are considered deprecated. Nothing should change for the enduser.
+
+## 1.4.5 (2021-01-04)
+### Fixes
+* Switch timestamp server for signing from Verisign to Globalsign.
+
 ## 1.4.4 (2020-01-17)
 ### Changes
 * Validator's `/validate` endpoint now always answers with status code 200 OK. Endpoint `/metrics` should be tested for value of `trivrost_validation_ok` as a healthcheck instead.
@@ -30,7 +60,7 @@
 
 ## 1.3.5 (2019-11-11)
 ### Fixes
-* Ignore `--psn_X_YYYYY` arugment which is appended by MacOS to the command line arguments when the programm was launched through a Gatekeeper context. Regression found in v1.3.2, v1.3.3, v1.3.4.
+* Ignore `--psn_X_YYYYY` argument which is appended by MacOS to the command line arguments when the programm was launched through a Gatekeeper context. Regression found in v1.3.2, v1.3.3, v1.3.4.
 
 ## 1.3.4 (2019-10-29)
 ### Fixes

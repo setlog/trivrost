@@ -2,11 +2,12 @@ package gui
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/setlog/trivrost/pkg/logging"
 )
 
 // Implements fetching.DownloadProgressHandler
@@ -15,10 +16,11 @@ type GuiDownloadProgressHandler struct {
 	progressAccumulator    uint64
 	ongoingProgressBuckets []uint64
 	problemUrl             string
+	log                    *logging.LogLimiter
 }
 
 func NewGuiDownloadProgressHandler(bucketCount int) *GuiDownloadProgressHandler {
-	return &GuiDownloadProgressHandler{progressMutex: &sync.RWMutex{}, ongoingProgressBuckets: make([]uint64, bucketCount)}
+	return &GuiDownloadProgressHandler{progressMutex: &sync.RWMutex{}, ongoingProgressBuckets: make([]uint64, bucketCount), log: logging.NewLogLimiter(5)}
 }
 
 func (handler *GuiDownloadProgressHandler) ResetProgress() {
@@ -60,7 +62,7 @@ func (handler *GuiDownloadProgressHandler) HandleFinishDownload(fromURL string, 
 }
 
 func (handler *GuiDownloadProgressHandler) HandleFailDownload(fromURL string, workerId int, err error) {
-	log.Errorf("GET %s failed: %v", fromURL, err)
+	handler.log.Errorf("GET %s failed: %v", fromURL, err)
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
@@ -68,23 +70,30 @@ func (handler *GuiDownloadProgressHandler) HandleFailDownload(fromURL string, wo
 }
 
 func (handler *GuiDownloadProgressHandler) HandleHttpGetError(fromURL string, err error) {
-	log.Warnf("GET %s could not start: %v", fromURL, err)
+	handler.log.Warnf("GET %s could not start: %v", fromURL, err)
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
-	NotifyProblem("Cannot reach server", false)
+
+	if strings.Contains(err.Error(), "x509: ") {
+		NotifyProblem("Certificate (X.509) problem", false)
+	} else if strings.Contains(err.Error(), "dial tcp: lookup") && strings.Contains(err.Error(), "no such host") {
+		NotifyProblem("Unable to resolve hostname", false)
+	} else {
+		NotifyProblem("Connection problem", false)
+	}
 }
 
 func (handler *GuiDownloadProgressHandler) HandleBadHttpResponse(fromURL string, code int) {
-	log.Warnf("GET %s yielded bad HTTP response: %s (Code was %d)", fromURL, http.StatusText(code), code)
+	handler.log.Warnf("GET %s, error %d: %s", fromURL, code, http.StatusText(code))
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL
 	NotifyProblem(fmt.Sprintf("HTTP Status %d", code), false)
 }
 
-func (handler *GuiDownloadProgressHandler) HandleReadError(fromURL string, err error) {
-	log.Warnf("GET %s interrupted: %v.", fromURL, err)
+func (handler *GuiDownloadProgressHandler) HandleReadError(fromURL string, err error, receivedByteCount int64) {
+	handler.log.Warnf("GET %s interrupted after receiving %d bytes: %v.", fromURL, receivedByteCount, err)
 	handler.progressMutex.Lock()
 	defer handler.progressMutex.Unlock()
 	handler.problemUrl = fromURL

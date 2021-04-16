@@ -13,9 +13,9 @@ VALIDATOR_BINARY        := validator
 SIGNER_BINARY           := signer
 
 # allow custom program name
-LAUNCHER_PROGRAM_NAME   := $(shell GO111MODULE=on go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BinaryName)
+LAUNCHER_PROGRAM_NAME   := $(shell go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BinaryName)
 LAUNCHER_PROGRAM_EXT    := 
-LAUNCHER_BRANDING_NAME  := $(shell GO111MODULE=on go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BrandingName)
+LAUNCHER_BRANDING_NAME  := $(shell go run cmd/echo_field/main.go cmd/launcher/resources/launcher-config.json BrandingName)
 MSI_PREFIX              := ${LAUNCHER_PROGRAM_NAME}
 
 GITDESC                 := $(shell git describe --tags 2> /dev/null || echo unavailable)
@@ -23,7 +23,7 @@ GITDESC                 := $(shell git describe --tags 2> /dev/null || echo unav
 LAUNCHER_VERSION        := $(shell git describe --tags --abbrev=0 --match "v[0-9]*.[0-9]*.[0-9]*" 2> /dev/null || echo unavailable)
 GITBRANCH               := $(shell git symbolic-ref -q --short HEAD || echo unknown)
 GITHASH                 := $(shell git rev-parse --short=8 --verify HEAD || echo unknown)
-LDFLAGS                 := -s -X main.gitDescription=${GITDESC} -X main.gitBranch=${GITBRANCH} -X main.gitHash=${GITHASH} -X "github.com/setlog/trivrost/cmd/launcher/launcher.buildTime=$(shell date -u "+%Y-%m-%d %H:%M:%S UTC")"
+LDFLAGS                 := -s -w -X main.gitDescription=${GITDESC} -X main.gitBranch=${GITBRANCH} -X main.gitHash=${GITHASH} -X "github.com/setlog/trivrost/cmd/launcher/launcher.buildTime=$(shell date -u "+%Y-%m-%d %H:%M:%S UTC")"
 
 # Assume version is part of the tag. If not, default to v0.0.0
 VERSIONOK := $(shell echo -n "${LAUNCHER_VERSION}" | grep -E ^v[0-9]+\.[0-9]+\.[0-9]+$$ && echo ok)
@@ -32,8 +32,7 @@ ifndef VERSIONOK
 endif
 $(info GIT description: '${GITDESC}' (latest master: '${LAUNCHER_VERSION}'), GIT branch '${GITBRANCH}', GIT hash '${GITHASH}')
 
-TIMESTAMP_SERVER = 'http://timestamp.verisign.com/scripts/timstamp.dll'
-# Alternative: http://timestamp.globalsign.com/scripts/timstamp.dll
+TIMESTAMP_SERVER = 'http://rfc3161timestamp.globalsign.com/advanced'
 
 #
 # Detect OS
@@ -58,7 +57,6 @@ endif
 $(info Detected uname-id '${OS_UNAME}' as OS '${OS}')
 
 # Globally enable go modules
-export GO111MODULE=on
 export GOOS=${OS}
 export LAUNCHER_PROGRAM_NAME
 export LAUNCHER_PROGRAM_EXT
@@ -70,13 +68,21 @@ export LAUNCHER_PROGRAM_EXT
 .PHONY: build bundle bundle-msi test copy-test-files generate clean sign dist help
 
 # Default target
-build: generate  ## Build (default)
+build: compile package
+
+compile: generate  ## Compile with go build. Run after make generate.
 ifeq (${OS},windows)
 	# Removing unneeded PNG from Windows binary
 	rm cmd/launcher/resources/icon.png.gen.go
 endif
 	# See https://github.com/golang/go/issues/18400#issuecomment-270414574 for why -installsuffix is needed.
 	go build -o "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+	$(info # compile finished)
+
+compress:  ## Compress compiled binary with UPX. Needs to run after make compile, but before make sign.
+	upx "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}"
+
+package:
 ifeq (${OS},darwin)
 	# Mac bundle is special
 	mkdir -p "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/MacOS"
@@ -85,7 +91,6 @@ ifeq (${OS},darwin)
 	mkdir -p "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources"
 	if [ -f cmd/launcher/resources/icon.icns ]; then cp cmd/launcher/resources/icon.icns "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources/icon.icns"; fi
 endif
-	$(info # make build finished)
 
 bundle:          ## Bundle OS-specific files. Call after signing
 	mkdir -p "${RELEASE_FILES_DIR}/${OS}"
@@ -151,7 +156,7 @@ ifndef CERT_KEY
 endif
 	$(info Signing windows release files...)
 	echo "$${CERT_FILE}" | base64 -d > ~tmp_launcher_cert
-	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /t ${TIMESTAMP_SERVER} /fd SHA512 "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.exe"
+	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /tr ${TIMESTAMP_SERVER} /td SHA256 /fd SHA512 "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.exe"
 	rm ~tmp_launcher_cert
 endif
 
@@ -167,8 +172,8 @@ ifneq (${OS},windows)
 else
 	$(info Signing windows release files...)
 	echo "$${CERT_FILE}" | base64 -d > ~tmp_launcher_cert
-	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /t ${TIMESTAMP_SERVER} /fd SHA512 "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}_386.msi"
-	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /t ${TIMESTAMP_SERVER} /fd SHA512 "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}_amd64.msi"
+	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /tr ${TIMESTAMP_SERVER} /td SHA256 /fd SHA512 "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}_386.msi"
+	@signtool sign /debug /a /v /d "${LAUNCHER_BRANDING_NAME}" /f ~tmp_launcher_cert /p "${CERT_KEY}" /tr ${TIMESTAMP_SERVER} /td SHA256 /fd SHA512 "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}_amd64.msi"
 	rm ~tmp_launcher_cert
 endif
 
@@ -214,7 +219,7 @@ copy-test-files: ## Copy example resources into resource directory
 	cp examples/defaulticon.ico cmd/launcher/resources/icon.ico
 
 generate:        ## Run go generate
-	GO111MODULE=off go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+	go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 	go generate -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
 
 clean:           ## Clean generated files
