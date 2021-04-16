@@ -1,6 +1,6 @@
 # Release-Changelog
 
-## TBD (TBD)
+## 1.5.0-rc0 (2021-04-16)
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
 * The binary can now be compressed with UPX when using `make compress`. Reduces the final filesize to less than 50%.
