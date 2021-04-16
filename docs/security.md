@@ -19,7 +19,7 @@ To set the timestamp automatically, the shell script [insert_timestamp](../scrip
 
 Please note that you have to set the timestamp in the deployment-config before signing the deployment-config. For the bundle info files, the hasher will automatically set the timestamp in UTC.
 
-If the file `timestamps.json` is corrupt, trivrost will mention it in the log file and behave as if the file does not exist.
+If the file `timestamps.json` is corrupt, trivrost will mention this in the log file and behave as if the file was missing, i.e. assume that it is being launched for the first time for the given vendor and product name combination.
 
 # Signing
 To sign the deployment-config and bundle info files we use `RSA` with the padding algorithm `PSS`. We use `sha256` as the hashing algorithm for signing. The signatures of the deployment-config have to be stored `base64` encoded. The signatures are saved in separate files with the same url as the original files, but with a `.signature` extension. So the signature for the bundle info file `https://example.com/linux/launcher/bundleinfo.json` has the url `https://example.com/linux/launcher/bundleinfo.json.signature.`
