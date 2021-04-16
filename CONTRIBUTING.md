@@ -35,7 +35,7 @@ Integration branch: **develop** (protected, default)
   - Tags can be used for test releases and should be distinct from existing version tags
   - Tags will create full releases, incl. docker images
 
-Maintanance branches: **maint-A.B.x** (protected)
+Maintenance branches: **maint-A.B.x** (protected)
   - Where A and B are a specific version, and 'x' is used in the branch name to indicate which that the patch level is being maintained in this branch.
 
 Feature-, bugfix and development branches:
@@ -44,7 +44,7 @@ Feature-, bugfix and development branches:
 ## Development cycle
 
 Development takes place on **develop**. It should always build and any larger features should be done in feature branches.
-If there are maintanace branches, each feature should be backported to a mintanace-branch.
+If there are maintenance branches, each feature should be backported to a maintenance-branch.
 
 Releases are tagged on **master** using v+[SemVer](https://semver.org/). E.g.: `vX.Y.Z`
 
