@@ -13,6 +13,7 @@
 * The same download-related log messages will now be printed at most 5 times (with information about this limit in the last message).
 * `hasher` will no longer blindly overwrite an existing bundleinfo.json but instead error out.
 * `hasher` will now exit with an error when the `pathToHash` has no files to hash.
+* `timestamps.json` is ignored, if it is corrupt.
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
 ### Fixes
