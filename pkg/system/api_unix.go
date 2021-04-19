@@ -47,3 +47,7 @@ func showLocalFileInFileManager(path string) error {
 func isProcessRunning(p *os.Process) bool {
 	return p.Signal(unix.Signal(0)) == nil
 }
+
+func universalPathName(p string) (string, error) {
+	return p, nil
+}
