@@ -219,7 +219,7 @@ copy-test-files: ## Copy example resources into resource directory
 	cp examples/defaulticon.ico cmd/launcher/resources/icon.ico
 
 generate:        ## Run go generate
-	go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.2.0
 	go generate -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
 
 clean:           ## Clean generated files
