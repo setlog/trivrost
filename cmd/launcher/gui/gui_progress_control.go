@@ -106,7 +106,7 @@ func NotifyProblem(problemMessage string, requiresUserAction bool) {
 			} else if requiresUserAction {
 				panelDownloadStatus.currentProblemMessage = "Cannot continue: " + problemMessage
 			} else {
-				panelDownloadStatus.currentProblemMessage = "taking longer than usual, retrying: " + problemMessage
+				panelDownloadStatus.currentProblemMessage = "Taking longer than usual, retrying: " + problemMessage
 			}
 		})
 	}
