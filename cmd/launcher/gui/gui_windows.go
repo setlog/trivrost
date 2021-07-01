@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"unicode/utf16"
 	"unsafe"
 
 	"github.com/setlog/trivrost/pkg/system"
@@ -145,7 +144,7 @@ func applyWindowStyle(handle uintptr) {
 }
 
 func loadIcons() {
-	binaryPath := goStringToConstantUTF16WinApiString(system.GetBinaryPath())
+	binaryPath := C.LPCWSTR(system.StringToUTF16UnmanagedString(system.GetBinaryPath()))
 	extractedIconCount := C.loadIcons(binaryPath)
 	didLoadIcons = true
 	C.free(unsafe.Pointer(binaryPath))
@@ -158,17 +157,6 @@ func loadIcons() {
 	} else {
 		log.Errorf("Extracted %d icons. Expected 2.", extractedIconCount)
 	}
-}
-
-func goStringToConstantUTF16WinApiString(s string) C.LPCWSTR {
-	utf16String := utf16.Encode([]rune(s))
-	utf16StringPointer := (*uint16)(C.calloc(C.size_t(len(utf16String)+1), C.size_t(unsafe.Sizeof(uint16(0)))))
-	currentCharPointer := utf16StringPointer
-	for _, c := range utf16String {
-		*currentCharPointer = c
-		currentCharPointer = (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(currentCharPointer)) + unsafe.Sizeof(uint16(0))))
-	}
-	return (C.LPCWSTR)(unsafe.Pointer(utf16StringPointer))
 }
 
 func setProgressState(s progressState) {
