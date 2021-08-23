@@ -50,7 +50,17 @@ func IsInstanceInstalledInSystemMode() bool {
 
 // IsInstanceInstalledForCurrentUser returns true iff the launcher's desired path under user files is occupied by the program running this code.
 func IsInstanceInstalledForCurrentUser() bool {
-	return system.GetProgramPath() == getTargetProgramPath()
+	programPath := system.GetProgramPath()
+	targetProgramPath := getTargetProgramPath()
+	if programPath == targetProgramPath {
+		return true
+	}
+	if runtime.GOOS == "windows" {
+		if strings.EqualFold(programPath, targetProgramPath) || strings.EqualFold(filepath.Clean(programPath), filepath.Clean(targetProgramPath)) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsInstallationOutdated returns true if the time the installed launcher binary was built

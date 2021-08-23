@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## 1.5.0 (2021-08-23)
+### Fixes
+* Fix case-insensitive comparison of program path and target program path leading to soft lock in Windows if APPDATA is configured with incorrect casing via registry.
+
 ## 1.5.0-rc0 (2021-04-16)
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
