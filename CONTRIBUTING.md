@@ -23,17 +23,11 @@ Please see [building.md](docs/building.md) for general building instructions.
 
 ## Branches
 
-Main release branch: **master** (protected)
-  - Each commit is one release
-  - Each commit is tagged with the version
-  - This is always the latest, stable and released version
-  - Each tag creates a new release
-
-Integration branch: **develop** (protected, default)
+Main release branch: **master** (protected, default)
   - Finished features, fixes etc. are merged into this branch
   - If possible, it should at any time build and pass tests
   - Tags can be used for test releases and should be distinct from existing version tags
-  - Tags will create full releases, incl. docker images
+  - Tags starting with v+Number will create full releases, incl. docker images
 
 Maintenance branches: **maint-A.B.x** (protected)
   - Where A and B are a specific version, and 'x' is used in the branch name to indicate which that the patch level is being maintained in this branch.
@@ -43,36 +37,20 @@ Feature-, bugfix and development branches:
 
 ## Development cycle
 
-Development takes place on **develop**. It should always build and any larger features should be done in feature branches.
+Development takes place on **master**. It should always build and any larger features should be done in feature branches.
 If there are maintenance branches, each feature should be backported to a maintenance-branch.
-
-Releases are tagged on **master** using v+[SemVer](https://semver.org/). E.g.: `vX.Y.Z`
+Releases are tagged using v+[SemVer](https://semver.org/). E.g.: `vX.Y.Z`
 
 To create a release for the latest version:
-  * Finish all pending changes to develop
+  * Finish all pending changes to master
   * Make sure CHANGES.md is complete and has the correct publication date and version number
-  * Run these commands:
-    ```
-    git checkout develop
-    git pull
-    # check with git log that the branch is in the state which you want to release
-    git checkout master
-    git pull
-    git merge develop --ff-only
-    git push
-    # check if pipeline succeeds - should always be the case!
-    ```
+  * Check if pipeline succeeds - should always be the case!
 Finally, make a release through [the release-overview of the project's GitHub page](https://github.com/setlog/trivrost/releases), creating a new tag on the latest `master`. Tag should be `vX.Y.Z`, title should be `vX.Y.Z (YYYY-MM-DD)` and message should be the markdown-formatted list of fixes, features and changes from `CHANGES.md`.
 
 Alternative to creating a tag without a release page entry:
 ```
 git tag "vX.Y.Z"
 git push origin "vX.Y.Z"
-```
-
-Finally, make sure that you do not accidentally continue work on master:
-```
-git checkout develop
 ```
 
 To create a release for a maintenance version, do not merge it into `master`. Instead, tag the release on the maintenance branch.
