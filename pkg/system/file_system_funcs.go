@@ -303,3 +303,25 @@ func CleanUpFileOperation(file *os.File, returnError *error) {
 		}
 	}
 }
+
+// FilepathsEquivalent returns true if the filepaths a and b are semantically equivalent (exceptions may exist).
+func FilepathsEquivalent(a, b string) bool {
+	a = filepath.Clean(a)
+	b = filepath.Clean(b)
+	if a == b {
+		return true
+	}
+	aResolved, aErr := universalPathName(a)
+	if aErr != nil && aErr.(*universalNameRetrievalError).ErrorType() != errorNotConnected {
+		log.Warnf(`could not determine UNC path for filepath "%s": %v\n`, a, aErr)
+	}
+	bResolved, bErr := universalPathName(b)
+	if bErr != nil && bErr.(*universalNameRetrievalError).ErrorType() != errorNotConnected {
+		log.Warnf(`could not determine UNC path for filepath "%s": %v\n`, b, bErr)
+	}
+	aResolved = filepath.Clean(aResolved)
+	bResolved = filepath.Clean(bResolved)
+	return (a == bResolved && bErr == nil) ||
+		(b == aResolved && aErr == nil) ||
+		(aResolved == bResolved && aErr == nil && bErr == nil)
+}
