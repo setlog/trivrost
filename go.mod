@@ -11,7 +11,7 @@ require (
 	github.com/gofrs/flock v0.8.1
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.11.0
-	github.com/shirou/gopsutil v3.21.7+incompatible
+	github.com/shirou/gopsutil v3.21.8+incompatible
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
