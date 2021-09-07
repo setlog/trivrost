@@ -9,12 +9,10 @@
     },
     {
       "matchPackageNames": ["golang.org/x/net"],
-      "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
     },
     {
       "matchPackageNames": ["golang.org/x/sys"],
-      "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
     }
   ],
