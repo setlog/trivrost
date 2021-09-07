@@ -53,7 +53,7 @@ func (downloader *Downloader) downloadInitiatedSuccessfully(dl *Download) {
 	sha1Sum := sha1.Sum(cert.Raw)
 	sha1SumHex := hex.EncodeToString(sha1Sum[:])
 	if _, loaded := downloader.seenFingerprints.LoadOrStore(sha1SumHex, true); !loaded {
-		log.Printf("Seeing new fingerprint %s (sha1) for host %v", sha1SumHex, dl.request.Host)
+		log.Printf("Seeing new TLS cert fingerprint %s (sha1) for host %v", sha1SumHex, dl.request.Host)
 	}
 }
 
