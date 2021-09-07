@@ -53,7 +53,7 @@ func (downloader *Downloader) downloadInitiatedSuccessfully(dl *Download) {
 	sha1Sum := sha1.Sum(cert.Raw)
 	sha1SumHex := hex.EncodeToString(sha1Sum[:])
 	if _, loaded := downloader.seenFingerprints.LoadOrStore(sha1SumHex, true); !loaded {
-		log.Printf("Seeing new TLS cert fingerprint %s (sha1) for host %v", sha1SumHex, dl.request.Host)
+		log.Printf("Stored new TLS cert fingerprint %s (sha1) for host %v this execution", sha1SumHex, dl.request.Host)
 	}
 }
 
@@ -150,7 +150,7 @@ func (downloader *Downloader) DownloadToRAM(fileMap config.FileInfoMap) (fileDat
 		}
 		dlFileSha := hex.EncodeToString(hash.Sum(nil))
 		if wantedFileInfo.SHA256 != "" && !strings.EqualFold(wantedFileInfo.SHA256, dlFileSha) {
-			return fmt.Errorf("Sha of downloaded file \"%s\" does not match expected value \"%s\". Was \"%s\"",
+			return fmt.Errorf("SHA256 of downloaded file \"%s\" does not match expected value \"%s\". Was \"%s\"",
 				dl.url, wantedFileInfo.SHA256, dlFileSha)
 		}
 		m.Lock()
