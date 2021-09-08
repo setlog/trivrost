@@ -17,7 +17,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.0.0-20210908191846-a5e095526f91
-	golang.org/x/sys v0.0.0-20210908160347-a851e7ddeee0
+	golang.org/x/sys v0.0.0-20210908233432-aa78b53d3365
 )
 
 go 1.13
