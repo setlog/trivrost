@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/net v0.0.0-20210929193557-e81a3d93ecf6
+	golang.org/x/net v0.0.0-20211004164453-cedda3a722dd
 	golang.org/x/sys v0.0.0-20211004093028-2c5d950f24ef
 )
 
