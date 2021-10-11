@@ -8,13 +8,20 @@
       "automerge": true
     },
     {
-      "matchPackageNames": ["golang.org/x/net"],
-      "automerge": true
-    },
-    {
-      "matchPackageNames": ["golang.org/x/sys"],
+      "matchPackageNames": ["golang.org/x/net", "golang.org/x/sys"],
+      "extends": ["schedule:monthly"]
       "automerge": true
     }
   ],
   "rebaseWhen": "behind-base-branch"
+}
+
+
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["aws-sdk"],
+      "extends": ["schedule:monthly"]
+    }
+  ]
 }
