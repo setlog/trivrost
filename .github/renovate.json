@@ -9,7 +9,7 @@
     },
     {
       "matchPackageNames": ["golang.org/x/net", "golang.org/x/sys"],
-      "extends": ["schedule:monthly"]
+      "extends": ["schedule:monthly"],
       "automerge": true
     }
   ],
