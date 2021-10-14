@@ -15,13 +15,3 @@
   ],
   "rebaseWhen": "behind-base-branch"
 }
-
-
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["aws-sdk"],
-      "extends": ["schedule:monthly"]
-    }
-  ]
-}
