@@ -1,7 +1,7 @@
 module github.com/setlog/trivrost
 
 require (
-	git.sr.ht/~tslocum/preallocate v0.1.1
+	git.sr.ht/~tslocum/preallocate v0.1.2
 	github.com/MMulthaupt/chronometry v0.1.1
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/andlabs/ui v0.0.0-20200610043537-70a69d6ae31e
