@@ -11,11 +11,12 @@ require (
 	github.com/gofrs/flock v0.8.1
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.11.0
-	github.com/shirou/gopsutil v3.21.10+incompatible
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0
+	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
 	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881
 )
