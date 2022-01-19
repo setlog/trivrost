@@ -45,7 +45,8 @@ To create a release for the latest version:
   * Finish all pending changes to master
   * Make sure CHANGES.md is complete and has the correct publication date and version number
   * Check if pipeline succeeds - should always be the case!
-Finally, make a release through [the release-overview of the project's GitHub page](https://github.com/setlog/trivrost/releases), creating a new tag on the latest `master`. Tag should be `vX.Y.Z`, title should be `vX.Y.Z (YYYY-MM-DD)` and message should be the markdown-formatted list of fixes, features and changes from `CHANGES.md`.
+  * Make a release through [the release-overview of the project's GitHub page](https://github.com/setlog/trivrost/releases), creating a new tag on the latest `master`. Tag should be `vX.Y.Z`, title should be `vX.Y.Z (YYYY-MM-DD)` and message should be the markdown-formatted list of fixes, features and changes from `CHANGES.md`.
+  * Prepare the CHANGES.md with a new (TBD) entry.
 
 Alternative to creating a tag without a release page entry:
 ```

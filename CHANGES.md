@@ -1,10 +1,15 @@
 # Release-Changelog
 
-## 1.5.0-rc1 (2021-08-23)
+## v1.5.0-rc2 (2022-01-19)
+### Fixes
+* Update github.com/golang/text-v0.3.6 dependency because of CVE-2021-38561.
+* Chore: update git.sr.ht/~tslocum/preallocate to v0.1.2, github.com/prometheus/client_golang to v1.12.0, github.com/shirou/gopsutil to v3.21.11
+
+## v1.5.0-rc1 (2021-08-23)
 ### Fixes
 * Fix case-insensitive comparison of program path and target program path leading to soft lock in Windows if APPDATA is configured with incorrect casing via registry.
 
-## 1.5.0-rc0 (2021-04-16)
+## v1.5.0-rc0 (2021-04-16)
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
 * The binary can now be compressed with UPX when using `make compress`. Reduces the final filesize to less than 50%.
@@ -26,31 +31,31 @@
 * The download-speed label now shows a three seconds average.
 * The same download-related log messages will now be printed at most 5 times (with information about this limit in the last message).
 
-## 1.4.6 (2021-01-25)
+## v1.4.6 (2021-01-25)
 ### Fixes
 * Windows binary signing: Use RFC-3161 timestamp server with sha 256 config. SHA-1 ciphers are considered deprecated. Nothing should change for the enduser.
 
-## 1.4.5 (2021-01-04)
+## v1.4.5 (2021-01-04)
 ### Fixes
 * Switch timestamp server for signing from Verisign to Globalsign.
 
-## 1.4.4 (2020-01-17)
+## v1.4.4 (2020-01-17)
 ### Changes
 * Validator's `/validate` endpoint now always answers with status code 200 OK. Endpoint `/metrics` should be tested for value of `trivrost_validation_ok` as a healthcheck instead.
 
-## 1.4.3 (2020-01-17)
+## v1.4.3 (2020-01-17)
 ### Fixes
 * Fix validator displaying wrong URL when using `configurl`.
 
-## 1.4.2 (2020-01-17)
+## v1.4.2 (2020-01-17)
 ### Fixes
 * Fix validator saying `configurl` is not set when it is.
 
-## 1.4.1 (2020-01-17)
+## v1.4.1 (2020-01-17)
 ### Features
 * `cmd/validator`: Run as service for use as healthcheck when started with `--act-as-service` command line argument; send HTTP GET requests to `:80/validate`. Customize port with `--port`. Override deployment-config URL with `configurl` query parameter.
 
-## 1.4.0 (2019-11-22)
+## v1.4.0 (2019-11-22)
 ### Features
 * `cmd/validator` will now check that command binary's *will be* downloaded per platform, where previously it would only check if they are available under their respective bundle URL.
 * Added new field `IsUpdateMandatory` to [deployment-config](docs/deployment-config.md), which allows to deny the user the launch of the application when system bundles require changes.
@@ -62,15 +67,15 @@
 ### Changes
 * trivrost now allows users to continue past failed self-updates as well as omitted changes to system bundles in [system mode](docs/lifecycle.md#system-mode) installations, unless [further configuration](docs/deployment-config.md) is made; see the new field `IsUpdateMandatory` in deployment-config.
 
-## 1.3.5 (2019-11-11)
+## v1.3.5 (2019-11-11)
 ### Fixes
 * Ignore `--psn_X_YYYYY` argument which is appended by MacOS to the command line arguments when the programm was launched through a Gatekeeper context. Regression found in v1.3.2, v1.3.3, v1.3.4.
 
-## 1.3.4 (2019-10-29)
+## v1.3.4 (2019-10-29)
 ### Fixes
 * Fix failure to launch on Windows if trivrost binary is located on a mounted volume for which no unique path exists because it has no drive letter assigned. See [this Go issue](https://github.com/golang/go/issues/20506#issuecomment-318514515) for details.
 
-## 1.3.3 (2019-10-18)
+## v1.3.3 (2019-10-18)
 ### Features
 * Users can now always open the log folder through a `Show logs...`-link in the lower-right corner of trivrost's progress window.
 * trivrost can now be closed by the user during the `DetermineLocalLauncherVersion` and `DetermineLocalBundleVersions` stages, where it would previously block until the stage completed.
@@ -79,7 +84,7 @@
 * When informing about bad command line arguments via GUI, display the most common arguments as a hint.
 * Build-time-difference of the launcher is now compared using the time package instead of a plain string comparison, bringing more robustness should the string ever be garbled.
 
-## 1.3.2 (2019-10-14)
+## v1.3.2 (2019-10-14)
 ### Features
 * trivrost will now handle the following signals, logging the stack trace of all goroutines before terminating: `SIGINT`, `SIGQUIT`, `SIGABRT`, `SIGTERM`, `SIGHUP`.
 ### Fixes
@@ -87,11 +92,11 @@
 ### Changes
 * trivrost will now inform about bad command line arguments via GUI.
 
-## 1.3.1 (2019-10-01)
+## v1.3.1 (2019-10-01)
 ### Changes
 * Missing `Content-Length`-headers will now cause size-checks to be skipped instead of failing. In those cases, bad files will only be detected by SHA-mismatch as soon as they have been downloaded entirely.
 
-## 1.3.0 (2019-09-27)
+## v1.3.0 (2019-09-27)
 ### Features
 * trivrost will now hint the final size of bundle files to the operating system, eliminating file fragmentation.
 * Added field `IgnoreLauncherBundleInfoHashes` to launcher-config, where you can specify the SHA-256 hash values of bundleinfo files to be ignored by trivrost when it checks for a self-update. This behaviour can be used to hand out specialized builds to specific users for hotfixing purposes without having to worry about the need to add (and later remove) the `-skipselfupdate` argument.
@@ -110,15 +115,15 @@
 * Renamed project to "trivrost" for open source release.
 * `scripts/signer` has been reimplemented in Go (under `cmd/signer`) and will be built when running `make tools`. `scripts/signer` has been removed.
 
-## 1.2.2 (2019-09-12)
+## v1.2.2 (2019-09-12)
 ### Changes
 * Backported from 1.3.0: Failure during self-update will now be reported to the user in a less generic, more detailed message.
 
-## 1.2.1 (2019-09-11)
+## v1.2.1 (2019-09-11)
 ### Fixes
 * Backported from 1.3.0: Fix signing of MSI bundles by no longer setting the SN.
 
-## 1.2.0 (2019-09-09)
+## v1.2.0 (2019-09-09)
 ### Features
 * trivrost will now download a number of files concurrently to reduce delays introduced by round-trip times.
 * trivrost will now stream file downloads to disk directly, without holding a copy in RAM first.
@@ -146,17 +151,17 @@
 * trivrost now updates the bundle folders directly, instead of downloading to a temporary directory first. The original idea was to prevent inconsistent states if trivrost should crash. However, since trivrost never attempts to launch the application in a state which does not match the one described in `bundleinfo.json`, this behavior is no longer required. It also enables trivrost to resume an update even if the launcher process was killed.
 * Less verbose linker output when building.
 
-## 1.1.8 (2019-07-17)
+## v1.1.8 (2019-07-17)
 ### Fixes
 * Validator tool now correctly concatenates package paths.
 ### Changes
 * Validator tool now logs the URLs it checked with a leading "OK:", as well as why it checked them.
 
-## 1.1.7 (2019-07-12)
+## v1.1.7 (2019-07-12)
 ### Fixes
 * More verbose logging output when running a self-update.
 
-## 1.1.6 (2019-07-10)
+## v1.1.6 (2019-07-10)
 ### Features
 * trivrost will now reuse the http client for slightly faster downloads of many small files.
 ### Fixes
@@ -166,24 +171,24 @@
 * Window resizing and maximizing is now disabled under Windows.
 * File system errors related to missing privileges will now display an error message instructing the user to contact their system administrator, instead of the more generic error message.
 
-## 1.1.5 (2019-06-28)
+## v1.1.5 (2019-06-28)
 ### Features
 * trivrost will now perform range requests on the remainder of failed transfers instead of starting from scratch.
 ### Fixes
 * If automatic Windows proxy was configured but not set, retrieving the proxy config would fail on windows. trivrost checks the automatic proxy config and if it is enabled but does not reutrn anything, it falls back to scripted or static proxy configuration. trivrost logs the detected proxy settings when starting. When started with -debug, it even logs the active proxy for each request.
 
-## 1.1.4 (2019-06-27)
+## v1.1.4 (2019-06-27)
 ### Fixes
 * Idle connections now time out.
 * trivrost now respects Windows system proxy settings.
 
-## 1.1.3 (2019-05-31)
+## v1.1.3 (2019-05-31)
 ### Fixes
 * Fix two trivrost instances being able to lock each other out from starting.
 ### Changes
 * Log file timestamps are now always in UTC.
 
-## 1.1.2 (2019-05-29)
+## v1.1.2 (2019-05-29)
 ### Features
 * New tool `validator` which can detect several problems in a given deployment-config.
 * Support for the `file://`-scheme in URLs using absolute local file paths.
@@ -194,11 +199,11 @@
 ### Changes
 * `.msi`-installer now displays correct `BrandingName` instead of a random temporary file name generated by Windows in the UAC confirmation dialog.
 
-## 1.1.1 (2019-05-17)
+## v1.1.1 (2019-05-17)
 ### Fixes
 * Workaround for potential MSI validation bugs when creating MSI installer.
 
-## 1.1.0 (2019-05-16)
+## v1.1.0 (2019-05-16)
 ### Features
 * trivrost will now remove unknown bundles; i.e. if the `bundles` folder contains a folder which does not match with the `LocalDirectory` of one of the `Bundles` in the deployment-config, then that folder will be deleted. This should keep users' hard drives clean if bundles are ever removed or renamed in the deployment-config.
 * The OS and architecture placeholders `{{.OS}}` and `{{.Arch}}` for deployment-config are back and will expand into `windows`/`linux`/`darwin` and `386`/`amd64`.
@@ -224,9 +229,9 @@
 * Removed the `-remove` command line flag.
 * The trivrost binary will now use the `BinaryName` configured in the launcher-config on install, instead of retaining whatever the executable file's name was.
 
-## 1.0.1 (2019-04-17)
+## v1.0.1 (2019-04-17)
 ### Features
 * Added support for Windows systems with broken `%APPDATA%` and `%LOCALAPPDATA%` environment variables.
 
-## 1.0.0 (2019-04-17)
+## v1.0.0 (2019-04-17)
 * First internal release.
