@@ -17,7 +17,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
+	golang.org/x/net v0.0.0-20220114011407-0dd24b26b47d
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9
 )
 
