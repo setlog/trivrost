@@ -11,7 +11,6 @@ import (
 
 /*
 #include <windows.h>
-#include <Commctrl.h>
 
 int centerWindow(ULONG_PTR ulpWindowHandle) {
     HANDLE windowHandle = (HANDLE)ulpWindowHandle;
