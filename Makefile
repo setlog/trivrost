@@ -70,6 +70,17 @@ export LAUNCHER_PROGRAM_EXT
 # Default target
 build: compile package
 
+build-all-from-linux: compile compile-darwin-from-linux compile-windows-from-linux package
+
+compile-windows-from-linux: generate
+	# Removing unneeded PNG from Windows binary
+	rm cmd/launcher/resources/icon.png.gen.go
+	GOOS=windows GOARCH=386 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ go build -o "${UPDATE_FILES_DIR}/windows/${LAUNCHER_PROGRAM_NAME}.exe" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+	#GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ go build -o "${UPDATE_FILES_DIR}/windows/${LAUNCHER_PROGRAM_NAME}.exe" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+
+compile-darwin-from-linux: generate
+	GOOS=darwin GOARCH=amd64 CC=o64-clang CXX=o64-clang++ go build -o "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+
 compile: generate  ## Compile with go build. Run after make generate.
 ifeq (${OS},windows)
 	# Removing unneeded PNG from Windows binary
@@ -83,13 +94,14 @@ compress:  ## Compress compiled binary with UPX. Needs to run after make compile
 	upx "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}"
 
 package:
-ifeq (${OS},darwin)
+# FIXME: Hardcoded output path instead of variable
+ifneq ($(wildcard out/update_files/darwin/.*),)
 	# Mac bundle is special
-	mkdir -p "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/MacOS"
-	mv "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}" "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/MacOS/launcher"
-	cp "cmd/launcher/resources/Info.plist" "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/"
-	mkdir -p "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources"
-	if [ -f cmd/launcher/resources/icon.icns ]; then cp cmd/launcher/resources/icon.icns "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources/icon.icns"; fi
+	mkdir -p "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}.app/Contents/MacOS"
+	mv "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}" "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}.app/Contents/MacOS/launcher"
+	cp "cmd/launcher/resources/Info.plist" "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}.app/Contents/"
+	mkdir -p "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources"
+	if [ -f cmd/launcher/resources/icon.icns ]; then cp cmd/launcher/resources/icon.icns "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}.app/Contents/Resources/icon.icns"; fi
 endif
 
 bundle:          ## Bundle OS-specific files. Call after signing
@@ -220,7 +232,7 @@ copy-test-files: ## Copy example resources into resource directory
 
 generate:        ## Run go generate
 	go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-	go generate -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+	go generate ${MODULE_PATH_LAUNCHER}
 
 clean:           ## Clean generated files
 ifndef OUT_DIR
