@@ -93,8 +93,8 @@ endif
 compress:  ## Compress compiled binary with UPX. Needs to run after make compile, but before make sign.
 	upx "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}"
 
-package:
 # FIXME: Hardcoded output path instead of variable
+package:
 ifneq ($(wildcard out/update_files/darwin/.*),)
 	# Mac bundle is special
 	mkdir -p "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}.app/Contents/MacOS"
