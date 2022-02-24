@@ -75,11 +75,11 @@ build-all-from-linux: compile compile-darwin-from-linux compile-windows-from-lin
 compile-windows-from-linux: generate
 	# Removing unneeded PNG from Windows binary
 	rm cmd/launcher/resources/icon.png.gen.go
-	GOOS=windows GOARCH=386 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ go build -o "${UPDATE_FILES_DIR}/windows/${LAUNCHER_PROGRAM_NAME}.exe" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+	CGO_ENABLED=1 GOOS=windows GOARCH=386 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ go build -o "${UPDATE_FILES_DIR}/windows/${LAUNCHER_PROGRAM_NAME}.exe" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
 	#GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ go build -o "${UPDATE_FILES_DIR}/windows/${LAUNCHER_PROGRAM_NAME}.exe" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
 
 compile-darwin-from-linux: generate
-	GOOS=darwin GOARCH=amd64 CC=o64-clang CXX=o64-clang++ go build -o "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+	CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CC=o64-clang CXX=o64-clang++ go build -o "${UPDATE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
 
 compile: generate  ## Compile with go build. Run after make generate.
 ifeq (${OS},windows)
@@ -87,7 +87,7 @@ ifeq (${OS},windows)
 	rm cmd/launcher/resources/icon.png.gen.go
 endif
 	# See https://github.com/golang/go/issues/18400#issuecomment-270414574 for why -installsuffix is needed.
-	go build -o "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
+	CGO_ENABLED=1 go build -o "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate -ldflags '${LDFLAGS}' ${MODULE_PATH_LAUNCHER}
 	$(info # compile finished)
 
 compress:  ## Compress compiled binary with UPX. Needs to run after make compile, but before make sign.
