@@ -115,6 +115,15 @@ else ifeq (${OS},windows)
 	cp "${UPDATE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}" "${RELEASE_FILES_DIR}/${OS}/${LAUNCHER_PROGRAM_NAME}"
 endif
 
+bundle-all-from-linux:
+	mkdir -p "${RELEASE_FILES_DIR}/darwin"
+	# zip is special and needs a cd
+	cd "${UPDATE_FILES_DIR}/darwin"; zip -r "../../../${RELEASE_FILES_DIR}/darwin/${LAUNCHER_PROGRAM_NAME}.zip" "${LAUNCHER_PROGRAM_NAME}.app"
+	mkdir -p "${RELEASE_FILES_DIR}/windows"
+	cp "${UPDATE_FILES_DIR}/windows/${LAUNCHER_PROGRAM_NAME}.exe" "${RELEASE_FILES_DIR}/windows/${LAUNCHER_PROGRAM_NAME}.exe"
+	mkdir -p "${RELEASE_FILES_DIR}/linux"
+	tar -cvf "${RELEASE_FILES_DIR}/linux/${LAUNCHER_PROGRAM_NAME}.tar" -C "${UPDATE_FILES_DIR}/linux" .
+
 # FIXME: The tool always assumes the x64 transform template to be under CWD/build -> parameter? Embed?
 DEPLOYMENT_CONFIG ?= trivrost/deployment-config.json
 ARCH ?= "386"
