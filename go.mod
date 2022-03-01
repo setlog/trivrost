@@ -18,7 +18,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
-	golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27
+	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9
 )
 
 go 1.13
