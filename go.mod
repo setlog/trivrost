@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.12.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
