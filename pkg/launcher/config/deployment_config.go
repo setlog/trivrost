@@ -41,10 +41,11 @@ type ExecutionConfig struct {
 }
 
 type Command struct {
-	Name            string             `json:"Name"`
-	Arguments       []string           `json:"Arguments,omitempty"`
-	Env             map[string]*string `json:"Env,omitempty"`
-	TargetPlatforms []string           `json:"TargetPlatforms,omitempty"`
+	Name                       string             `json:"Name"`
+	WorkingDirectoryBundleName string             `json:"WorkingDirectoryBundleName,omitempty"`
+	Arguments                  []string           `json:"Arguments,omitempty"`
+	Env                        map[string]*string `json:"Env,omitempty"`
+	TargetPlatforms            []string           `json:"TargetPlatforms,omitempty"`
 }
 
 func (dc *DeploymentConfig) HasLauncherUpdateConfig() bool {

@@ -36,7 +36,7 @@ func executeCommands(ctx context.Context, commandConfigs []config.Command, launc
 }
 
 func executeCommand(ctx context.Context, commandConfig config.Command, launcherFlags *flags.LauncherFlags) (*exec.Cmd, *system.ProcessSignature) {
-	commandWorkingDirectory := places.GetBundleFolderPath()
+	commandWorkingDirectory := findWorkingDirectoryByBundle(commandConfig.WorkingDirectoryBundleName)
 	commandBinaryPath := findMatchingExecutablePath(filepath.FromSlash(commandConfig.Name))
 	for {
 		log.Infof("Trying to start binary \"%s\" with working directory \"%s\" and args %v", commandBinaryPath, commandWorkingDirectory, commandConfig.Arguments)
@@ -51,6 +51,18 @@ func executeCommand(ctx context.Context, commandConfig config.Command, launcherF
 			return command, procSig
 		}
 	}
+}
+
+func findWorkingDirectoryByBundle(bundleName string) string {
+	if bundleName == "" {
+		return places.GetBundleFolderPath()
+	}
+
+	systemWideBundlePath := filepath.Join(places.GetSystemWideBundleFolderPath(), bundleName)
+	if system.FolderExists(systemWideBundlePath) {
+		return places.GetSystemWideBundleFolderPath()
+	}
+	return places.GetBundleFolderPath()
 }
 
 func findMatchingExecutablePath(filePath string) string {
