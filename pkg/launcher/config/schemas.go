@@ -84,6 +84,9 @@ const deploymentConfigSchema = `{
 								"type": "string",
 								"minLength": 1
 							},
+							"WorkingDirectoryBundleName": {
+								"type": "string"
+							},
 							"Arguments": {
 								"type": "array",
 								"items": {

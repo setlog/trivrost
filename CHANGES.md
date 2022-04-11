@@ -2,10 +2,11 @@
 
 ## TBD (TBD)
 ### Features
+* [`Commands`](docs/deployment-config.md#user-content-fields) can now optionally specify `WorkingDirectoryBundleName` to reference a bundle by the `LocalDirectory` property. If set and the referenced bundle is installed as a system-bundle, then the working directory will be set to the `systembundles`-folder. This is needed if you execute a command that requires another system bundle as a relative path.
 ### Fixes
 ### Changes
 
-## v1.5.0 (2022-04-4)
+## v1.5.0 (2022-04-04)
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
 * The binary can now be compressed with UPX when using `make compress`. Reduces the final filesize to less than 50%.

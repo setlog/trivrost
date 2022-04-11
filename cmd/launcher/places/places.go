@@ -63,6 +63,7 @@ func GetSystemWideBundleFolderPath() string {
 	return filepath.Join(filepath.Dir(system.GetProgramPath()), "systembundles")
 }
 
+// GetBundleFolderPath returns the default bundle path in the local AppData folder.
 func GetBundleFolderPath() string {
 	return filepath.Join(GetAppLocalDataFolderPath(), "bundles")
 }
