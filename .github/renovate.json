@@ -11,6 +11,10 @@
       "matchPackageNames": ["golang.org/x/net", "golang.org/x/sys"],
       "extends": ["schedule:monthly"],
       "automerge": true
+    },
+    {
+      "matchPackageNames": ["github.com/mattn/go-ieproxy"],
+      "automerge": false
     }
   ],
   "rebaseWhen": "behind-base-branch"
