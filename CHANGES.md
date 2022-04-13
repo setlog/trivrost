@@ -1,6 +1,10 @@
 # Release-Changelog
 
-## v1.5.0 (2022-04-4)
+## v1.5.1 (2022-03-13)
+### Fixes
+* Downgrade github.com/mattn/go-ieproxy dependency to 0.0.1 since it was causing build issues on Mac.
+
+## v1.5.0 (2022-04-04)
 ### Features
 * trivrost will log the progress of downloads if the connection was interrupted for any reason.
 * The binary can now be compressed with UPX when using `make compress`. Reduces the final filesize to less than 50%.
