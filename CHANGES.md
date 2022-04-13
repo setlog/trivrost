@@ -3,6 +3,7 @@
 ## TBD (TBD)
 ### Features
 * [`Commands`](docs/deployment-config.md#user-content-fields) can now optionally specify `WorkingDirectoryBundleName` to reference a bundle by the `LocalDirectory` property. If set and the referenced bundle is installed as a system-bundle, then the working directory will be set to the `systembundles`-folder instead of the `bundles`-folder. This is useful if you execute a command that requires to reference resources from other system-bundles via relative path in command arguments or environment variables.
+* `bundown`: Added flag `--skip-present-bundles` which, if set, causes `bundown` to skip download of bundles the corresponding folder of which already exist at the directory specified by `--out`.
 ### Fixes
 ### Changes
 
