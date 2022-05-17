@@ -3,6 +3,7 @@
 ## TBD (TBD)
 ### Features
 ### Fixes
+* `installdown`: No longer fail to parse version strings as 'launcherversion' that contain a suffix after the SemVer or no 'v' prefix. For examples these version strings no longer break: 'v1.2.0-rc0', '1.2.0'
 ### Changes
 
 ## v1.6.0 (2022-05-16)
