@@ -35,6 +35,8 @@ const archGo64 = "amd64"
 const archWin32 = "x86"
 const archGo32 = "386"
 
+var validVersionRegex = regexp.MustCompile(`v?([0-9]+\.[0-9]+\.[0-9]+).*`)
+
 type wxsConfig struct {
 	VendorName        string
 	ProductName       string
@@ -207,12 +209,10 @@ func configure() *wxsConfig {
 	if *arch == archGo64 {
 		*arch = archWin64
 	}
-	versionRegex := `v?([0-9]+\.[0-9]+\.[0-9]+).*`
-	pattern := regexp.MustCompile(versionRegex)
-	versionMatch := pattern.FindAllStringSubmatch(*launcherVersion, -1)
 
+	versionMatch := validVersionRegex.FindAllStringSubmatch(*launcherVersion, -1)
 	if versionMatch == nil {
-		fatalf("Parameter --%s must be a version in the format %s. Found: %s", launcherVersionFlag, versionRegex, *launcherVersion)
+		fatalf("Parameter --%s must be a version in the format %s. Found: %s", launcherVersionFlag, validVersionRegex.String(), *launcherVersion)
 	}
 	*launcherVersion = versionMatch[0][1]
 	fmt.Printf("Using version %s for MSI.\n", *launcherVersion)
