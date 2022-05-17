@@ -4,13 +4,15 @@ The resulting binaries are placed under the `out/update_files/<windows|linux|dar
 
 In this document, we will focus on how to get the project to build, i.e. successfully run just `make`, disregarding its configuration for now. Additional make-targets are mentioned further below.
 
+## Common prerequisites
+- [`git`](https://git-scm.com/)
+- [`go`](https://golang.org/) >= v1.16
+- [`goversioninfo`](https://github.com/josephspurrier/goversioninfo) (Make sure to add `$GOPATH/bin` to your `$PATH`)
+
+
 # Unix
 
 ## Prerequisites
-- [`git`](https://git-scm.com/)
-- [`go`](https://golang.org/) >= v1.13
-- [`goversioninfo`](https://github.com/josephspurrier/goversioninfo) (Make sure to add `$GOPATH/bin` to your `$PATH`)
-- [`make`](https://superuser.com/questions/352000/whats-a-good-way-to-install-build-essentials-all-common-useful-commands-on)
 - [`upx`](https://upx.github.io/)
 - `libgtk-3-dev`
 
@@ -24,9 +26,6 @@ In this document, we will focus on how to get the project to build, i.e. success
 # Windows
 
 ## Prerequisites
-- [`git`](https://git-scm.com/)
-- [`go`](https://golang.org/) >= v1.13
-- [`goversioninfo`](https://github.com/josephspurrier/goversioninfo) (Make sure to add `%GOPATH%\bin` to your `%PATH%`)
 - [`upx`](https://upx.github.io/)
 
 ## Further instructions
