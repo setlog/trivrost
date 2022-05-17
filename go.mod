@@ -20,6 +20,6 @@ require (
 	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32
 )
 
-go 1.13
+go 1.16
 
 replace git.sr.ht/~tslocum/preallocate => github.com/smallnest/preallocate v0.1.1

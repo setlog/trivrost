@@ -4,6 +4,7 @@
 ### Features
 ### Fixes
 ### Changes
+* Raise minimal go version to 1.16. (Builds are tested with 1.16 and 1.18 in CI)
 
 ## v1.6.0 (2022-05-16)
 ### Features
