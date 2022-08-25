@@ -15,6 +15,7 @@ In this document, we will focus on how to get the project to build, i.e. success
 ## Prerequisites
 - [`upx`](https://upx.github.io/)
 - `libgtk-3-dev`
+- `build-essential`
 
 ## Building
 1. `go get -d -u github.com/setlog/trivrost`
