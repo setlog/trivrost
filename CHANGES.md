@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## v1.7.0 (2023-05-23)
+### Changes
+* No changes, just a re-tag of v1.7.0-rc0
+
 ## v1.7.0-rc0 (2022-05-19)
 ### Fixes
 * `installdown`: No longer fail to parse version strings as 'launcherversion' that contain a suffix after the SemVer or no 'v' prefix. For examples these version strings no longer break: 'v1.2.0-rc0', '1.2.0'
