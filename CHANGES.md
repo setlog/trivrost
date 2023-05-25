@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## TBD (TBD)
+### Changes
+* Raise minimum golang requirement to 1.17
+
 ## v1.7.0 (2023-05-23)
 ### Changes
 * No changes, just a re-tag of v1.7.0-rc0
