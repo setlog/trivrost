@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/client_golang v1.12.2
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.3
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.10.0
 	golang.org/x/sys v0.8.0
