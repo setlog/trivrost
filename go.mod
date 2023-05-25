@@ -15,7 +15,7 @@ require (
 	github.com/stretchr/testify v1.7.5
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.7.0
-	golang.org/x/sys v0.6.0
+	golang.org/x/sys v0.8.0
 )
 
 require (
