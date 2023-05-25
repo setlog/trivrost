@@ -11,6 +11,7 @@
 * `accept-uninstall`: Accept uninstall prompt when it is dismissed. Use with `-dismiss-gui-prompts`.
 * `dismiss-gui-prompts`: Automatically dismiss GUI prompts.
 * `nostreampassing`: Do not relay standard streams to executed commands.
+* `extra-env`: Pass all arguments to execution as environment variables. Different variables are separated via `;`. Variable name and value are separated by `=`.
 
 ## hasher
 Hasher is a utility which generates [bundle info files](walkthrough.md#Bundle-info) given a directory path as an input. Usage:  
