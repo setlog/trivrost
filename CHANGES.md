@@ -1,9 +1,6 @@
 # Release-Changelog
 
 ## TBD (TBD)
-### Features
-* Add option to register `SchemeHandlers` to deployment-config. See [deployment-config.md](docs/deployment-config.md).
-
 ### Changes
 * Raise minimum golang requirement to 1.17
 

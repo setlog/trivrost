@@ -68,8 +68,8 @@ func (u *Updater) announceStatus(status UpdaterStatus, progressTarget uint64) {
 	}
 }
 
-func (u *Updater) ObtainDeploymentConfig(deploymentConfigURL string) {
-	log.Infof("Obtaining deployment config from \"%s\".", deploymentConfigURL)
+func (u *Updater) Prepare(deploymentConfigURL string) {
+	log.Infof("Downloading deployment config from \"%s\".", deploymentConfigURL)
 	data, err := u.downloader.DownloadSignedResource(deploymentConfigURL, u.publicKeys)
 	if err != nil {
 		panic(err)

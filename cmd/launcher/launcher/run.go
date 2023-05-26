@@ -2,11 +2,8 @@ package launcher
 
 import (
 	"context"
-	"strings"
 
-	"github.com/setlog/systemuri"
 	"github.com/setlog/trivrost/pkg/launcher/config"
-	"github.com/setlog/trivrost/pkg/system"
 
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/gui"
@@ -27,7 +24,7 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	updater := createUpdater(ctx, wireHandler(gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)))
 
 	gui.SetStage(gui.StageGetDeploymentConfig, 0)
-	updater.ObtainDeploymentConfig(resources.LauncherConfig.DeploymentConfigURL)
+	updater.Prepare(resources.LauncherConfig.DeploymentConfigURL)
 
 	if !IsInstanceInstalledInSystemMode() && !launcherFlags.SkipSelfUpdate {
 		updateLauncherToLatestVersion(updater, launcherFlags)
@@ -36,7 +33,6 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 
 	gui.SetStage(gui.StageLaunchApplication, 0)
 	handleUpdateOmissions(ctx, updater)
-	registerSchemeHandlers(launcherFlags, updater.GetDeploymentConfig().SchemeHandlers)
 	launch(ctx, updater.GetDeploymentConfig().Execution, launcherFlags)
 }
 
@@ -102,19 +98,6 @@ func handleInsufficientPrivileges(ctx context.Context, wasAtLeastOneMandatoryUpd
 	} else {
 		gui.Pause(ctx, "Some optional changes were not applied because they affect files in protected system folders. "+howTo+
 			"\nYou may click \"Continue\" to ignore this for the time being.")
-	}
-}
-
-func registerSchemeHandlers(launcherFlags *flags.LauncherFlags, schemaHandlers []config.SchemeHandler) {
-	transmittingFlags := launcherFlags.GetTransmittingFlags()
-	for _, schemaHandler := range schemaHandlers {
-		// TODO: Create flag "-lockagnostic" (or such) to allow to eliminate all self-restarting behavior (when used in combination with "-skipselfupdate") to reduce UI flickering?
-		// TODO: Create and then always add flag "-skipschemehandlerregistry" (or such) here to prevent -extra-env from being added?
-		// TODO: systemuri does not presently allow a commandLine: only application path.
-		// TODO: systemuri does not presently allow positional URL resource template argument according to deployment-config.md.
-		// TODO: systemuri does not presently implement %%-escapes according to deployment-config.md.
-		commandLine := system.GetBinaryPath() + " " + strings.Join(transmittingFlags, " ") + schemaHandler.ArgumentLine
-		systemuri.RegisterURLHandler(resources.LauncherConfig.BrandingName, schemaHandler.Scheme, commandLine)
 	}
 }
 

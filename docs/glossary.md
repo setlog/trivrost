@@ -20,6 +20,3 @@ The deployment config tells trivrost where to check for updates to itself and it
 
 ## trivrost deployment artifact
 We occasionally need to differ between just trivrost's executable binary and its entire deployment artifact as a whole. On Windows and Linux these two concepts are the same thing. On MacOS however, the deployment artifact of trivrost actually is a `.app`-folder, which contains the binary at `Contents/MacOS/launcher`.
-
-## Transmitting flags
-Whenever trivrost restarts itself as part of its exclusive lock and self-update mechanisms, it passes most of the command line arguments it was run with (such as `-skipselfupdate`) to the new instance as well. We refer to arguments affected by this as "transmitting flags".
