@@ -12,9 +12,15 @@ import (
 
 type DeploymentConfig struct {
 	Timestamp      string                 `json:"Timestamp,omitempty"`
+	SchemeHandlers []SchemeHandler        `json:"SchemeHandlers,omitempty"`
 	LauncherUpdate []LauncherUpdateConfig `json:"LauncherUpdate,omitempty"`
 	Bundles        []BundleConfig         `json:"Bundles,omitempty"`
 	Execution      ExecutionConfig        `json:"Execution,omitempty"`
+}
+
+type SchemeHandler struct {
+	Scheme       string `json:"Scheme,omitempty"`
+	ArgumentLine string `json:"ArgumentLine,omitempty"`
 }
 
 type HashDataConfig struct {
