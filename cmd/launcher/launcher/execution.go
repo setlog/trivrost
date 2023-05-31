@@ -39,8 +39,9 @@ func executeCommand(ctx context.Context, commandConfig config.Command, launcherF
 	commandWorkingDirectory := findWorkingDirectoryByBundle(commandConfig.WorkingDirectoryBundleName)
 	commandBinaryPath := findMatchingExecutablePath(filepath.FromSlash(commandConfig.Name))
 	for {
+		finalEnv := mergeMaps(commandConfig.Env, launcherFlags.ExtraEnvs)
 		log.Infof("Trying to start binary \"%s\" with working directory \"%s\" and args %v", commandBinaryPath, commandWorkingDirectory, commandConfig.Arguments)
-		command, procSig, err := system.StartProcess(commandBinaryPath, commandWorkingDirectory, commandConfig.Arguments, commandConfig.Env, !launcherFlags.NoStreamPassing)
+		command, procSig, err := system.StartProcess(commandBinaryPath, commandWorkingDirectory, commandConfig.Arguments, finalEnv, !launcherFlags.NoStreamPassing)
 		if err != nil {
 			log.Info(err)
 			gui.NotifyProblem(fmt.Sprintf("System denies launch of \"%s\"", filepath.Base(command.Path)), true)
@@ -51,6 +52,18 @@ func executeCommand(ctx context.Context, commandConfig config.Command, launcherF
 			return command, procSig
 		}
 	}
+}
+
+func mergeMaps(map1 map[string]*string, map2 map[string]string) map[string]*string {
+	result := make(map[string]*string)
+	for k, v := range map1 {
+		result[k] = v
+	}
+	for k, v := range map2 {
+		v2 := v
+		result[k] = &v2
+	}
+	return result
 }
 
 func findWorkingDirectoryByBundle(bundleName string) string {
