@@ -1,17 +1,17 @@
 package launcher
 
 import (
+	"github.com/setlog/systemuri"
+	"github.com/setlog/trivrost/cmd/launcher/flags"
+	"github.com/setlog/trivrost/cmd/launcher/resources"
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/setlog/systemuri"
-	"github.com/setlog/trivrost/cmd/launcher/flags"
-	"github.com/setlog/trivrost/cmd/launcher/resources"
 
 	"github.com/setlog/trivrost/cmd/launcher/places"
 
@@ -136,12 +136,72 @@ func RegisterSchemeHandlers(launcherFlags *flags.LauncherFlags, schemeHandlers [
 		// TODO: Create and then always add flag "-skipschemehandlerregistry" (or such) here to prevent -extra-env from being added?
 		// TODO: systemuri does not presently implement %%-escapes according to deployment-config.md.
 		binaryPath := system.GetBinaryPath()
-		arguments := strings.Join(transmittingFlags, " ") + schemeHandler.Arguments
+		// We want to pass a few flags from the current execution (transmitting flags) as well, but only if they are not set in the passed arguments.
+		finalArguments := []string{}
+		finalArguments = removeFromList(transmittingFlags, extractArguments(schemeHandler.Arguments))
+		finalArguments = filterWhitelistArguments(finalArguments)
+
+		transmittingFlagsFiltered := removeFromList(transmittingFlags, finalArguments)
+		transmittingFlagsFiltered = []string{} // TODO: We actually want to create a whitelist here of flags that are okay to retain
+
+		arguments := strings.Join(transmittingFlagsFiltered, " ") + schemeHandler.Arguments
 		err := systemuri.RegisterURLHandler(resources.LauncherConfig.BrandingName, schemeHandler.Scheme, binaryPath, arguments)
 		if err != nil {
 			log.Warnf("Registering the scheme \"%s\" failed: %v", schemeHandler.Scheme, err)
 		}
 	}
+}
+
+// TODO: Make case insensitive
+func filterWhitelistArguments(arguments []string) []string {
+	// slice of entries to allow in the arguments list
+	whitelist := []string{
+		"debug",
+		"skipselfupdate",
+		"roaming",
+		"deployment-config",
+		"extra-env",
+	}
+
+	var filteredArguments []string
+
+	sort.Strings(whitelist)
+	for _, argument := range arguments {
+		if found := sort.SearchStrings(whitelist, argument); found < len(whitelist) && whitelist[found] == argument {
+			continue
+		}
+		filteredArguments = append(filteredArguments, argument)
+	}
+
+	return filteredArguments
+}
+
+// TODO: Make case insensitive
+func removeFromList(sourceList []string, itemsToRemove []string) []string {
+	argSet := make(map[string]bool)
+	for _, item := range itemsToRemove {
+		argSet[item] = true
+	}
+
+	var filteredSourceList []string
+	for _, item := range sourceList {
+		if _, ok := argSet[item]; !ok {
+			filteredSourceList = append(filteredSourceList, item)
+		}
+	}
+	return filteredSourceList
+}
+
+func extractArguments(input string) []string {
+	words := strings.Fields(input)
+	var args []string
+	for _, w := range words {
+		if strings.HasPrefix(w, "-") || strings.HasPrefix(w, "--") {
+			arg := strings.SplitN(w, "=", 2)[0]
+			args = append(args, arg)
+		}
+	}
+	return args
 }
 
 func MustRestartWithInstalledBinary(launcherFlags *flags.LauncherFlags) {
