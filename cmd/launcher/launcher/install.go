@@ -45,12 +45,12 @@ func IsInstanceInstalled() bool {
 	return isInstalled
 }
 
-// IsInstanceInstalledInSystemMode returns true iff we are in system mode.
+// IsInstanceInstalledInSystemMode returns true if we are in system mode.
 func IsInstanceInstalledInSystemMode() bool {
 	return system.FolderExists(places.GetSystemWideBundleFolderPath())
 }
 
-// IsInstanceInstalledForCurrentUser returns true iff the launcher's desired path under user files is occupied by the program running this code.
+// IsInstanceInstalledForCurrentUser returns true if the launcher's desired path under user files is occupied by the program running this code.
 func IsInstanceInstalledForCurrentUser() bool {
 	programPath := system.GetProgramPath()
 	targetProgramPath := getTargetProgramPath()
