@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type LauncherFlags struct {
@@ -23,8 +24,11 @@ type LauncherFlags struct {
 	DismissGuiPrompts  bool
 	LogIndexCounter    int
 	LogInstanceCounter int
+	// Readonly field of passed environment variables
+	ExtraEnvs map[string]string
 
-	nextLogIndex int
+	nextLogIndex   int
+	extraEnvString string
 }
 
 const (
@@ -41,11 +45,11 @@ const (
 	DismissGuiPromptsFlag  = "dismiss-gui-prompts"
 	LogIndexCounterFlag    = "log-index"
 	LogInstanceCounterFlag = "log-instance"
+	ExtraEnvFlag           = "extra-env"
 )
 
 func Setup(args []string) (*LauncherFlags, error) {
 	launcherFlags := LauncherFlags{nextLogIndex: -1}
-
 	// MacOS might append program serial number which we have to ignore/remove from args
 	ignoredArgsExp := regexp.MustCompile("-+psn.*")
 	for i, arg := range args {
@@ -70,12 +74,14 @@ func Setup(args []string) (*LauncherFlags, error) {
 	flagSet.BoolVar(&launcherFlags.DismissGuiPrompts, DismissGuiPromptsFlag, false, "Automatically dismiss GUI prompts.")
 	flagSet.IntVar(&launcherFlags.LogIndexCounter, LogIndexCounterFlag, -1, "Number to increment when restarting.")
 	flagSet.IntVar(&launcherFlags.LogInstanceCounter, LogInstanceCounterFlag, 0, "Number to increment when started by user.")
+	flagSet.StringVar(&launcherFlags.extraEnvString, ExtraEnvFlag, "", "Extra environment variables that will be passed to executions")
 	setDeprecatedFlags(flagSet)
 
 	err := flagSet.Parse(args[1:])
 	if err != nil {
 		return &launcherFlags, withSuggestions(err, flagSet, []string{DebugFlag, RoamingFlag, SkipSelfUpdateFlag, UninstallFlag})
 	}
+	launcherFlags.ExtraEnvs = parseExtraEnv(launcherFlags.extraEnvString)
 
 	if !launcherFlags.DismissGuiPrompts && launcherFlags.AcceptInstall {
 		return &launcherFlags, fmt.Errorf("-%s was set when -%s was not", AcceptInstallFlag, DismissGuiPromptsFlag)
@@ -86,6 +92,22 @@ func Setup(args []string) (*LauncherFlags, error) {
 	}
 
 	return &launcherFlags, nil
+}
+
+func parseExtraEnv(extraEnvString string) map[string]string {
+	if extraEnvString == "" {
+		return nil
+	}
+	extraEnvs := make(map[string]string)
+	splitted := strings.Split(extraEnvString, ";")
+	for _, envVar := range splitted {
+		keyValue := strings.SplitN(envVar, "=", 2)
+		if len(keyValue) != 2 {
+			panic("invalid extra environment variables - missing \"=\"")
+		}
+		extraEnvs[keyValue[0]] = keyValue[1]
+	}
+	return extraEnvs
 }
 
 func withSuggestions(err error, flagSet *flag.FlagSet, suggestFlags []string) error {
@@ -133,6 +155,9 @@ func (launcherFlags *LauncherFlags) GetTransmittingFlags() (transmittingFlags []
 	}
 	if launcherFlags.NoStreamPassing {
 		transmittingFlags = append(transmittingFlags, "-"+NoStreamPassingFlag)
+	}
+	if launcherFlags.extraEnvString != "" {
+		transmittingFlags = append(transmittingFlags, "-"+ExtraEnvFlag, launcherFlags.extraEnvString)
 	}
 
 	return transmittingFlags
