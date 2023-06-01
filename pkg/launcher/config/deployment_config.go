@@ -19,8 +19,8 @@ type DeploymentConfig struct {
 }
 
 type SchemeHandler struct {
-	Scheme       string `json:"Scheme,omitempty"`
-	ArgumentLine string `json:"ArgumentLine,omitempty"`
+	Scheme    string `json:"Scheme,omitempty"`
+	Arguments string `json:"Arguments,omitempty"`
 }
 
 type HashDataConfig struct {

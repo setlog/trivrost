@@ -224,8 +224,10 @@ github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFR
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
-github.com/setlog/systemuri v0.0.0-20230526080928-88974150704d h1:AQGV8NyH71kpiuW35nvqfnFe9ffrCsdAWrSQjyEqxiQ=
-github.com/setlog/systemuri v0.0.0-20230526080928-88974150704d/go.mod h1:gq1832MMUy0gN037ydvmttmzlYhqUUPO/sVNrVQ60d4=
+github.com/setlog/systemuri v0.0.0-20230601090920-e6e374b3b5f4 h1:k0gCu2523rknGl1l2o/zrEmSv1/YVcBgWAJRW/YstR0=
+github.com/setlog/systemuri v0.0.0-20230601090920-e6e374b3b5f4/go.mod h1:gq1832MMUy0gN037ydvmttmzlYhqUUPO/sVNrVQ60d4=
+github.com/setlog/systemuri v0.0.0-20230601092534-82770c4053ba h1:6vHnyps2j1UyoUISvDCy/jhT4beUlQtHRdyatAKz6WE=
+github.com/setlog/systemuri v0.0.0-20230601092534-82770c4053ba/go.mod h1:gq1832MMUy0gN037ydvmttmzlYhqUUPO/sVNrVQ60d4=
 github.com/shirou/gopsutil v3.21.11+incompatible h1:+1+c1VGhc88SSonWP6foOcLhvnKlUeu/erjjvaPEYiI=
 github.com/shirou/gopsutil v3.21.11+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=

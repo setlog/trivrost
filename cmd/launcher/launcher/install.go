@@ -1,6 +1,7 @@
 package launcher
 
 import (
+	"github.com/setlog/trivrost/pkg/launcher/config"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -8,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/setlog/systemuri"
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/resources"
 
@@ -111,6 +113,8 @@ func Install(launcherFlags *flags.LauncherFlags) {
 
 	InstallShortcuts(targetProgramPath, launcherFlags)
 
+	// Registering the scheme handlers had to happen in run.go, since we do not have the deployment config here, yet.
+
 	MustRestartWithInstalledBinary(launcherFlags)
 }
 
@@ -122,6 +126,22 @@ func InstallShortcuts(targetProgramPath string, launcherFlags *flags.LauncherFla
 		waitGroup.Done()
 	})
 	waitGroup.Wait()
+}
+
+// RegisterSchemeHandlers registers the schemes defined in the deployment config
+func RegisterSchemeHandlers(launcherFlags *flags.LauncherFlags, schemeHandlers []config.SchemeHandler) {
+	transmittingFlags := launcherFlags.GetTransmittingFlags()
+	for _, schemeHandler := range schemeHandlers {
+		// TODO: Create flag "-lockagnostic" (or such) to allow to eliminate all self-restarting behavior (when used in combination with "-skipselfupdate") to reduce UI flickering?
+		// TODO: Create and then always add flag "-skipschemehandlerregistry" (or such) here to prevent -extra-env from being added?
+		// TODO: systemuri does not presently implement %%-escapes according to deployment-config.md.
+		binaryPath := system.GetBinaryPath()
+		arguments := strings.Join(transmittingFlags, " ") + schemeHandler.Arguments
+		err := systemuri.RegisterURLHandler(resources.LauncherConfig.BrandingName, schemeHandler.Scheme, binaryPath, arguments)
+		if err != nil {
+			log.Warnf("Registering the scheme \"%s\" failed: %v", schemeHandler.Scheme, err)
+		}
+	}
 }
 
 func MustRestartWithInstalledBinary(launcherFlags *flags.LauncherFlags) {
