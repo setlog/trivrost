@@ -2,7 +2,7 @@ package dummy_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/setlog/trivrost/pkg/dummy"
@@ -12,7 +12,7 @@ import (
 func TestReadCloser(t *testing.T) {
 	data := []byte("super amazing data")
 	rc := &dummy.ByteReadCloser{Buffer: bytes.NewBuffer(data)}
-	readData, err := ioutil.ReadAll(rc)
+	readData, err := io.ReadAll(rc)
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
@@ -24,7 +24,7 @@ func TestReadCloser(t *testing.T) {
 func TestReadCloserBigFile(t *testing.T) {
 	data := []byte("hyper amazing data" + misc.MustGetRandomHexString(10000))
 	rc := &dummy.ByteReadCloser{Buffer: bytes.NewBuffer(data)}
-	readData, err := ioutil.ReadAll(rc)
+	readData, err := io.ReadAll(rc)
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}

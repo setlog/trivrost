@@ -241,7 +241,7 @@ func configure() *wxsConfig {
 }
 
 func mustReaderForFile(filePath string) io.Reader {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fatalf("Could not read file \"%s\": %v", filePath, err)
 	}

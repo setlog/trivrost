@@ -3,11 +3,10 @@ package misc
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 )
 
 func MustReadAll(fromReader io.Reader) []byte {
-	data, err := ioutil.ReadAll(fromReader)
+	data, err := io.ReadAll(fromReader)
 	if err != nil {
 		panic(err)
 	}

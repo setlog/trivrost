@@ -3,7 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -120,7 +121,7 @@ func (bundleFiles FileInfoMap) FilePaths() []string {
 }
 
 func ReadInfo(filePath string) *BundleInfo {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err)
 	}
@@ -128,7 +129,7 @@ func ReadInfo(filePath string) *BundleInfo {
 }
 
 func ReadInfoFromReader(reader *strings.Reader) *BundleInfo {
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		panic(err)
 	}

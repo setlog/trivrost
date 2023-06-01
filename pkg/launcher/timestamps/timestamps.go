@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -60,7 +59,7 @@ func (timestamps *Timestamps) write(filePath string) {
 }
 
 func ReadTimestampsFromReader(reader io.Reader) *Timestamps {
-	bytes, err := ioutil.ReadAll(reader)
+	bytes, err := io.ReadAll(reader)
 	if err != nil {
 		panic(fmt.Sprintf("Could not read from reader: %v", err))
 	}

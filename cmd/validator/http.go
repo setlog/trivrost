@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
@@ -12,9 +13,9 @@ func getFile(fileUrlString string) ([]byte, error) {
 	fileUrl, err := url.Parse(fileUrlString)
 	if err == nil && fileUrl.Scheme == "file" {
 		fileUrl.Scheme = ""
-		return ioutil.ReadFile(fileUrl.String())
+		return os.ReadFile(fileUrl.String())
 	} else if err != nil || fileUrl.Scheme == "" {
-		return ioutil.ReadFile(fileUrlString)
+		return os.ReadFile(fileUrlString)
 	}
 
 	client := &http.Client{}
@@ -27,7 +28,7 @@ func getFile(fileUrlString string) ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("received bad status code %s", resp.Status)
 	}
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }
 
 func getHttpHeadResult(url string) (responseCode int, err error) {
