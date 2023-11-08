@@ -54,3 +54,6 @@ test.json
 .idea/
 *.iml
 .vscode/
+
+# local test deployment-config
+deployment-config.json

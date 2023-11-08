@@ -99,7 +99,7 @@ func MustPutFile(localFilePath string, bytes []byte) {
 }
 
 func MustReadFile(filePath string) []byte {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not read file \"%s\"", filePath), err})
 	}
@@ -107,7 +107,7 @@ func MustReadFile(filePath string) []byte {
 }
 
 func MustCopyFile(from, to string) {
-	data, err := ioutil.ReadFile(from)
+	data, err := os.ReadFile(from)
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not read file \"%s\"", from), err})
 	}
@@ -116,7 +116,7 @@ func MustCopyFile(from, to string) {
 		panic(&FileSystemError{fmt.Sprintf("Could not stat file \"%s\"", from), err})
 	}
 	log.Debugf(`Copying "%s" to "%s" with mode %s.`, from, to, strconv.FormatInt(int64(info.Mode()), 8))
-	err = ioutil.WriteFile(to, data, info.Mode())
+	err = os.WriteFile(to, data, info.Mode())
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not write file \"%s\"", to), err})
 	}

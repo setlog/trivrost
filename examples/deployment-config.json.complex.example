@@ -1,5 +1,11 @@
 {
   "Timestamp": "2019-02-07 14:53:17",
+  "SchemeHandlers": [
+    {
+      "Scheme": "com.setlog.example",
+      "Arguments": "--extra-env=\"APP_LAUNCH_OPTIONS=%s\""
+    }
+  ],
   "LauncherUpdate": [
     {
       "BundleInfoURL": "https://example.com/windows/launcher/bundleinfo.json",

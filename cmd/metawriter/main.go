@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -56,7 +55,7 @@ func replacePlaceholders(text string) string {
 
 func mustReadFile(filePath string) string {
 	fmt.Printf("Metawriter: Reading \"%s\".\n", filePath)
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fatalf("Could not read \"%s\": %v", filePath, err)
 	}
@@ -65,7 +64,7 @@ func mustReadFile(filePath string) string {
 
 func mustWriteFile(filePath string, data []byte) {
 	fmt.Printf("Metawriter: Writing \"%s\".\n", filePath)
-	err := ioutil.WriteFile(filePath, data, 0600)
+	err := os.WriteFile(filePath, data, 0600)
 	if err != nil {
 		fatalf("Could not open file \"%s\" for writing: %v", filePath, err)
 	}
@@ -108,7 +107,7 @@ func validateVariables() {
 }
 
 func mustReaderForFile(filePath string) io.Reader {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fatalf("Could not read file \"%s\": %v", filePath, err)
 	}

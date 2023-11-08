@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"runtime"
 
+	"github.com/setlog/systemuri"
 	"github.com/setlog/trivrost/cmd/launcher/locking"
 
 	"github.com/setlog/trivrost/cmd/launcher/flags"
@@ -38,9 +39,19 @@ func uninstall(launcherFlags *flags.LauncherFlags) {
 	gui.ShowWaitDialog("Uninstalling "+brandingName, "Please wait as "+brandingName+" is uninstalling.")
 	deletePlainFiles()
 	deleteBundles()
+	unregisterSchemeHandlers()
 	defer prepareProgramDeletionWithFinalizerFunc()()
 	gui.HideWaitDialog()
 	gui.BlockingDialog("Uninstallation complete", brandingName+" has been uninstalled.", []string{"Close"}, 0, launcherFlags.DismissGuiPrompts)
+}
+
+// unregisterSchemeHandlers removes all handlers that are associated with this binary
+func unregisterSchemeHandlers() {
+	binaryPath := system.GetBinaryPath()
+	err := systemuri.UnregisterURLHandlerByPath(binaryPath)
+	if err != nil {
+		log.Warnf("Unregistering the schemes for binary \"%s\" failed: %v", binaryPath, err)
+	}
 }
 
 func deletePlainFiles() {

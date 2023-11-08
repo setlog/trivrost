@@ -10,7 +10,6 @@ import (
 	"encoding/pem"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
@@ -35,7 +34,8 @@ func createSignatures() {
 		if err != nil {
 			fatalf("Creating of a signature for the file %s failed: %v", targetFiles[i], err)
 		}
-		if err = ioutil.WriteFile(targetFiles[i]+".signature", []byte(signature), 0644); err != nil {
+
+		if err = os.WriteFile(targetFiles[i]+".signature", []byte(signature), 0644); err != nil {
 			fatalf("Could not write a signature into the file %s.signature: %v", targetFiles[i], err)
 		}
 	}
@@ -55,7 +55,7 @@ func createFileSignature(key *rsa.PrivateKey, fileContent []byte) (string, error
 }
 
 func readFile(fileName string) []byte {
-	content, err := ioutil.ReadFile(fileName)
+	content, err := os.ReadFile(fileName)
 	if err != nil {
 		fatalf("Could not read a file %s: %v", fileName, err)
 	}

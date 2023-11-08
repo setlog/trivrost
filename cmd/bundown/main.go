@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -145,7 +144,7 @@ func isFolder(filePath string) bool {
 }
 
 func mustReaderForFile(filePath string) io.Reader {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fatalf("Could not read file \"%s\": %v", filePath, err)
 	}

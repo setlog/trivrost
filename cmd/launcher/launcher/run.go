@@ -2,14 +2,12 @@ package launcher
 
 import (
 	"context"
-
-	"github.com/setlog/trivrost/pkg/launcher/config"
-
 	"github.com/setlog/trivrost/cmd/launcher/flags"
 	"github.com/setlog/trivrost/cmd/launcher/gui"
 	"github.com/setlog/trivrost/cmd/launcher/locking"
 	"github.com/setlog/trivrost/cmd/launcher/places"
 	"github.com/setlog/trivrost/cmd/launcher/resources"
+	"github.com/setlog/trivrost/pkg/launcher/config"
 
 	"github.com/setlog/trivrost/pkg/fetching"
 	"github.com/setlog/trivrost/pkg/logging"
@@ -24,7 +22,7 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 	updater := createUpdater(ctx, wireHandler(gui.NewGuiDownloadProgressHandler(fetching.MaxConcurrentDownloads)))
 
 	gui.SetStage(gui.StageGetDeploymentConfig, 0)
-	updater.Prepare(resources.LauncherConfig.DeploymentConfigURL)
+	updater.ObtainDeploymentConfig(resources.LauncherConfig.DeploymentConfigURL)
 
 	if !IsInstanceInstalledInSystemMode() && !launcherFlags.SkipSelfUpdate {
 		updateLauncherToLatestVersion(updater, launcherFlags)
@@ -33,6 +31,8 @@ func Run(ctx context.Context, launcherFlags *flags.LauncherFlags) {
 
 	gui.SetStage(gui.StageLaunchApplication, 0)
 	handleUpdateOmissions(ctx, updater)
+	// Registering the schema handlers here instead of install.go, since we have the updater (deployment config) here
+	RegisterSchemeHandlers(launcherFlags, updater.GetDeploymentConfig().SchemeHandlers)
 	launch(ctx, updater.GetDeploymentConfig().Execution, launcherFlags)
 }
 
