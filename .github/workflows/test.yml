@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Install Go
-        uses: actions/setup-go@v4.0.1
+        uses: actions/setup-go@v5.0.0
         with:
           go-version: ${{ matrix.go-version }}
       - name: Install libgtk-3-dev
