@@ -1,15 +1,6 @@
 <?xml version='1.0' encoding='windows-1252'?>
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
 
-    <!-- Configure variables for ProgramFiles path to install into the correct 64bit directory when installing
-    the 64bit version -->
-    <?if $(sys.BUILDARCH) = x64 ?>
-    <?define Win64 = "yes" ?>
-    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
-    <?else ?>
-    <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
-    <?endif ?>
-
     <!-- default to installing shortcuts for all users -->
     <?define ALLUSERS = "1" ?>
 
@@ -46,6 +37,22 @@
         <MajorUpgrade AllowDowngrades="yes"/>
 
         <Media Id="1" Cabinet="simple.cab" EmbedCab="yes"/>
+
+        <!-- UI Options - Add this to allow user to select the install directory -->
+        <!-- Define the property to tell WIX to use the folder given in WIXUI_INSTALLDIR -->
+        <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONROOTDIRECTORY"/>
+
+        <!-- Link the UI for install directory selection -->
+        <UIRef Id="WixUI_InstallDir"/>
+
+        <!-- Configure variables for ProgramFiles path to install into the correct 64bit directory when installing
+        the 64bit version -->
+        <?if $(sys.BUILDARCH) = x64 ?>
+        <?define Win64 = "yes" ?>
+        <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+        <?else ?>
+        <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+        <?endif ?>
 
         <!-- component group must be auto-generated in the pipeline -->
         <Directory Id="TARGETDIR" Name="SourceDir">
