@@ -87,7 +87,7 @@ func compileMsi(cfg *wxsConfig) {
 		"-sice:ICE61",
 		"-sacl",
 		"-sval",
-		"-ext WixUIExtension",
+		"-ext", "WixUIExtension",
 		"-b", cfg.ComponentGroupDir,
 		"-out", filepath.Join(cfg.OutDir, cfg.MsiOutputFile),
 		filepath.Join(cfg.OutDir, cfg.ComponentGroupId+cfg.Arch+".wixobj"),
