@@ -6,7 +6,7 @@ require (
 	github.com/andlabs/ui v0.0.0-20200610043537-70a69d6ae31e
 	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.16.0
-	github.com/go-ole/go-ole v1.2.6
+	github.com/go-ole/go-ole v1.3.0
 	github.com/gofrs/flock v0.8.1
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.15.1
