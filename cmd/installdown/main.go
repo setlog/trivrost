@@ -76,7 +76,7 @@ func compileMsi(cfg *wxsConfig) {
 	logrus.Info("Running candle to build launcher.wixobj")
 	mustRunCommand("candle",
 		filepath.Join(cfg.OutDir, "launcher.wxs"),
-		"-o", filepath.Join(cfg.OutDir, "launcher wixobj"),
+		"-o", filepath.Join(cfg.OutDir, "launcher.wixobj"),
 		"-arch", cfg.Arch)
 
 	// -sice:ICE61 suppress ICE61, the warning about same-version-upgrade which we need to allow for updating bundled bundles
