@@ -1,100 +1,102 @@
 <?xml version='1.0' encoding='windows-1252'?>
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
 
-    <!-- default to installing shortcuts for all users -->
-    <?define ALLUSERS = "1" ?>
+  <!-- default to installing shortcuts for all users -->
+  <?define ALLUSERS = "1" ?>
 
-    <!-- The product UpgradeCode GUID should depend on `VendorName` and `ProductName` and should be unique! -->
-    <!-- Language 1033 with Codepage 1252 = us-english -->
-    <Product Id='*'
-             Name='{{.BrandingName}}'
+  <!-- The product UpgradeCode GUID should depend on `VendorName` and `ProductName` and should be unique! -->
+  <!-- Language 1033 with Codepage 1252 = us-english -->
+  <Product Id='*'
+           Name='{{.BrandingName}}'
+           Manufacturer='{{.VendorName}}'
+           UpgradeCode='{{.GuidUpgradeCode}}'
+           Language='1033'
+           Codepage='1252'
+           Version='{{.LauncherVersion}}'>
+
+    <Package Id='*'
+             Keywords='Installer'
+             Description="{{.BrandingName}} Installer"
              Manufacturer='{{.VendorName}}'
-             UpgradeCode='{{.GuidUpgradeCode}}'
-             Language='1033'
-             Codepage='1252'
-             Version='{{.LauncherVersion}}'>
+             InstallerVersion='310'
+             Languages='1033'
+             SummaryCodepage='1252'
+             Compressed='yes'
+             InstallScope='perMachine'
+             Platform="$(sys.BUILDARCH)"/>
 
-        <Package Id='*'
-                 Keywords='Installer'
-                 Description="{{.BrandingName}} Installer"
-                 Manufacturer='{{.VendorName}}'
-                 InstallerVersion='310'
-                 Languages='1033'
-                 SummaryCodepage='1252'
-                 Compressed='yes'
-                 InstallScope='perMachine'
-                 Platform="$(sys.BUILDARCH)"/>
+    <!-- LaunchCondition to check for 64bit Windows and prevent 32bit install -->
+    <?if $(sys.BUILDARCH) = x86 ?>
+    <Condition Message="You are attempting to run the 32-bit installer on a 64-bit version of Windows.">
+      <![CDATA[NOT Msix64 ]]>
+    </Condition>
+    <?endif?>
 
-        <!-- LaunchCondition to check for 64bit Windows and prevent 32bit install -->
-        <?if $(sys.BUILDARCH) = x86 ?>
-        <Condition Message="You are attempting to run the 32-bit installer on a 64-bit version of Windows.">
-            <![CDATA[NOT Msix64 ]]>
-        </Condition>
-        <?endif?>
+    <!-- Uninstall older versions before installing a new one. AllowDowngrades includes uninstalling of older
+    and also the same version -->
+    <MajorUpgrade AllowDowngrades="yes"/>
 
-        <!-- Uninstall older versions before installing a new one. AllowDowngrades includes uninstalling of older
-        and also the same version -->
-        <MajorUpgrade AllowDowngrades="yes"/>
+    <Media Id="1" Cabinet="simple.cab" EmbedCab="yes"/>
 
-        <Media Id="1" Cabinet="simple.cab" EmbedCab="yes"/>
+    <!-- Link the UI for install directory selection -->
+    <UI>
+      <UIRef Id="WixUI_InstallDir"/>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
+    </UI>
+    <!-- UI Options - Add this to allow user to select the install directory -->
+    <!-- Define the property to tell WIX to use the folder given in WIXUI_INSTALLDIR -->
+    <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONROOTDIRECTORY"/>
 
-        <!-- Link the UI for install directory selection -->
-        <UI>
-          <UIRef Id="WixUI_InstallDir"/>
-          <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
-          <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
-        </UI>
-        <!-- UI Options - Add this to allow user to select the install directory -->
-        <!-- Define the property to tell WIX to use the folder given in WIXUI_INSTALLDIR -->
-        <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONROOTDIRECTORY"/>
+    <!-- Configure variables for ProgramFiles path to install into the correct 64bit directory when installing
+    the 64bit version -->
+    <?if $(sys.BUILDARCH) = x64 ?>
+    <?define Win64 = "yes" ?>
+    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+    <?else ?>
+    <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+    <?endif ?>
 
-        <!-- Configure variables for ProgramFiles path to install into the correct 64bit directory when installing
-        the 64bit version -->
-        <?if $(sys.BUILDARCH) = x64 ?>
-        <?define Win64 = "yes" ?>
-        <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
-        <?else ?>
-        <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
-        <?endif ?>
+    <!-- component group must be auto-generated in the pipeline -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="$(var.PlatformProgramFilesFolder)">
+        <Directory Id="VENDORROOTDIRECTORY" Name="{{.VendorName}}">
+          <Directory Id="APPLICATIONROOTDIRECTORY" Name="{{.ProductName}}">
 
-        <!-- component group must be auto-generated in the pipeline -->
-        <Directory Id="TARGETDIR" Name="SourceDir">
-            <Directory Id="$(var.PlatformProgramFilesFolder)">
-                <Directory Id="VENDORROOTDIRECTORY" Name="{{.VendorName}}">
-                    <Directory Id="APPLICATIONROOTDIRECTORY" Name="{{.ProductName}}">
+            <Component Id="MainExecutable" Guid="*">
+              <File Id="MainExe" Source="SourceDir\{{.BinaryName}}.exe" KeyPath="yes" Checksum="yes"/>
+            </Component>
+            <Component Id="MainExecutableDesktopShortcut" Guid="*">
+              <Shortcut Id="startmenu" Directory="ProgramMenuDir" Name="{{.BrandingName}}" WorkingDirectory='APPLICATIONROOTDIRECTORY'
+                        Target="[APPLICATIONROOTDIRECTORY]{{.BinaryName}}" Icon="MainExecutable.exe"/>
+              <Shortcut Id="desktop" Directory="DesktopFolder" Name="{{.BrandingName}}" WorkingDirectory='APPLICATIONROOTDIRECTORY'
+                        Target="[APPLICATIONROOTDIRECTORY]{{.BinaryName}}" Icon="MainExecutable.exe"/>
+              <RegistryValue Root='HKCU' Key='Software\{{.VendorName}}\{{.ProductName}}' Type='string' Name="Desktop" Value='' KeyPath='yes'/>
+            </Component>
 
-                        <Component Id="MainExecutable" Guid="*">
-                            <File Id="MainExe" Source="SourceDir\{{.BinaryName}}.exe" KeyPath="yes" Checksum="yes"/>
-                        </Component>
-                        <Component Id="MainExecutableDesktopShortcut" Guid="*">
-                            <Shortcut Id="startmenu" Directory="ProgramMenuDir" Name="{{.BrandingName}}" WorkingDirectory='APPLICATIONROOTDIRECTORY' Target="[APPLICATIONROOTDIRECTORY]{{.BinaryName}}" Icon="MainExecutable.exe"/>
-                            <Shortcut Id="desktop" Directory="DesktopFolder" Name="{{.BrandingName}}" WorkingDirectory='APPLICATIONROOTDIRECTORY' Target="[APPLICATIONROOTDIRECTORY]{{.BinaryName}}" Icon="MainExecutable.exe"/>
-                            <RegistryValue Root='HKCU' Key='Software\{{.VendorName}}\{{.ProductName}}' Type='string' Name="Desktop" Value='' KeyPath='yes'/>
-                        </Component>
-
-                    </Directory>
-                </Directory>
-            </Directory>
-
-            <Directory Id="ProgramMenuFolder" Name="Programs">
-                <Directory Id="ProgramMenuDir" Name="{{.BrandingName}}">
-                    <Component Id="ProgramMenuDir" Guid="*">
-                        <RemoveFolder Id='ProgramMenuDir' On='uninstall'/>
-                        <RegistryValue Root='HKCU' Key='Software\{{.VendorName}}\{{.ProductName}}' Type='string' Name="ProgramMenu" Value='' KeyPath='yes'/>
-                    </Component>
-                </Directory>
-            </Directory>
-
-            <Directory Id="DesktopFolder" Name="Desktop"/>
+          </Directory>
         </Directory>
+      </Directory>
 
-        <Feature Id="DefaultFeature" Title="Application" Level="1">
-            <ComponentRef Id="MainExecutable"/>
-            <ComponentRef Id="MainExecutableDesktopShortcut"/>
-            <ComponentRef Id='ProgramMenuDir'/>
-            <ComponentGroupRef Id="{{.ComponentGroupId}}"/>
-        </Feature>
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="{{.BrandingName}}">
+          <Component Id="ProgramMenuDir" Guid="*">
+            <RemoveFolder Id='ProgramMenuDir' On='uninstall'/>
+            <RegistryValue Root='HKCU' Key='Software\{{.VendorName}}\{{.ProductName}}' Type='string' Name="ProgramMenu" Value='' KeyPath='yes'/>
+          </Component>
+        </Directory>
+      </Directory>
 
-        <Icon Id="MainExecutable.exe" SourceFile="{{.BinaryName}}.exe"/>
-    </Product>
+      <Directory Id="DesktopFolder" Name="Desktop"/>
+    </Directory>
+
+    <Feature Id="DefaultFeature" Title="Application" Level="1">
+      <ComponentRef Id="MainExecutable"/>
+      <ComponentRef Id="MainExecutableDesktopShortcut"/>
+      <ComponentRef Id='ProgramMenuDir'/>
+      <ComponentGroupRef Id="{{.ComponentGroupId}}"/>
+    </Feature>
+
+    <Icon Id="MainExecutable.exe" SourceFile="{{.BinaryName}}.exe"/>
+  </Product>
 </Wix>
