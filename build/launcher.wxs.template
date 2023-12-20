@@ -38,12 +38,23 @@
 
         <Media Id="1" Cabinet="simple.cab" EmbedCab="yes"/>
 
+        <!-- Link the UI for install directory selection -->
+        <UI>
+          <UIRef Id="WixUI_InstallDir"/>
+          <Publish Dialog="WelcomeDlg"
+                   Control="Next"
+                   Event="NewDialog"
+                   Value="InstallDirDlg"
+                   Order="2">1</Publish>
+          <Publish Dialog="InstallDirDlg"
+                   Control="Back"
+                   Event="NewDialog"
+                   Value="WelcomeDlg"
+                   Order="2">1</Publish>
+        </UI>
         <!-- UI Options - Add this to allow user to select the install directory -->
         <!-- Define the property to tell WIX to use the folder given in WIXUI_INSTALLDIR -->
         <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONROOTDIRECTORY"/>
-
-        <!-- Link the UI for install directory selection -->
-        <UIRef Id="WixUI_InstallDir"/>
 
         <!-- Configure variables for ProgramFiles path to install into the correct 64bit directory when installing
         the 64bit version -->
