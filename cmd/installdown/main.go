@@ -69,9 +69,11 @@ func main() {
 
 func compileMsi(cfg *wxsConfig) {
 	// -arch run for specified arch
+	logrus.Info("Running candle to build component wixobj")
 	mustRunCommand("candle",
 		filepath.Join(cfg.OutDir, cfg.ComponentGroupId+cfg.Arch+".wxs"),
 		"-o", filepath.Join(cfg.OutDir, cfg.ComponentGroupId+cfg.Arch+".wixobj"))
+	logrus.Info("Running candle to build launcher.wixobj")
 	mustRunCommand("candle",
 		filepath.Join(cfg.OutDir, "launcher.wxs"),
 		"-o", filepath.Join(cfg.OutDir, "launcher.wixobj"),
@@ -80,10 +82,12 @@ func compileMsi(cfg *wxsConfig) {
 	// -sice:ICE61 suppress ICE61, the warning about same-version-upgrade which we need to allow for updating bundled bundles
 	//  without updating the launcher
 	// -sacl suppress ACL warning
+	logrus.Info("Running light to compile final msi")
 	mustRunCommand("light",
 		"-sice:ICE61",
 		"-sacl",
 		"-sval",
+		"-ext", "WixUIExtension",
 		"-b", cfg.ComponentGroupDir,
 		"-out", filepath.Join(cfg.OutDir, cfg.MsiOutputFile),
 		filepath.Join(cfg.OutDir, cfg.ComponentGroupId+cfg.Arch+".wixobj"),

@@ -6,6 +6,7 @@
 
 ### Features
 * Add option to pass extra environment variables to the execution via `-extra-env`
+* The MSI installer script now offers the ability to choose the installation location
 
 ## v1.7.0 (2023-05-23)
 ### Changes
