@@ -41,16 +41,8 @@
         <!-- Link the UI for install directory selection -->
         <UI>
           <UIRef Id="WixUI_InstallDir"/>
-          <Publish Dialog="WelcomeDlg"
-                   Control="Next"
-                   Event="NewDialog"
-                   Value="InstallDirDlg"
-                   Order="2">1</Publish>
-          <Publish Dialog="InstallDirDlg"
-                   Control="Back"
-                   Event="NewDialog"
-                   Value="WelcomeDlg"
-                   Order="2">1</Publish>
+          <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
+          <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
         </UI>
         <!-- UI Options - Add this to allow user to select the install directory -->
         <!-- Define the property to tell WIX to use the folder given in WIXUI_INSTALLDIR -->
