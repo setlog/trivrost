@@ -1,20 +1,20 @@
 # Release-Changelog
 
-## TBD (TBD)
+## v1.8.0 (2023-12-20)
 ### Changes
-* Raise minimum golang requirement to 1.17
+* Raise minimum golang requirement to 1.17.
 
 ### Features
-* Add option to pass extra environment variables to the execution via `-extra-env`
-* The MSI installer script now offers the ability to choose the installation location
+* Add option to pass extra environment variables to the execution via `-extra-env`.
+* The MSI installer script now offers the ability to choose the installation location.
 
 ## v1.7.0 (2023-05-23)
 ### Changes
-* No changes, just a re-tag of v1.7.0-rc0
+* No changes, just a re-tag of v1.7.0-rc0.
 
 ## v1.7.0-rc0 (2022-05-19)
 ### Fixes
-* `installdown`: No longer fail to parse version strings as 'launcherversion' that contain a suffix after the SemVer or no 'v' prefix. For examples these version strings no longer break: 'v1.2.0-rc0', '1.2.0'
+* `installdown`: No longer fail to parse version strings as 'launcherversion' that contain a suffix after the SemVer or no 'v' prefix. For examples these version strings no longer break: 'v1.2.0-rc0', '1.2.0'.
 ### Changes
 * Raise minimal go version to 1.16. (Builds are tested with 1.16 and 1.18 in CI)
 
