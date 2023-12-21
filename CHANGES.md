@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## v1.8.2 (2023-12-21)
+### Features
+* MSI property `ADDROAMINGARGUMENT` can be provided with value `true` to have installed shortcuts provided with the `--roaming` argument.
+
 ## v1.8.1 (2023-12-21)
 ### Fixes
 * MSI Build will no longer deny installation into network drive.
