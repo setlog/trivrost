@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## v1.8.1 (2023-12-21)
+### Fixes
+* MSI Build will no longer deny installation into network drive.
+
 ## v1.8.0 (2023-12-20)
 ### Changes
 * Raise minimum golang requirement to 1.17.

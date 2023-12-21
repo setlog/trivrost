@@ -48,6 +48,10 @@
     <!-- Define the property to tell WIX to use the folder given in WIXUI_INSTALLDIR -->
     <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONROOTDIRECTORY"/>
 
+    <!-- Allow installation to network drives. BUG: If .msi is built with Wix v3, users must TYPE
+        the path instead of using the browse dialog for this to work. See https://github.com/wixtoolset/issues/issues/4737 -->
+    <Property Id="WIXUI_DONTVALIDATEPATH" Value="1" />
+
     <!-- Configure variables for ProgramFiles path to install into the correct 64bit directory when installing
     the 64bit version -->
     <?if $(sys.BUILDARCH) = x64 ?>
