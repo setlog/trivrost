@@ -41,11 +41,12 @@
     <!-- Link the UI for install directory selection -->
     <UI>
       <UIRef Id="WixUI_InstallDir"/>
-      <Dialog Id="TrivrostSettingsDlg" Title="Settings">
-        <Control Id="CheckBoxAddRoamingArgument" Property="ADDROAMINGARGUMENT" Type="CheckBox" X="20" Y="160" Width="56" Height="17" Default="no" CheckBoxValue="true" Text="Create shortcuts with the --roaming argument. This causes persistent files to be stored in %APPDATA% instead of %LOCALAPPDATA%. Useful for some Citrix setups. If you do not know what this means, leave this unchecked." />
+      <!-- <Dialog Id="TrivrostSettingsDlg" Title="Settings" Width="640" Height="200">
+        <Control Id="CheckBoxAddRoamingArgument" Property="ADDROAMINGARGUMENT" Type="CheckBox" X="20" Y="20" Width="600" Height="30" Default="no" CheckBoxValue="true" Text="Create shortcuts with the -roaming argument. This causes persistent files to be stored in %APPDATA% instead of %LOCALAPPDATA%. \n Useful for some Citrix setups. If you do not know what this means, leave this unchecked." />
       </Dialog>
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="TrivrostSettingsDlg" Order="2">1</Publish>
-      <Publish Dialog="TrivrostSettingsDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
+      -->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
+      <!--<Publish Dialog="TrivrostSettingsDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>-->
       <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
     </UI>
 
@@ -83,10 +84,10 @@
               <RegistryValue Root='HKCU' Key='Software\{{.VendorName}}\{{.ProductName}}' Type='string' Name="Desktop" Value='' KeyPath='yes'/>
               <Condition><![CDATA[ADDROAMINGARGUMENT<>"true"]]></Condition>
             </Component>
-            <Component Id="MainExecutableDesktopShortcut" Guid="*">
-              <Shortcut Id="startmenu" Directory="ProgramMenuDir" Name="{{.BrandingName}}" WorkingDirectory='APPLICATIONROOTDIRECTORY'
+            <Component Id="MainExecutableDesktopShortcutRoaming" Guid="*">
+              <Shortcut Id="startmenuRoaming" Directory="ProgramMenuDir" Name="{{.BrandingName}}" WorkingDirectory='APPLICATIONROOTDIRECTORY'
                         Target="[APPLICATIONROOTDIRECTORY]{{.BinaryName}}" Arguments="--roaming" Icon="MainExecutable.exe"/>
-              <Shortcut Id="desktop" Directory="DesktopFolder" Name="{{.BrandingName}}" WorkingDirectory='APPLICATIONROOTDIRECTORY'
+              <Shortcut Id="desktopRoaming" Directory="DesktopFolder" Name="{{.BrandingName}}" WorkingDirectory='APPLICATIONROOTDIRECTORY'
                         Target="[APPLICATIONROOTDIRECTORY]{{.BinaryName}}" Arguments="--roaming" Icon="MainExecutable.exe"/>
               <RegistryValue Root='HKCU' Key='Software\{{.VendorName}}\{{.ProductName}}' Type='string' Name="Desktop" Value='' KeyPath='yes'/>
               <Condition><![CDATA[ADDROAMINGARGUMENT="true"]]></Condition>
@@ -110,6 +111,7 @@
     <Feature Id="DefaultFeature" Title="Application" Level="1">
       <ComponentRef Id="MainExecutable"/>
       <ComponentRef Id="MainExecutableDesktopShortcut"/>
+      <ComponentRef Id="MainExecutableDesktopShortcutRoaming"/>
       <ComponentRef Id='ProgramMenuDir'/>
       <ComponentGroupRef Id="{{.ComponentGroupId}}"/>
     </Feature>
