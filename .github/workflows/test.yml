@@ -28,7 +28,7 @@ jobs:
         if: startsWith(matrix.platform, 'windows')
         run: choco install upx -y
       - name: Checkout repository
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.3
       - name: Build
         shell: bash
         run: |
