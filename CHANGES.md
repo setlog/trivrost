@@ -1,5 +1,9 @@
 # Release-Changelog
 
+## TBD
+### Fixes
+* `make tools` did not build 'metawriter'm which is now built.
+
 ## v1.8.2 (2023-12-21)
 ### Features
 * MSI property `ADDROAMINGARGUMENT` can be provided with value `true` to have installed shortcuts provided with the `--roaming` argument.
