@@ -8,7 +8,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/go-ole/go-ole v1.3.0
 	github.com/gofrs/flock v0.8.1
-	github.com/mattn/go-ieproxy v0.0.1
+	github.com/mattn/go-ieproxy v0.0.12
 	github.com/prometheus/client_golang v1.17.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.9.3
