@@ -24,6 +24,7 @@ LAUNCHER_VERSION        := $(shell git describe --tags --abbrev=0 --match "v[0-9
 GITBRANCH               := $(shell git symbolic-ref -q --short HEAD || echo unknown)
 GITHASH                 := $(shell git rev-parse --short=8 --verify HEAD || echo unknown)
 LDFLAGS                 := -s -w -X main.gitDescription=${GITDESC} -X main.gitBranch=${GITBRANCH} -X main.gitHash=${GITHASH} -X "github.com/setlog/trivrost/cmd/launcher/launcher.buildTime=$(shell date -u "+%Y-%m-%d %H:%M:%S UTC")"
+EXTRA_CGO_LDFLAGS       ?=
 
 # Assume version is part of the tag. If not, default to v0.0.0
 VERSIONOK := $(shell echo -n "${LAUNCHER_VERSION}" | grep -E ^v[0-9]+\.[0-9]+\.[0-9]+$$ && echo ok)
@@ -52,7 +53,7 @@ else ifneq (,$(findstring Linux,${OS_UNAME}))
 else ifneq (,$(findstring Darwin,${OS_UNAME}))
 	OS = darwin
 	export CGO_CFLAGS=-mmacosx-version-min=10.8
-	export CGO_LDFLAGS=-mmacosx-version-min=10.8
+	export CGO_LDFLAGS=-mmacosx-version-min=10.8 $(EXTRA_CGO_LDFLAGS)
 endif
 $(info Detected uname-id '${OS_UNAME}' as OS '${OS}')
 
