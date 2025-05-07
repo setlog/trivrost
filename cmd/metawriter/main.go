@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"html"
 	"io"
 	"io/ioutil"
 	"os"
@@ -39,16 +40,16 @@ func writeMetaFiles() {
 }
 
 func replacePlaceholders(text string) string {
-	text = strings.Replace(text, "${LAUNCHER_BINARY}", os.Getenv("LAUNCHER_BINARY"), -1)
-	text = strings.Replace(text, "${LAUNCHER_BINARY_EXT}", os.Getenv("LAUNCHER_BINARY_EXT"), -1)
-	text = strings.Replace(text, "${LAUNCHER_VENDOR_NAME}", launcherConfig.VendorName, -1)
-	text = strings.Replace(text, "${LAUNCHER_BRANDING_NAME}", launcherConfig.BrandingName, -1)
-	text = strings.Replace(text, "${LAUNCHER_BRANDING_NAME_SHORT}", launcherConfig.BrandingNameShort, -1)
-	text = strings.Replace(text, "${LAUNCHER_REVERSE_DNS_PRODUCT_ID}", launcherConfig.ReverseDnsProductId, -1)
-	text = strings.Replace(text, "${LAUNCHER_VERSION_MAJOR}", strconv.Itoa(launcherConfig.ProductVersion.Major), -1)
-	text = strings.Replace(text, "${LAUNCHER_VERSION_MINOR}", strconv.Itoa(launcherConfig.ProductVersion.Minor), -1)
-	text = strings.Replace(text, "${LAUNCHER_VERSION_PATCH}", strconv.Itoa(launcherConfig.ProductVersion.Patch), -1)
-	text = strings.Replace(text, "${LAUNCHER_VERSION_BUILD}", strconv.Itoa(launcherConfig.ProductVersion.Build), -1)
+	text = strings.Replace(text, "${LAUNCHER_BINARY}", html.EscapeString(os.Getenv("LAUNCHER_BINARY"))), -1)
+	text = strings.Replace(text, "${LAUNCHER_BINARY_EXT}", html.EscapeString(os.Getenv("LAUNCHER_BINARY_EXT")), -1)
+	text = strings.Replace(text, "${LAUNCHER_VENDOR_NAME}", html.EscapeString(launcherConfig.VendorName), -1)
+	text = strings.Replace(text, "${LAUNCHER_BRANDING_NAME}", html.EscapeString(launcherConfig.BrandingName), -1)
+	text = strings.Replace(text, "${LAUNCHER_BRANDING_NAME_SHORT}", html.EscapeString(launcherConfig.BrandingNameShort), -1)
+	text = strings.Replace(text, "${LAUNCHER_REVERSE_DNS_PRODUCT_ID}", html.EscapeString(launcherConfig.ReverseDnsProductId), -1)
+	text = strings.Replace(text, "${LAUNCHER_VERSION_MAJOR}", strconv.Itoa(html.EscapeString(launcherConfig.ProductVersion.Major)), -1)
+	text = strings.Replace(text, "${LAUNCHER_VERSION_MINOR}", strconv.Itoa(html.EscapeString(launcherConfig.ProductVersion.Minor)), -1)
+	text = strings.Replace(text, "${LAUNCHER_VERSION_PATCH}", strconv.Itoa(html.EscapeString(launcherConfig.ProductVersion.Patch)), -1)
+	text = strings.Replace(text, "${LAUNCHER_VERSION_BUILD}", strconv.Itoa(html.EscapeString(launcherConfig.ProductVersion.Build)), -1)
 	text = strings.Replace(text, "${LAUNCHER_VERSION_SEMANTIC}", versionSemantic, -1)
 	text = strings.Replace(text, "${LAUNCHER_VERSION_FULL}", versionFull, -1)
 	return text
