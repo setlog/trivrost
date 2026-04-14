@@ -3,52 +3,121 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/launcher/hashing"
+	"github.com/sirupsen/logrus"
 )
 
 const timeFormat = "2006-01-02 15:04:05"
-const bundlefilename = "/bundleinfo.json"
+const bundleFileName = "bundleinfo.json"
+
+type discardingWriter struct{}
+
+func (dw discardingWriter) Write(p []byte) (n int, err error) { return len(p), nil }
 
 func main() {
+	log.SetFlags(0)
+	logrus.SetOutput(discardingWriter{})
+	var verifyOnly bool
+	var absentFilePathsString string
+	flag.BoolVar(&verifyOnly, "verify", false, "Verify only")
+	flag.StringVar(&absentFilePathsString, "absent", "", "Comma-separated list of disk files to treat as absent. Escape with ',,'")
 	flag.Parse()
 	if flag.NArg() != 2 {
-		fmt.Println("Hasher expects exactly two parameters.")
-		fmt.Println("The first parameter is the unique bundle name.")
-		fmt.Println("The second parameter is the path to the directory to hash.")
-
-		log.Info("Wrong number of arguments for hasher. Stopping.")
-
-		os.Exit(1)
+		log.Println("Hasher expects exactly two parameters.")
+		log.Println("The first parameter is the unique bundle name.")
+		log.Println("The second parameter is the path to the directory to hash.")
+		log.Println("Additional flags:")
+		log.Println("  -verify                   Verify that state recorded in bundle info file matches state on disk and unique bundle name matches.")
+		log.Println("  -absent file1,file2,...   Comma-separated list of disk files to treat as absent. Escape with ',,'.")
+		log.Fatal("Wrong number of arguments for hasher. Stopping.")
 	}
+	absentFilePaths := stringSplitDoubleSepEscapable(absentFilePathsString, ',')
 
 	uniqueBundleName := flag.Arg(0)
 	pathToHash := flag.Arg(1)
-	hashesFile := filepath.Join(pathToHash, bundlefilename)
-	mustHashDirectory(uniqueBundleName, pathToHash, hashesFile)
-
-	log.Info("Finished hasher.")
+	bundleFilePath := filepath.Join(pathToHash, bundleFileName)
+	if verifyOnly {
+		mustVerifyDirectory(uniqueBundleName, pathToHash, bundleFilePath, absentFilePaths)
+	} else {
+		mustHashDirectory(uniqueBundleName, pathToHash, bundleFilePath)
+	}
 }
 
-func mustHashDirectory(uniqueBundleName, pathToHash, hashesFile string) {
-	log.WithFields(log.Fields{"uniqueBundleName": uniqueBundleName, "pathToHash": pathToHash, "hashesFile": hashesFile}).Info("Hashing directory.")
+func stringSplitDoubleSepEscapable(str string, sep rune) (res []string) {
+	var ss strings.Builder
+	checkTerminate := false
+	for _, r := range str {
+		if r == sep {
+			checkTerminate = !checkTerminate
+			if checkTerminate {
+				continue
+			}
+		} else if checkTerminate {
+			if ss.Len() > 0 {
+				res = append(res, ss.String())
+			}
+			ss.Reset()
+			checkTerminate = false
+		}
+		ss.WriteRune(r)
+	}
+	if ss.Len() > 0 {
+		res = append(res, ss.String())
+	}
+	return res
+}
+
+func mustVerifyDirectory(uniqueBundleName, pathToHash, bundleFilePath string, absentFilePaths []string) {
 	pathInfo, err := os.Stat(pathToHash)
 	if err != nil {
-		log.Panicf("Cannot hash \"%s\". %s", pathToHash, err)
+		log.Fatalf("Verification of %#q failed: cannot stat %#q: %v.\n", bundleFilePath, pathToHash, err)
 	}
 	if !pathInfo.IsDir() {
-		log.Panicf("\"%s\" must be a directory.", pathToHash)
+		log.Fatalf("Verification of %#q failed: \"%s\" must be a directory.\n", bundleFilePath, pathToHash)
 	}
-	_, checkErr := os.Stat(filepath.Join(pathToHash, bundlefilename))
+	fileInfoDisk := hashing.MustHash(context.Background(), pathToHash)
+	for _, absentFilePath := range absentFilePaths {
+		delete(fileInfoDisk, absentFilePath)
+	}
+	bundleInfoRecorded := config.ReadInfo(bundleFilePath)
+	fileInfoRecorded := bundleInfoRecorded.BundleFiles
+
+	if bundleInfoRecorded.UniqueBundleName != uniqueBundleName {
+		log.Fatalf("Verification of %#q failed: unique bundle name of %#q presents as %#q. Expected  %#q.\n", bundleFilePath, bundleFilePath, bundleInfoRecorded.UniqueBundleName, uniqueBundleName)
+	}
+
+	diffToDisk := config.MakeDiffFileInfoMap(fileInfoRecorded, fileInfoDisk)
+	if diffToDisk.HasChanges() {
+		log.Fatalf("Verification of %#q failed: files on disk have %d changes:\n", bundleFilePath, len(diffToDisk))
+		for diffFilePath, diffFileInfo := range diffToDisk {
+			if diffFileInfo.SHA256 == "" {
+				log.Printf("%#q: %s on disk but absent in %#q.\n", diffFilePath, diffFileInfo.SHA256, bundleFilePath)
+			} else {
+				log.Printf("%#q: %s on disk but %s in %#q.\n", diffFilePath, diffFileInfo.SHA256, fileInfoRecorded[diffFilePath].GetSHA256(), bundleFilePath)
+			}
+		}
+	}
+}
+
+func mustHashDirectory(uniqueBundleName, pathToHash, bundleFilePath string) {
+	log.Printf("Hashing directory %#q for bundle %#q.\n", pathToHash, uniqueBundleName)
+	pathInfo, err := os.Stat(pathToHash)
+	if err != nil {
+		log.Fatalf("Cannot hash \"%s\". %s\n", pathToHash, err)
+	}
+	if !pathInfo.IsDir() {
+		log.Fatalf("\"%s\" must be a directory.\n", pathToHash)
+	}
+	_, checkErr := os.Stat(bundleFilePath)
 	if checkErr == nil || os.IsExist(checkErr) {
-		log.Panicf("Found existing \"%s\", aborting!", filepath.Join(pathToHash, bundlefilename))
+		log.Fatalf("Found existing \"%s\". Aborting.\n", bundleFilePath)
 	}
 	bundleInfo := &config.BundleInfo{
 		BundleFiles:      hashing.MustHash(context.Background(), pathToHash),
@@ -56,7 +125,8 @@ func mustHashDirectory(uniqueBundleName, pathToHash, hashesFile string) {
 		UniqueBundleName: uniqueBundleName,
 	}
 	if len(bundleInfo.BundleFiles) == 0 {
-		log.Panicf("No files to hash at %v", pathToHash)
+		log.Fatalf("No files to hash at %v\n", pathToHash)
 	}
-	config.WriteInfo(bundleInfo, hashesFile)
+	log.Printf("Writing %#q.\n", bundleFilePath)
+	config.WriteInfo(bundleInfo, bundleFilePath)
 }

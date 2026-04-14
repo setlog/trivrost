@@ -3,6 +3,7 @@
 ## TBD (TBD)
 ### Features
 * Add optional environment variable `EXTRA_CGO_LDFLAGS` to Makefile, which can be used to add `CGO_LDFLAGS` to the build process under darwin.
+* `hasher`: Add command line arguments `-verify` and `-absent`.
 
 ## v1.8.2 (2023-12-21)
 ### Features

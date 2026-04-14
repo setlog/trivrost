@@ -14,8 +14,12 @@
 * `extra-env`: Pass all arguments to execution as environment variables. Different variables are separated via `;`. Variable name and value are separated by `=`.
 
 ## hasher
-Hasher is a utility which generates [bundle info files](walkthrough.md#Bundle-info) given a directory path as an input. Usage:  
-`hasher unique_bundle_name path/to/bundle/folder`
+Hasher is a utility which generates [bundle info files](walkthrough.md#Bundle-info) given a directory path as an input:  
+`hasher unique_bundle_name path/to/bundle`
+
+It can also be used to verify an existing bundle info file:  
+`hasher -verify -absent path/to/bundle/bundleinfo.json path/to/bundle`  
+Argument `-absent` takes a comma-separated list of disk files to treat as being absent.
 
 ## bundown
 Bundown is a utility which can download bundles for a desired OS/Arch combination.

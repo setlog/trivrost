@@ -25,6 +25,20 @@ type FileInfo struct {
 	Size   int64  `json:"Size"`
 }
 
+func (f *FileInfo) GetSHA256() string {
+	if f == nil {
+		return ""
+	}
+	return f.SHA256
+}
+
+func (f *FileInfo) GetSize() int64 {
+	if f == nil {
+		return 0
+	}
+	return f.Size
+}
+
 // GetFileHashes returns a FileInfoMap for the info's BundleFiles using filepath.Separator in the place of forward slashes.
 func (info *BundleInfo) GetFileHashes() FileInfoMap {
 	fm := NewFileInfoMap()
