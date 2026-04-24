@@ -39,14 +39,9 @@ func (f *FileInfo) GetSize() int64 {
 	return f.Size
 }
 
-// GetFileHashes returns a FileInfoMap for the info's BundleFiles using filepath.Separator in the place of forward slashes.
+// GetFileHashes is a shorthand for info.BundleFiles.ForOS()
 func (info *BundleInfo) GetFileHashes() FileInfoMap {
-	fm := NewFileInfoMap()
-	for filePath, fileInfo := range info.BundleFiles {
-		genericFileInfo := *fileInfo
-		fm[filepath.FromSlash(filePath)] = &genericFileInfo
-	}
-	return fm
+	return info.BundleFiles.ForOS()
 }
 
 // ForOS returns a copy of the FileInfoMap where all keys' forward slashes are replaced by the separator
