@@ -18,7 +18,7 @@ Hasher is a utility which generates [bundle info files](walkthrough.md#Bundle-in
 `hasher unique_bundle_name path/to/bundle`
 
 It can also be used to verify an existing bundle info file:  
-`hasher -verify -absent path/to/bundle/bundleinfo.json path/to/bundle`  
+`hasher -verify path/to/bundle`  
 Argument `-absent` takes a comma-separated list of disk files to treat as being absent.
 
 ## bundown
