@@ -33,7 +33,7 @@ func (u *Updater) updateProgram(programPath string) (madeChanges bool) {
 	log.Infof("Checking against latest version.")
 	u.announceStatus(RetrieveRemoteLauncherVersion, 0)
 	updateConfig := u.deploymentConfig.GetLauncherUpdateConfig()
-	bundleInfo, bundleInfoSha := u.RetrieveBundleInfo(updateConfig.BundleInfoURL, u.publicKeys)
+	bundleInfo, bundleInfoSha := u.retrieveBundleInfo(updateConfig.BundleInfoURL)
 	if u.IsShaIgnored(bundleInfoSha) {
 		log.Warnf("Ignoring launcher bundleinfo with sha \"%s\".", bundleInfoSha)
 		return false

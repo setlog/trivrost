@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/rsa"
 	"flag"
 	"fmt"
 	"io"
@@ -17,7 +18,6 @@ import (
 	"github.com/setlog/trivrost/cmd/launcher/resources"
 
 	"github.com/setlog/trivrost/pkg/fetching"
-	"github.com/setlog/trivrost/pkg/launcher/bundle"
 	"github.com/setlog/trivrost/pkg/launcher/config"
 )
 
@@ -60,7 +60,7 @@ func downloadBundles(deploymentConfig *config.DeploymentConfig, outDirPath strin
 	if err != nil {
 		fatalf("%v", err)
 	}
-	updater := bundle.NewUpdaterWithDeploymentConfig(context.Background(), deploymentConfig, &fetching.ConsoleDownloadProgressHandler{}, resources.PublicRsaKeys)
+	downloader := fetching.NewDownloader(context.Background(), &fetching.ConsoleDownloadProgressHandler{})
 	for _, bundle := range deploymentConfig.Bundles {
 		if shouldDownloadBundle(bundle.Tags, tags) {
 			if skipPresentBundles && isFolder(filepath.Join(outDirPathAbs, bundle.LocalDirectory)) {
@@ -68,12 +68,21 @@ func downloadBundles(deploymentConfig *config.DeploymentConfig, outDirPath strin
 			} else {
 				log.Infof("Starting download of bundle %s", bundle.BaseURL)
 				bundleDirectory := filepath.Join(outDirPathAbs, bundle.LocalDirectory)
-				updater.DownloadBundle(bundle.BaseURL, bundle.BundleInfoURL, resources.PublicRsaKeys, bundleDirectory)
+				downloadBundle(downloader, bundle.BaseURL, bundle.BundleInfoURL, resources.PublicRsaKeys, bundleDirectory)
 			}
 		} else {
 			log.Infof("Not downloading bundle %s: none of its tags %v match the supplied tags %v.", bundle.BaseURL, bundle.Tags, tags)
 		}
 	}
+}
+
+func downloadBundle(downloader *fetching.Downloader, fromURL string, bundleInfoURL string, publicKeys []*rsa.PublicKey, toFolder string) {
+	bundleInfoData, err := downloader.DownloadSignedResource(bundleInfoURL, publicKeys)
+	if err != nil {
+		fatalf("Could not download bundle info from \"%s\": %v", bundleInfoURL, err)
+	}
+	bundleInfo := config.ReadInfoFromByteSlice(bundleInfoData)
+	downloader.MustDownloadToDirectory(fromURL, bundleInfo.BundleFiles, toFolder)
 }
 
 func shouldDownloadBundle(bundleTags []string, allowedTags []string) bool {

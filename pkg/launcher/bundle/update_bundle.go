@@ -1,7 +1,6 @@
 package bundle
 
 import (
-	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -75,7 +74,7 @@ func (u *Updater) determineBundleChanges() {
 		urls = append(urls, bundleUpdateInfo.BundleInfoURL)
 	}
 	log.Infof("Downloading bundle information for bundles from these URLs: %v.", urls)
-	bundleInfos, err := u.RetrieveBundleInfos(urls, u.publicKeys)
+	bundleInfos, err := u.retrieveBundleInfos(urls)
 	if err != nil {
 		panic(err)
 	}
@@ -85,7 +84,7 @@ func (u *Updater) determineBundleChanges() {
 	}
 }
 
-func (u *Updater) RetrieveBundleInfos(urls []string, publicKeys []*rsa.PublicKey) (bundleInfos map[string]*config.BundleInfo, err error) {
+func (u *Updater) retrieveBundleInfos(urls []string) (bundleInfos map[string]*config.BundleInfo, err error) {
 	bundleInfosData, err := u.downloader.DownloadSignedResources(urls, u.publicKeys)
 	if err != nil {
 		return nil, err
@@ -97,8 +96,8 @@ func (u *Updater) RetrieveBundleInfos(urls []string, publicKeys []*rsa.PublicKey
 	return bundleInfos, err
 }
 
-func (u *Updater) RetrieveBundleInfo(fromURL string, publicKeys []*rsa.PublicKey) (info *config.BundleInfo, sha string) {
-	bundleInfosData, err := u.downloader.DownloadSignedResources([]string{fromURL}, publicKeys)
+func (u *Updater) retrieveBundleInfo(fromURL string) (info *config.BundleInfo, sha string) {
+	bundleInfosData, err := u.downloader.DownloadSignedResources([]string{fromURL}, u.publicKeys)
 	if err != nil {
 		panic(err)
 	}
@@ -147,9 +146,4 @@ func deleteChangedFiles(fileMap config.FileInfoMap, localDirPath string) {
 	for filePath := range fileMap {
 		system.MustRemoveFile(filepath.Join(localDirPath, filePath))
 	}
-}
-
-func (u *Updater) DownloadBundle(fromURL string, bundleInfoURL string, publicKeys []*rsa.PublicKey, toFolder string) {
-	bundleInfo, _ := u.RetrieveBundleInfo(bundleInfoURL, publicKeys)
-	u.downloader.MustDownloadToDirectory(fromURL, bundleInfo.BundleFiles, toFolder)
 }
