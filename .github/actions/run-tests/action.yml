@@ -1,0 +1,41 @@
+name: Run Tests
+description: Set up Go, install platform dependencies, build tools, and run tests
+
+inputs:
+  go-version:
+    description: Go version to install
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Go
+      uses: actions/setup-go@v6.4.0
+      with:
+        go-version: ${{ inputs.go-version }}
+
+    - name: Install libgtk-3-dev
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev
+
+    - name: Install UPX (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get update -y && sudo apt-get install -y upx-ucl
+
+    - name: Install UPX (Windows)
+      if: runner.os == 'Windows'
+      shell: bash
+      run: choco install upx -y
+
+    - name: Build
+      shell: bash
+      run: |
+        make copy-test-files
+        make
+        make tools
+
+    - name: Test
+      shell: bash
+      run: make test
