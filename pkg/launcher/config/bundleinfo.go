@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -141,7 +142,27 @@ func ReadInfoFromByteSlice(data []byte) *BundleInfo {
 	if err != nil {
 		panic(err)
 	}
+	validateBundleInfoPaths(info.BundleFiles)
 	return &info
+}
+
+func validateBundleInfoPaths(bundleFiles FileInfoMap) {
+	for filePath := range bundleFiles {
+		if filePath == "" {
+			panic("Bundle info contains an empty file path")
+		}
+		if strings.HasPrefix(filePath, "/") {
+			panic(fmt.Sprintf("Bundle info file path %q must not be absolute", filePath))
+		}
+
+		cleanPath := path.Clean(filePath)
+		if cleanPath == "." || cleanPath == ".." || strings.HasPrefix(cleanPath, "../") {
+			panic(fmt.Sprintf("Bundle info file path %q escapes the bundle directory", filePath))
+		}
+		if cleanPath != filePath {
+			panic(fmt.Sprintf("Bundle info file path %q must be clean and normalized; use %q instead", filePath, cleanPath))
+		}
+	}
 }
 
 func WriteInfo(info *BundleInfo, filePath string) {
