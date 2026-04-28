@@ -4,6 +4,9 @@
 ### Features
 * Add optional environment variable `EXTRA_CGO_LDFLAGS` to Makefile, which can be used to add `CGO_LDFLAGS` to the build process under darwin.
 
+### Fixes
+* Reject invalid file paths in bundle info files before updating local bundles.
+
 ## v1.8.2 (2023-12-21)
 ### Features
 * MSI property `ADDROAMINGARGUMENT` can be provided with value `true` to have installed shortcuts provided with the `--roaming` argument.
