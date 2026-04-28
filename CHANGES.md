@@ -6,6 +6,7 @@
 
 ### Fixes
 * Simplify bundle info downloads so updater-internal code consistently uses the updater's configured public keys.
+* Validate `BaseURL` and `IsUpdateMandatory` correctly in the deployment-config schema.
 * Reject invalid file paths in bundle info files before updating local bundles.
 
 ## v1.8.2 (2023-12-21)

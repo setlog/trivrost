@@ -32,8 +32,11 @@ const deploymentConfigSchema = `{
 					"BundleInfoURL": {
 						"$ref": "#/definitions/URL"
 					},
-					"BundleURL": {
+					"BaseURL": {
 						"$ref": "#/definitions/URL"
+					},
+					"IsUpdateMandatory": {
+						"type": "boolean"
 					},
 					"TargetPlatforms": {
 						"$ref": "#/definitions/TargetPlatformsArray"
@@ -50,8 +53,11 @@ const deploymentConfigSchema = `{
 					"BundleInfoURL": {
 						"$ref": "#/definitions/URL"
 					},
-					"BundleURL": {
+					"BaseURL": {
 						"$ref": "#/definitions/URL"
+					},
+					"IsUpdateMandatory": {
+						"type": "boolean"
 					},
 					"TargetPlatforms": {
 						"$ref": "#/definitions/TargetPlatformsArray"

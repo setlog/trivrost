@@ -59,3 +59,29 @@ func TestDetectMissingExecution(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 }
+
+func TestDetectInvalidBaseURLAndIsUpdateMandatoryTypes(t *testing.T) {
+	err := config.ValidateDeploymentConfig(`{
+		"Timestamp": "2019-02-07 14:53:17",
+		"Bundles": [
+			{
+				"BundleInfoURL": "https://example.com/testapp/bundleinfo.json",
+				"BaseURL": 42,
+				"LocalDirectory": "app",
+				"IsUpdateMandatory": "yes"
+			}
+		],
+		"Execution": {
+			"Commands": [
+				{
+					"Name": "java"
+				}
+			]
+		}
+	}`)
+	if err == nil ||
+		!strings.Contains(err.Error(), "Bundles.0.BaseURL: Invalid type. Expected: string, given: integer") ||
+		!strings.Contains(err.Error(), "Bundles.0.IsUpdateMandatory: Invalid type. Expected: boolean, given: string") {
+		t.Fatalf("%v", err)
+	}
+}
