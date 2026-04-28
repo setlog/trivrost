@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/davecgh/go-spew/spew"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,7 +17,7 @@ func (fm FileInfoMap) Join(other FileInfoMap) {
 
 func (fm FileInfoMap) MustGetOnly() (key string, fileInfo *FileInfo) {
 	if len(fm) != 1 {
-		panic(spew.Sprintf("Not exactly one entry in FileInfoMap. Got %d: %+v.", len(fm), fm))
+		panic(fmt.Sprintf("Not exactly one entry in FileInfoMap. Got %d: %+v.", len(fm), fm))
 	}
 	for k, v := range fm {
 		return k, v
