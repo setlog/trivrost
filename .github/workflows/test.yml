@@ -31,7 +31,6 @@ jobs:
 
   full-test:
     name: Full test (${{ matrix.platform }})
-    if: ${{ github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/master') }}
     strategy:
       matrix:
         go-version: [ '1.26' ]
