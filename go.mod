@@ -8,7 +8,7 @@ require (
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.35.0
 	golang.org/x/sys v0.30.0
