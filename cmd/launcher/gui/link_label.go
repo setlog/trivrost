@@ -1,7 +1,7 @@
 package gui
 
 import (
-	"github.com/andlabs/ui"
+	"github.com/libui-ng/golang-ui"
 )
 
 // See https://docs.microsoft.com/en-us/windows/win32/uxguide/vis-fonts#fonts-and-colors

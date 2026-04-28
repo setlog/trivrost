@@ -6,7 +6,7 @@ import (
 
 	"github.com/setlog/trivrost/pkg/misc"
 
-	"github.com/andlabs/ui"
+	"github.com/libui-ng/golang-ui"
 	log "github.com/sirupsen/logrus"
 )
 

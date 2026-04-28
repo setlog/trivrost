@@ -15,7 +15,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/andlabs/ui"
+	"github.com/libui-ng/golang-ui"
 	"github.com/setlog/trivrost/cmd/launcher/locking"
 	"github.com/setlog/trivrost/pkg/system"
 )

@@ -6,7 +6,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/andlabs/ui"
+	"github.com/libui-ng/golang-ui"
 	log "github.com/sirupsen/logrus"
 )
 
