@@ -142,8 +142,8 @@ endif
 tools:           ## Build helper tools like hasher
 	go build -o "${OUT_DIR}/${HASHER_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_HASHER}
 	go build -o "${OUT_DIR}/${VALIDATOR_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_VALIDATOR}
-	go build -o "${OUT_DIR}/${SIGNER_BIANRY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_SIGNER}
-	go build -o "${OUT_DIR}/${METAWRITER_BIANRY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_METAWRITER}
+	go build -o "${OUT_DIR}/${SIGNER_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_SIGNER}
+	go build -o "${OUT_DIR}/${METAWRITER_BINARY}${LAUNCHER_PROGRAM_EXT}" -v -installsuffix _separate ${MODULE_PATH_METAWRITER}
 
 help:            ## Show this help
 	@fgrep -h "##" ${MAKEFILE_LIST} | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
