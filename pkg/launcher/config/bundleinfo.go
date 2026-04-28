@@ -154,6 +154,9 @@ func validateBundleInfoPaths(bundleFiles FileInfoMap) {
 		if strings.HasPrefix(filePath, "/") {
 			panic(fmt.Sprintf("Bundle info file path %q must not be absolute", filePath))
 		}
+		if strings.Contains(filePath, `\`) {
+			panic(fmt.Sprintf("Bundle info file path %q must use forward slashes", filePath))
+		}
 
 		cleanPath := path.Clean(filePath)
 		if cleanPath == "." || cleanPath == ".." || strings.HasPrefix(cleanPath, "../") {
