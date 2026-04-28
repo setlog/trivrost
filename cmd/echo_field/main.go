@@ -20,9 +20,9 @@ func main() {
 	parseFlags()
 	launcherConfig := config.ReadLauncherConfigFromReader(mustReaderForFile(launcherConfigPath))
 	if keyOfValue == "BinaryName" {
-		fmt.Printf(launcherConfig.BinaryName)
+		fmt.Print(launcherConfig.BinaryName)
 	} else if keyOfValue == "BrandingName" {
-		fmt.Printf(launcherConfig.BrandingName)
+		fmt.Print(launcherConfig.BrandingName)
 	} else {
 		fatalf("Unknown launcher-config key \"%s\".", keyOfValue)
 	}

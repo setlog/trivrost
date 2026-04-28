@@ -38,6 +38,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-go 1.17
+go 1.26.0
 
 replace git.sr.ht/~tslocum/preallocate => github.com/smallnest/preallocate v0.1.1
