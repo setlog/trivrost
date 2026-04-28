@@ -24,6 +24,8 @@ You release your own build of a trivrost executable to your users. The users sta
 ## State of this project
 Production-ready, with high confidence for Linux and Windows builds. Has approximately 10.000 active Windows users for one of our builds. MacOS-support [needs input](https://github.com/setlog/trivrost/issues/11).
 
+Known issue: Windows builds currently require an older MinGW-w64 toolchain. Newer MinGW versions can fail while linking the launcher because `github.com/libui-ng/golang-ui` ships a prebuilt `libui` archive that is not compatible with them.
+
 ## Learn more
 1. [Background info](docs/reasons.md)
 1. [Glossary](docs/glossary.md)

@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/shirou/gopsutil/process"
+	"github.com/shirou/gopsutil/v4/process"
 	log "github.com/sirupsen/logrus"
 )
 

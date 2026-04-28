@@ -3,38 +3,46 @@ on:
   push:
     tags-ignore: ["v[0-9]+.[0-9]+.[0-9]+.*", "trigger-push"]
   pull_request:
+  schedule:
+    # Weekly full matrix run on Mondays at 04:00 UTC.
+    - cron: "0 4 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  smoke-test:
+    name: Smoke test (${{ matrix.platform }})
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main')
     strategy:
       matrix:
-        go-version: [ '1.20', '1.17' ]
-        platform: [ ubuntu-20.04, macos-13, windows-2019 ]
+        go-version: [ '1.26' ]
+        platform: [ ubuntu-24.04, windows-2025 ]
     runs-on: ${{ matrix.platform }}
-    if: always()
 
     steps:
-      - name: Install Go
-        uses: actions/setup-go@v5.4.0
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.2
+      - name: Run CI
+        uses: ./.github/actions/run-tests
         with:
           go-version: ${{ matrix.go-version }}
-      - name: Install libgtk-3-dev
-        if: startsWith(matrix.platform, 'ubuntu')
-        run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev
-      - name: Install UPX (Linux)
-        if: startsWith(matrix.platform, 'ubuntu')
-        run: sudo apt-get update -y && sudo apt-get install -y upx-ucl
-      - name: Install UPX (Windows)
-        if: startsWith(matrix.platform, 'windows')
-        run: choco install upx -y
+
+  full-test:
+    name: Full test (${{ matrix.platform }})
+    if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    strategy:
+      matrix:
+        go-version: [ '1.26' ]
+        # Note: 'macos-26' for arm does not yet work
+        platform: [ ubuntu-22.04, ubuntu-24.04, macos-15-intel, windows-2025 ]
+    runs-on: ${{ matrix.platform }}
+
+    steps:
       - name: Checkout repository
-        uses: actions/checkout@v4.2.2
-      - name: Build
-        shell: bash
-        run: |
-          make copy-test-files
-          make
-          make tools
-      - name: Test
-        shell: bash
-        run: make test
+        uses: actions/checkout@v6.0.2
+      - name: Run CI
+        uses: ./.github/actions/run-tests
+        with:
+          go-version: ${{ matrix.go-version }}

@@ -1,0 +1,59 @@
+name: Run Tests
+description: Set up Go, install platform dependencies, build tools, and run tests
+
+inputs:
+  go-version:
+    description: Go version to install
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Go
+      uses: actions/setup-go@v6.4.0
+      with:
+        go-version: ${{ inputs.go-version }}
+
+    - name: Install libgtk-3-dev
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev
+
+    - name: Install UPX (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get update -y && sudo apt-get install -y upx-ucl
+
+    - name: Install UPX (Windows)
+      if: runner.os == 'Windows'
+      shell: bash
+      run: choco install upx -y
+
+    - name: Install older MinGW-w64 (Windows)
+      if: runner.os == 'Windows'
+      id: winlibs
+      uses: bwoodsend/setup-winlibs-action@v1
+      with:
+        tag: '11.1.0-12.0.0-9.0.0-r1'
+        architecture: x86_64
+        threads: win32
+        add_to_path: true
+
+    - name: Export MinGW-w64 toolchain variables (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        "CC=${{ steps.winlibs.outputs.bin }}\gcc.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "CXX=${{ steps.winlibs.outputs.bin }}\g++.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "AR=${{ steps.winlibs.outputs.bin }}\ar.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Build
+      shell: bash
+      run: |
+        make copy-test-files
+        make
+        make tools
+
+    - name: Test
+      shell: bash
+      run: make test
