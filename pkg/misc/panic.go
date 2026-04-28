@@ -13,7 +13,7 @@ func LogPanic() {
 	}
 }
 
-func LogRecoveredValue(r interface{}) {
+func LogRecoveredValue(r any) {
 	// The stack printed when panic() is not recover()ed bypasses file-logging, so log it explicitly here.
 	log.Panicf("Unrecoverable state: %v\n%v", r, TryRemoveLines(string(debug.Stack()), 1, 3))
 }

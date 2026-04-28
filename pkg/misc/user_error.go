@@ -46,7 +46,7 @@ func (e *UserError) Message() string {
 
 // UserErrorf constructs a new *UserError with given cause and formatted message. The message should start with
 // a capital letter and have proper punctuation - but no word-wrapping line-breaks - for display in a dialog.
-func UserErrorf(cause error, userMessageFormat string, args ...interface{}) error {
+func UserErrorf(cause error, userMessageFormat string, args ...any) error {
 	return &UserError{cause: cause, userMessage: fmt.Sprintf(userMessageFormat, args...)}
 }
 

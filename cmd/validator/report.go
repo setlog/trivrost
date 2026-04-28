@@ -7,11 +7,11 @@ type report struct {
 	isError bool
 }
 
-func errorReport(info string, args ...interface{}) *report {
+func errorReport(info string, args ...any) *report {
 	return &report{message: fmt.Sprintf(info, args...), isError: true}
 }
 
-func statusReport(info string, args ...interface{}) *report {
+func statusReport(info string, args ...any) *report {
 	return &report{message: fmt.Sprintf(info, args...), isError: false}
 }
 

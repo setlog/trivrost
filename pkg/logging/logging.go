@@ -3,7 +3,7 @@ package logging
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -86,7 +86,7 @@ func GetLogFilePath() string {
 
 func DeleteOldLogFiles() {
 	maxLogFileAge := time.Hour * 24 * 20
-	infos, err := ioutil.ReadDir(folderPath)
+	infos, err := readDirFileInfos(folderPath)
 	now := time.Now()
 	if err != nil {
 		log.Errorf("Could not read contents of log directory \"%s\": %v", folderPath, err)
@@ -128,7 +128,7 @@ func getLogFileName(logIndex int, logInstance int) (string, int) {
 	if logIndex != -1 {
 		return concatenateLogFileNameArtifacts(logIndex, logInstance, descriptor), logIndex
 	}
-	infos, err := ioutil.ReadDir(folderPath)
+	infos, err := readDirFileInfos(folderPath)
 	if err != nil {
 		log.WithFields(log.Fields{"err": err, "folderPath": folderPath}).Warning("Could not read directory contents.")
 		return concatenateLogFileNameArtifacts(0, logInstance, descriptor), 0
@@ -137,7 +137,7 @@ func getLogFileName(logIndex int, logInstance int) (string, int) {
 	return concatenateLogFileNameArtifacts(useIndex, logInstance, descriptor), useIndex
 }
 
-func getNextIndex(infos []os.FileInfo) int {
+func getNextIndex(infos []fs.FileInfo) int {
 	latestIndex := getLatestIndex(infos)
 	if latestIndex < maxIndex {
 		return (latestIndex + 1) % (maxIndex + 1)
@@ -150,7 +150,23 @@ func getNextIndex(infos []os.FileInfo) int {
 	return firstAvailableIndex
 }
 
-func getLatestIndex(infos []os.FileInfo) int {
+func readDirFileInfos(folderPath string) ([]fs.FileInfo, error) {
+	entries, err := os.ReadDir(folderPath)
+	if err != nil {
+		return nil, err
+	}
+	infos := make([]fs.FileInfo, 0, len(entries))
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			return nil, err
+		}
+		infos = append(infos, info)
+	}
+	return infos, nil
+}
+
+func getLatestIndex(infos []fs.FileInfo) int {
 	for i := len(infos) - 1; i >= 0; i-- {
 		name := infos[i].Name()
 		if isLogFileName(name) {
@@ -163,7 +179,7 @@ func getLatestIndex(infos []os.FileInfo) int {
 	return -1
 }
 
-func getFirstAvailableIndex(infos []os.FileInfo) int {
+func getFirstAvailableIndex(infos []fs.FileInfo) int {
 	firstAvailableIndex := 0
 	for _, info := range infos {
 		name := info.Name()

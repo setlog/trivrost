@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -124,7 +123,7 @@ func (downloader *Downloader) DownloadToDirectory(baseUrl string, fileMap config
 		urlToPathMap[url] = relativeFilePath
 		urlToInfoMap[url] = fileInfo
 	}
-	return downloader.DownloadResources(stringStringMapKeys(urlToPathMap), func(dl *Download) error {
+	return downloader.DownloadResources(urlToInfoMap.FilePaths(), func(dl *Download) error {
 		return updateFile(dl, urlToInfoMap[dl.url], filepath.Join(localDirPath, urlToPathMap[dl.url]))
 	})
 }
@@ -141,12 +140,12 @@ func (downloader *Downloader) DownloadToRAM(fileMap config.FileInfoMap) (fileDat
 	return fileData, downloader.DownloadResources(fileMap.FilePaths(), func(dl *Download) error {
 		wantedFileInfo := fileMap[dl.url]
 		hash := sha256.New()
-		data, err := ioutil.ReadAll(io.TeeReader(dl, hash))
+		data, err := io.ReadAll(io.TeeReader(dl, hash))
 		if err != nil {
 			if downloader.ctx.Err() != nil {
 				return downloader.ctx.Err()
 			}
-			return fmt.Errorf("ioutil.ReadAll failed: %v", err)
+			return fmt.Errorf("io.ReadAll failed: %v", err)
 		}
 		dlFileSha := hex.EncodeToString(hash.Sum(nil))
 		if wantedFileInfo.SHA256 != "" && !strings.EqualFold(wantedFileInfo.SHA256, dlFileSha) {

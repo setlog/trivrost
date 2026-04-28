@@ -51,8 +51,8 @@ func areJsonEqual(str1, str2 string, t *testing.T) bool {
 	return reflect.DeepEqual(parseAbstractJson(str1, t), parseAbstractJson(str2, t))
 }
 
-func parseAbstractJson(str string, t *testing.T) interface{} {
-	var parsed interface{}
+func parseAbstractJson(str string, t *testing.T) any {
+	var parsed any
 	err := json.Unmarshal([]byte(str), &parsed)
 	if err != nil {
 		t.Fatalf("The following string doesn't seem to be a valid json: %s", str)

@@ -3,9 +3,12 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"maps"
+	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/setlog/trivrost/pkg/misc"
@@ -113,15 +116,11 @@ func (bundleFiles FileInfoMap) Prepend(pathElement string, sep rune) FileInfoMap
 }
 
 func (bundleFiles FileInfoMap) FilePaths() []string {
-	paths := make([]string, 0, len(bundleFiles))
-	for filePath := range bundleFiles {
-		paths = append(paths, filePath)
-	}
-	return paths
+	return slices.Collect(maps.Keys(bundleFiles))
 }
 
 func ReadInfo(filePath string) *BundleInfo {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err)
 	}
@@ -129,7 +128,7 @@ func ReadInfo(filePath string) *BundleInfo {
 }
 
 func ReadInfoFromReader(reader *strings.Reader) *BundleInfo {
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		panic(err)
 	}

@@ -17,7 +17,7 @@ func NewLogLimiter(limit int) *LogLimiter {
 	return &LogLimiter{limit: int64(limit), seenMessages: &sync.Map{}}
 }
 
-func (l *LogLimiter) Logf(level log.Level, format string, args ...interface{}) {
+func (l *LogLimiter) Logf(level log.Level, format string, args ...any) {
 	l.Log(level, fmt.Sprintf(format, args...))
 }
 
@@ -34,7 +34,7 @@ func (l *LogLimiter) Log(level log.Level, message string) {
 	}
 }
 
-func (l *LogLimiter) Infof(format string, args ...interface{}) {
+func (l *LogLimiter) Infof(format string, args ...any) {
 	l.Logf(log.InfoLevel, format, args...)
 }
 
@@ -42,7 +42,7 @@ func (l *LogLimiter) Info(message string) {
 	l.Log(log.InfoLevel, message)
 }
 
-func (l *LogLimiter) Warnf(format string, args ...interface{}) {
+func (l *LogLimiter) Warnf(format string, args ...any) {
 	l.Logf(log.WarnLevel, format, args...)
 }
 
@@ -50,7 +50,7 @@ func (l *LogLimiter) Warn(message string) {
 	l.Log(log.WarnLevel, message)
 }
 
-func (l *LogLimiter) Errorf(format string, args ...interface{}) {
+func (l *LogLimiter) Errorf(format string, args ...any) {
 	l.Logf(log.ErrorLevel, format, args...)
 }
 
