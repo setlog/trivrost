@@ -1,7 +1,7 @@
 package gui
 
 import (
-	"github.com/libui-ng/golang-ui"
+	"github.com/andlabs/ui"
 	"github.com/setlog/trivrost/pkg/stats"
 )
 

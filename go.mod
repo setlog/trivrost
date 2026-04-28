@@ -2,9 +2,9 @@ module github.com/setlog/trivrost
 
 require (
 	git.sr.ht/~tslocum/preallocate v0.1.2
+	github.com/andlabs/ui v0.0.0-20200610043537-70a69d6ae31e
 	github.com/go-ole/go-ole v1.3.0
 	github.com/gofrs/flock v0.13.0
-	github.com/libui-ng/golang-ui v0.0.0-20230331052320-13dec0981460
 	github.com/mattn/go-ieproxy v0.0.12
 	github.com/prometheus/client_golang v1.23.2
 	github.com/shirou/gopsutil/v4 v4.26.3
