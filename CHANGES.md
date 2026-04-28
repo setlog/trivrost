@@ -5,6 +5,7 @@
 * Add optional environment variable `EXTRA_CGO_LDFLAGS` to Makefile, which can be used to add `CGO_LDFLAGS` to the build process under darwin.
 
 ### Fixes
+* Simplify bundle info downloads so updater-internal code consistently uses the updater's configured public keys.
 * Validate `BaseURL` and `IsUpdateMandatory` correctly in the deployment-config schema.
 * Reject invalid file paths in bundle info files before updating local bundles.
 
