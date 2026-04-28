@@ -2,11 +2,12 @@ package logging
 
 import (
 	"fmt"
-	"github.com/fatih/color"
-	log "github.com/sirupsen/logrus"
+
 	"path"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type logRelay struct {
@@ -22,7 +23,7 @@ func (lr *logRelay) Write(p []byte) (n int, err error) {
 			logMessage := strings.TrimLeft(fullMessage[colonBeforeMessageIndex+1:], " ")
 			filePath := filepath.ToSlash(fullMessage[:colonBeforeLineNumberIndex])
 			interestingPath := path.Join(path.Base(path.Dir(path.Dir(filePath))), path.Base(path.Dir(filePath)), path.Base(filePath))
-			codeLocationHint := colorize(fmt.Sprintf("[%s:%s]", interestingPath, lineNumberString), color.FgHiBlack, true)
+			codeLocationHint := colorize(fmt.Sprintf("[%s:%s]", interestingPath, lineNumberString), ansiHiBlack, true)
 			fullMessage = logMessage + " " + codeLocationHint
 		}
 	}

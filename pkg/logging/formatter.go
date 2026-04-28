@@ -9,13 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/setlog/trivrost/pkg/misc"
 
 	log "github.com/sirupsen/logrus"
 )
 
-const codeLocationHintColor = color.FgHiBlack
+const codeLocationHintColor = ansiHiBlack
 
 type LogFormatter struct {
 }
@@ -25,7 +24,7 @@ func (lf *LogFormatter) Format(entry *log.Entry) ([]byte, error) {
 		return []byte("\n"), nil
 	}
 	messageTypeShort := getMessageTypeShort(entry.Level)
-	time := colorize(getTimeString(), color.FgHiBlack, true)
+	time := colorize(getTimeString(), ansiHiBlack, true)
 	logMessage := misc.StripTrailingLineBreak(entry.Message)
 	codeLocationHint := ""
 	if !hasCodeLocationHint(logMessage) { // logRelay will have written code location hint for standard log package prints already.
@@ -88,10 +87,10 @@ func getSortedFields(entry *log.Entry) string {
 	lastIndex, i := len(entry.Data)-1, 0
 	for _, fieldName := range sortedFieldNames {
 		fieldValue := entry.Data[fieldName]
-		q := fmt.Sprintf("%s%s%v", colorize(fieldName, color.FgCyan, false), colorize("=", color.FgHiBlack, true), fieldValue)
+		q := fmt.Sprintf("%s%s%v", colorize(fieldName, ansiCyan, false), colorize("=", ansiHiBlack, true), fieldValue)
 		fields += q
 		if i != lastIndex {
-			fields += colorize(", ", color.FgHiBlack, true)
+			fields += colorize(", ", ansiHiBlack, true)
 		}
 		i++
 	}
@@ -111,21 +110,21 @@ func getSortedFieldNames(data log.Fields) []string {
 func getMessageTypeShort(level log.Level) string {
 	switch level {
 	case log.TraceLevel:
-		return colorize("T", color.FgHiBlack, true)
+		return colorize("T", ansiHiBlack, true)
 	case log.DebugLevel:
-		return colorize("D", color.FgHiBlack, true)
+		return colorize("D", ansiHiBlack, true)
 	case log.InfoLevel:
 		return "I"
 	case log.WarnLevel:
-		return colorize("W", color.FgYellow, true)
+		return colorize("W", ansiYellow, true)
 	case log.ErrorLevel:
-		return colorize("E", color.FgRed, true)
+		return colorize("E", ansiRed, true)
 	case log.FatalLevel:
-		return colorize("F", color.FgRed, true)
+		return colorize("F", ansiRed, true)
 	case log.PanicLevel:
-		return colorize("P", color.FgMagenta, true)
+		return colorize("P", ansiMagenta, true)
 	default:
-		return colorize("?", color.FgRed, true)
+		return colorize("?", ansiRed, true)
 	}
 }
 
