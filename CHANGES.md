@@ -5,7 +5,7 @@
 * Add optional environment variable `EXTRA_CGO_LDFLAGS` to Makefile, which can be used to add `CGO_LDFLAGS` to the build process under darwin.
 
 ### Fixes
-* CI tests now validate against Ubuntu 22.04, 24.04, MacOS-15-Intel, Windows-2022.
+* CI tests now validate against Ubuntu 22.04, 24.04, MacOS-15-Intel, Windows-2025.
 * Simplify bundle info downloads so updater-internal code consistently uses the updater's configured public keys.
 * Validate `BaseURL` and `IsUpdateMandatory` correctly in the deployment-config schema.
 * Reject invalid file paths in bundle info files before updating local bundles.

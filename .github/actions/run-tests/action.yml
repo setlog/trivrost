@@ -29,6 +29,24 @@ runs:
       shell: bash
       run: choco install upx -y
 
+    - name: Install older MinGW-w64 (Windows)
+      if: runner.os == 'Windows'
+      id: winlibs
+      uses: bwoodsend/setup-winlibs-action@v1
+      with:
+        tag: '11.1.0-12.0.0-9.0.0-r1'
+        architecture: x86_64
+        threads: win32
+        add_to_path: true
+
+    - name: Export MinGW-w64 toolchain variables (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        "CC=${{ steps.winlibs.outputs.bin }}\gcc.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "CXX=${{ steps.winlibs.outputs.bin }}\g++.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "AR=${{ steps.winlibs.outputs.bin }}\ar.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
     - name: Build
       shell: bash
       run: |
