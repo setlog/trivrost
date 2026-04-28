@@ -19,7 +19,7 @@ func ValidateDeploymentConfig(expandedDeploymentConfig string) error {
 		for _, desc := range result.Errors() {
 			errorMessage += fmt.Sprintf("\n%s", desc)
 		}
-		return fmt.Errorf(errorMessage)
+		return fmt.Errorf("%s", errorMessage)
 	}
 
 	return nil
