@@ -8,11 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/setlog/trivrost/pkg/launcher/timestamps"
 	"github.com/setlog/trivrost/pkg/system"
 
-	"github.com/MMulthaupt/chronometry"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
@@ -44,9 +44,9 @@ func (u *Updater) determineLocalBundleVersions() {
 
 func (u *Updater) makeBundleUpdateConfigFromBundle(bundleConfig config.BundleConfig, bundleFolderPath string) *BundleUpdateInfo {
 	bundleUpdateConfig := BundleUpdateInfo{BundleConfig: bundleConfig}
-	sw := chronometry.NewStartedStopwatch()
+	startedAt := time.Now()
 	bundleUpdateConfig.PresentState = hashing.MustHash(u.ctx, filepath.Join(bundleFolderPath, bundleConfig.LocalDirectory))
-	log.Infof("Hashing directory of bundle \"%s\" took %v.", bundleConfig.LocalDirectory, sw.TakeLapTime())
+	log.Infof("Hashing directory of bundle \"%s\" took %v.", bundleConfig.LocalDirectory, time.Since(startedAt))
 	return &bundleUpdateConfig
 }
 
@@ -133,12 +133,12 @@ func (u *Updater) installBundleUpdates() {
 }
 
 func applyBundleUpdate(fileMap config.FileInfoMap, fromPath, toPath string) {
-	sw := chronometry.NewStartedStopwatch()
+	startedAt := time.Now()
 	deleteChangedFiles(fileMap, toPath)
 	log.Infof("Moving %d files from \"%s\" to \"%s\".", fileMap.UpdateFileCount(), fromPath, toPath)
 	system.MustMoveFiles(fromPath, toPath)
 	system.MustRecursivelyRemoveEmptyFolders(toPath)
-	log.Infof("Applying bundle update to folder \"%s\" took %v.", toPath, sw.TakeLapTime())
+	log.Infof("Applying bundle update to folder \"%s\" took %v.", toPath, time.Since(startedAt))
 }
 
 func deleteChangedFiles(fileMap config.FileInfoMap, localDirPath string) {

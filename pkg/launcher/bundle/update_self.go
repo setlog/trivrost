@@ -9,7 +9,6 @@ import (
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/launcher/hashing"
 
-	"github.com/davecgh/go-spew/spew"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/setlog/trivrost/pkg/misc"
@@ -44,7 +43,7 @@ func (u *Updater) updateProgram(programPath string) (madeChanges bool) {
 
 	if wantedState.HasChanges() {
 		log.WithFields(log.Fields{"updateConfig": fmt.Sprintf("%+v", updateConfig)}).
-			Infof(spew.Sprintf("Launcher at \"%s\" is outdated. Updating from state %+v to %+v.", programPath, presentState, wantedState))
+			Infof("Launcher at %q is outdated. Updating from state %+v to %+v.", programPath, presentState, wantedState)
 		if system.IsDir(programPath) {
 			u.updateApplicationFolder(updateConfig, wantedState, programPath)
 		} else {

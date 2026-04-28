@@ -3,14 +3,23 @@ package logging
 import (
 	"fmt"
 	"io"
-
-	"github.com/fatih/color"
 )
 
 type withoutStyleWriter struct {
 	target    io.Writer
 	isCutting bool
 }
+
+type ansiCode int
+
+const (
+	ansiReset   ansiCode = 0
+	ansiRed     ansiCode = 31
+	ansiMagenta ansiCode = 35
+	ansiYellow  ansiCode = 33
+	ansiCyan    ansiCode = 36
+	ansiHiBlack ansiCode = 90
+)
 
 func (dw *withoutStyleWriter) Write(p []byte) (n int, err error) {
 	decolored := make([]byte, 0)
@@ -36,7 +45,7 @@ func (dw *withoutStyleWriter) Write(p []byte) (n int, err error) {
 	return
 }
 
-func colorize(text string, colorCode color.Attribute, clearAfter bool) string {
+func colorize(text string, colorCode ansiCode, clearAfter bool) string {
 	if text == "" {
 		if clearAfter {
 			return clearStyle()
@@ -49,10 +58,10 @@ func colorize(text string, colorCode color.Attribute, clearAfter bool) string {
 	return fmt.Sprintf("%s%s", formatStyle(colorCode), text)
 }
 
-func formatStyle(colorCode color.Attribute) string {
+func formatStyle(colorCode ansiCode) string {
 	return fmt.Sprintf("\x1B[%dm", colorCode)
 }
 
 func clearStyle() string {
-	return fmt.Sprintf("\x1B[%dm", color.Reset)
+	return fmt.Sprintf("\x1B[%dm", ansiReset)
 }
