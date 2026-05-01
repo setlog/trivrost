@@ -7,7 +7,7 @@ require (
 	github.com/gofrs/flock v0.13.0
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.23.2
-	github.com/shirou/gopsutil/v4 v4.26.3
+	github.com/shirou/gopsutil/v4 v4.26.4
 	github.com/sirupsen/logrus v1.9.4
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.53.0
