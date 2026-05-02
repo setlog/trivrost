@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"maps"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -10,9 +12,7 @@ func NewFileInfoMap() FileInfoMap {
 }
 
 func (fm FileInfoMap) Join(other FileInfoMap) {
-	for k, v := range other {
-		fm[k] = v
-	}
+	maps.Copy(fm, other)
 }
 
 func (fm FileInfoMap) MustGetOnly() (key string, fileInfo *FileInfo) {

@@ -2,10 +2,11 @@ package logging
 
 import (
 	"fmt"
+	"maps"
 	"path"
 	"path/filepath"
 	"runtime/debug"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -98,13 +99,7 @@ func getSortedFields(entry *log.Entry) string {
 }
 
 func getSortedFieldNames(data log.Fields) []string {
-	names, i := make([]string, len(data)), 0
-	for k := range data {
-		names[i] = k
-		i++
-	}
-	sort.Strings(names)
-	return names
+	return slices.Sorted(maps.Keys(data))
 }
 
 func getMessageTypeShort(level log.Level) string {

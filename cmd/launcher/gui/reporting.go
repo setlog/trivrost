@@ -29,12 +29,12 @@ func HandlePanic(launcherFlags *flags.LauncherFlags) {
 	}
 }
 
-func PanicInformatively(r interface{}, launcherFlags *flags.LauncherFlags) {
+func PanicInformatively(r any, launcherFlags *flags.LauncherFlags) {
 	defer presentError(getPanicMessage(r), launcherFlags.DismissGuiPrompts)
 	misc.LogRecoveredValue(r)
 }
 
-func getPanicMessage(r interface{}) string {
+func getPanicMessage(r any) string {
 	message := "Something went wrong. The program will now close."
 
 	userError, ok := r.(*misc.UserError)

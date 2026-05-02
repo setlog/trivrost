@@ -1,4 +1,4 @@
-// +build linux darwin
+//go:build linux || darwin
 
 package system
 
@@ -25,8 +25,8 @@ func mustDetectArchitecture() {
 func removeEnv(envs []string, name string) []string {
 	for i := 0; i < len(envs); i++ {
 		env := envs[i]
-		kv := strings.SplitN(env, "=", 2)
-		if len(kv) == 2 && kv[0] == name {
+		key, _, ok := strings.Cut(env, "=")
+		if ok && key == name {
 			envs = append(envs[:i], envs[i+1:]...)
 			break
 		}

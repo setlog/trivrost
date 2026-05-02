@@ -7,9 +7,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/setlog/trivrost/pkg/system"
@@ -87,10 +87,8 @@ func downloadBundle(downloader *fetching.Downloader, fromURL string, bundleInfoU
 
 func shouldDownloadBundle(bundleTags []string, allowedTags []string) bool {
 	for _, allowedTag := range allowedTags {
-		for _, bundleTag := range bundleTags {
-			if bundleTag == allowedTag {
-				return true
-			}
+		if slices.Contains(bundleTags, allowedTag) {
+			return true
 		}
 		if (len(bundleTags) == 0) && (allowedTag == tagUntagged) {
 			return true
@@ -154,14 +152,14 @@ func isFolder(filePath string) bool {
 }
 
 func mustReaderForFile(filePath string) io.Reader {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fatalf("Could not read file \"%s\": %v", filePath, err)
 	}
 	return bytes.NewReader(data)
 }
 
-func fatalf(formatMessage string, args ...interface{}) {
+func fatalf(formatMessage string, args ...any) {
 	fmt.Printf(formatMessage+"\n", args...)
 	os.Exit(1)
 }

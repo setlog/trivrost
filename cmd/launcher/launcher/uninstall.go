@@ -1,7 +1,6 @@
 package launcher
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -108,7 +107,7 @@ func deleteLeftoverBinaries() {
 		return
 	}
 	targetDir := places.GetLauncherTargetDirectoryPath()
-	fileList, err := ioutil.ReadDir(targetDir)
+	fileList, err := os.ReadDir(targetDir)
 	if err != nil {
 		log.Errorf("Could not read directory \"%s\": %v", targetDir, err)
 		return

@@ -5,13 +5,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/setlog/trivrost/pkg/misc"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
+	"github.com/setlog/trivrost/pkg/misc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,18 +19,34 @@ func fopen(filePath string) (io.ReadCloser, error) {
 	return os.Open(filePath)
 }
 
-func stat(filePath string) (os.FileInfo, error) {
+func stat(filePath string) (fs.FileInfo, error) {
 	return os.Stat(filePath)
 }
 
 func MustHash(ctx context.Context, hashFilePath string) config.FileInfoMap {
 	log.Infof("Hash \"%s\".", hashFilePath)
-	return mustHashRelatively(ctx, ioutil.ReadDir, fopen, stat, hashFilePath)
+	return mustHashRelatively(ctx, readDir, fopen, stat, hashFilePath)
 }
 
-type readDirFunc func(dirPath string) ([]os.FileInfo, error)
+type readDirFunc func(dirPath string) ([]fs.FileInfo, error)
 type readFileFunc func(filePath string) (io.ReadCloser, error)
-type statFunc func(filePath string) (os.FileInfo, error)
+type statFunc func(filePath string) (fs.FileInfo, error)
+
+func readDir(dirPath string) ([]fs.FileInfo, error) {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	infos := make([]fs.FileInfo, 0, len(entries))
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			return nil, err
+		}
+		infos = append(infos, info)
+	}
+	return infos, nil
+}
 
 func mustHashRelatively(ctx context.Context, readDir readDirFunc, readFile readFileFunc, stat statFunc, hashFilePath string) config.FileInfoMap {
 	info, err := stat(hashFilePath)
@@ -77,7 +93,7 @@ func mustHashDir(ctx context.Context, readDir readDirFunc, readFile readFileFunc
 	return fm
 }
 
-func mustReadDir(readDir readDirFunc, directoryPath string) []os.FileInfo {
+func mustReadDir(readDir readDirFunc, directoryPath string) []fs.FileInfo {
 	infos, err := readDir(directoryPath)
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -97,7 +96,7 @@ func compileMsi(cfg *wxsConfig) {
 func generateComponentGroupsFile(cfg *wxsConfig) {
 	// need to exclude the binary because it is part of the wxs file already. Moving it to the side temporarily
 	// which is an utterly stupid way to do it. FIXME
-	dir, err := ioutil.TempDir(cfg.OutDir, "launcher")
+	dir, err := os.MkdirTemp(cfg.OutDir, "launcher")
 	if err != nil {
 		panic(err)
 	}
@@ -245,14 +244,14 @@ func configure() *wxsConfig {
 }
 
 func mustReaderForFile(filePath string) io.Reader {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fatalf("Could not read file \"%s\": %v", filePath, err)
 	}
 	return bytes.NewReader(data)
 }
 
-func fatalf(formatMessage string, args ...interface{}) {
+func fatalf(formatMessage string, args ...any) {
 	fmt.Printf(formatMessage+"\n", args...)
 	os.Exit(1)
 }
