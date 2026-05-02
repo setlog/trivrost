@@ -3,6 +3,7 @@
 ## TBD (TBD)
 ### Features
 * Add optional environment variable `EXTRA_CGO_LDFLAGS` to Makefile, which can be used to add `CGO_LDFLAGS` to the build process under darwin.
+* `hasher`: Add command line arguments `-overwrite`, `-verify` and `-absent`.
 
 ### Fixes
 * CI tests now validate against Ubuntu 22.04, 24.04, MacOS-15-Intel, Windows-2025.

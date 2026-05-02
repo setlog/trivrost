@@ -26,14 +26,23 @@ type FileInfo struct {
 	Size   int64  `json:"Size"`
 }
 
-// GetFileHashes returns a FileInfoMap for the info's BundleFiles using filepath.Separator in the place of forward slashes.
-func (info *BundleInfo) GetFileHashes() FileInfoMap {
-	fm := NewFileInfoMap()
-	for filePath, fileInfo := range info.BundleFiles {
-		genericFileInfo := *fileInfo
-		fm[filepath.FromSlash(filePath)] = &genericFileInfo
+func (f *FileInfo) GetSHA256() string {
+	if f == nil {
+		return ""
 	}
-	return fm
+	return f.SHA256
+}
+
+func (f *FileInfo) GetSize() int64 {
+	if f == nil {
+		return 0
+	}
+	return f.Size
+}
+
+// GetFileHashes is a shorthand for info.BundleFiles.ForOS()
+func (info *BundleInfo) GetFileHashes() FileInfoMap {
+	return info.BundleFiles.ForOS()
 }
 
 // ForOS returns a copy of the FileInfoMap where all keys' forward slashes are replaced by the separator
