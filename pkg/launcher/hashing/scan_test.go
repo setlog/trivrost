@@ -34,17 +34,45 @@ func TestMustHashRelatively(t *testing.T) {
 func dummyListDirectory(dirPath string) ([]fs.DirEntry, error) {
 	switch dirPath {
 	case "x":
-		return []fs.DirEntry{dummy.NewDirEntry("foo", true), dummy.NewDirEntry("fuu", true), dummy.NewDirEntry("foo", false)}, nil
+		return []fs.DirEntry{newDirEntry("foo", true), newDirEntry("fuu", true), newDirEntry("foo", false)}, nil
 	case filepath.FromSlash("x/foo"):
-		return []fs.DirEntry{dummy.NewDirEntry("bar", false)}, nil
+		return []fs.DirEntry{newDirEntry("bar", false)}, nil
 	case filepath.FromSlash("x/fuu"):
-		return []fs.DirEntry{dummy.NewDirEntry("moo", true), dummy.NewDirEntry("baaar", false)}, nil
+		return []fs.DirEntry{newDirEntry("moo", true), newDirEntry("baaar", false)}, nil
 	case filepath.FromSlash("x/fuu/moo"):
-		return []fs.DirEntry{dummy.NewDirEntry("meow", true)}, nil
+		return []fs.DirEntry{newDirEntry("meow", true)}, nil
 	case filepath.FromSlash("x/fuu/moo/meow"):
-		return []fs.DirEntry{dummy.NewDirEntry("bla", false)}, nil
+		return []fs.DirEntry{newDirEntry("bla", false)}, nil
 	}
 	return []fs.DirEntry{}, fmt.Errorf("Could not find the specified directory \"%s\"", dirPath)
+}
+
+func newDirEntry(name string, isDir bool) fs.DirEntry {
+	return dirEntry{name: name, isDir: isDir}
+}
+
+type dirEntry struct {
+	name  string
+	isDir bool
+}
+
+func (de dirEntry) Name() string {
+	return de.name
+}
+
+func (de dirEntry) IsDir() bool {
+	return de.isDir
+}
+
+func (de dirEntry) Type() fs.FileMode {
+	if de.isDir {
+		return fs.ModeDir
+	}
+	return 0
+}
+
+func (de dirEntry) Info() (fs.FileInfo, error) {
+	return dummy.NewFileInfo(de.name, de.isDir), nil
 }
 
 func dummyReadFile(filePath string) (io.ReadCloser, error) {

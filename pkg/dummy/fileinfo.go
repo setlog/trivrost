@@ -10,10 +10,6 @@ func NewFileInfo(name string, isDir bool) fs.FileInfo {
 	return &FileInfo{name: name, isDir: isDir}
 }
 
-func NewDirEntry(name string, isDir bool) fs.DirEntry {
-	return &FileInfo{name: name, isDir: isDir}
-}
-
 type FileInfo struct {
 	name  string
 	isDir bool
@@ -29,9 +25,6 @@ func (dfi *FileInfo) Size() int64 {
 }
 
 func (dfi *FileInfo) Mode() os.FileMode {
-	if dfi.isDir {
-		return os.ModeDir | 0755
-	}
 	return 0755
 }
 
@@ -45,13 +38,4 @@ func (dfi *FileInfo) IsDir() bool {
 
 func (dfi *FileInfo) Sys() any {
 	return nil
-}
-
-// Satisfy fs.DirEntry interface requirements.
-func (dfi *FileInfo) Type() fs.FileMode {
-	return dfi.Mode().Type()
-}
-
-func (dfi *FileInfo) Info() (fs.FileInfo, error) {
-	return dfi, nil
 }
