@@ -31,20 +31,20 @@ func TestMustHashRelatively(t *testing.T) {
 	}
 }
 
-func dummyListDirectory(dirPath string) ([]fs.FileInfo, error) {
+func dummyListDirectory(dirPath string) ([]fs.DirEntry, error) {
 	switch dirPath {
 	case "x":
-		return []fs.FileInfo{dummy.NewFileInfo("foo", true), dummy.NewFileInfo("fuu", true), dummy.NewFileInfo("foo", false)}, nil
+		return []fs.DirEntry{dummy.NewDirEntry("foo", true), dummy.NewDirEntry("fuu", true), dummy.NewDirEntry("foo", false)}, nil
 	case filepath.FromSlash("x/foo"):
-		return []fs.FileInfo{dummy.NewFileInfo("bar", false)}, nil
+		return []fs.DirEntry{dummy.NewDirEntry("bar", false)}, nil
 	case filepath.FromSlash("x/fuu"):
-		return []fs.FileInfo{dummy.NewFileInfo("moo", true), dummy.NewFileInfo("baaar", false)}, nil
+		return []fs.DirEntry{dummy.NewDirEntry("moo", true), dummy.NewDirEntry("baaar", false)}, nil
 	case filepath.FromSlash("x/fuu/moo"):
-		return []fs.FileInfo{dummy.NewFileInfo("meow", true)}, nil
+		return []fs.DirEntry{dummy.NewDirEntry("meow", true)}, nil
 	case filepath.FromSlash("x/fuu/moo/meow"):
-		return []fs.FileInfo{dummy.NewFileInfo("bla", false)}, nil
+		return []fs.DirEntry{dummy.NewDirEntry("bla", false)}, nil
 	}
-	return []fs.FileInfo{}, fmt.Errorf("Could not find the specified directory \"%s\"", dirPath)
+	return []fs.DirEntry{}, fmt.Errorf("Could not find the specified directory \"%s\"", dirPath)
 }
 
 func dummyReadFile(filePath string) (io.ReadCloser, error) {

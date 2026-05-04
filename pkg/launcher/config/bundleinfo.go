@@ -116,7 +116,7 @@ func (bundleFiles FileInfoMap) Prepend(pathElement string, sep rune) FileInfoMap
 }
 
 func (bundleFiles FileInfoMap) FilePaths() []string {
-	return slices.Collect(maps.Keys(bundleFiles))
+	return slices.Sorted(maps.Keys(bundleFiles))
 }
 
 func ReadInfo(filePath string) *BundleInfo {
@@ -127,7 +127,7 @@ func ReadInfo(filePath string) *BundleInfo {
 	return ReadInfoFromByteSlice(data)
 }
 
-func ReadInfoFromReader(reader *strings.Reader) *BundleInfo {
+func ReadInfoFromReader(reader io.Reader) *BundleInfo {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		panic(err)
