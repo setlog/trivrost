@@ -239,7 +239,7 @@ func (dl *Download) handlePanic(errPtr *error) {
 	}
 }
 
-func setError(panicObject interface{}, errPtr *error) bool {
+func setError(panicObject any, errPtr *error) bool {
 	if panicErr, ok := panicObject.(DownloadError); ok {
 		*errPtr = panicErr
 		return true

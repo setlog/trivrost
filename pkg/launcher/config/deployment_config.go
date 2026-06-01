@@ -78,8 +78,7 @@ func ParseDeploymentConfig(reader io.Reader, os string, arch string) (deployment
 }
 
 func configureLauncherUpdates(launchers []LauncherUpdateConfig) {
-	launcherCount := len(launchers)
-	for i := 0; i < launcherCount; i++ {
+	for i := range launchers {
 		configureLauncherUpdate(&launchers[i])
 	}
 }
@@ -93,8 +92,7 @@ func configureLauncherUpdate(launcher *LauncherUpdateConfig) {
 }
 
 func configureBundles(bundles []BundleConfig) {
-	bundleCount := len(bundles)
-	for i := 0; i < bundleCount; i++ {
+	for i := range bundles {
 		configureBundle(&bundles[i])
 	}
 }

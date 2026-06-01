@@ -3,7 +3,6 @@ package locking
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/setlog/trivrost/pkg/system"
@@ -11,7 +10,7 @@ import (
 )
 
 func readProcessSignatureListFile(filePath string) (procSigs []system.ProcessSignature) {
-	bytes, err := ioutil.ReadFile(filePath)
+	bytes, err := os.ReadFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -36,7 +35,7 @@ func mustWriteProcessSignatureListFile(filePath string, procSigs []system.Proces
 	if err != nil {
 		panic(fmt.Sprintf("Could not marshal process signature slice of length %d: %v", len(procSigs), err))
 	}
-	err = ioutil.WriteFile(filePath, bytes, 0666)
+	err = os.WriteFile(filePath, bytes, 0666)
 	if err != nil {
 		panic(fmt.Sprintf("Could not write process signature list file \"%s\": %v", filePath, err))
 	}

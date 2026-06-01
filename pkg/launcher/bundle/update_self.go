@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/launcher/hashing"
@@ -101,10 +102,5 @@ func (u *Updater) SetIgnoredLauncherUpdateBundleInfoSHAs(ignoreShas []string) {
 }
 
 func (u *Updater) IsShaIgnored(sha string) bool {
-	for _, ignoreSha := range u.ignoredLauncherUpdateBundleInfoSHAs {
-		if ignoreSha == sha {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(u.ignoredLauncherUpdateBundleInfoSHAs, sha)
 }

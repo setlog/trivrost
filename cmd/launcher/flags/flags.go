@@ -101,11 +101,11 @@ func parseExtraEnv(extraEnvString string) map[string]string {
 	extraEnvs := make(map[string]string)
 	splitted := strings.Split(extraEnvString, ";")
 	for _, envVar := range splitted {
-		keyValue := strings.SplitN(envVar, "=", 2)
-		if len(keyValue) != 2 {
+		key, value, ok := strings.Cut(envVar, "=")
+		if !ok {
 			panic("invalid extra environment variables - missing \"=\"")
 		}
-		extraEnvs[keyValue[0]] = keyValue[1]
+		extraEnvs[key] = value
 	}
 	return extraEnvs
 }

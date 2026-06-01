@@ -1,11 +1,12 @@
 package dummy
 
 import (
+	"io/fs"
 	"os"
 	"time"
 )
 
-func NewFileInfo(name string, isDir bool) os.FileInfo {
+func NewFileInfo(name string, isDir bool) fs.FileInfo {
 	return &FileInfo{name: name, isDir: isDir}
 }
 
@@ -14,7 +15,7 @@ type FileInfo struct {
 	isDir bool
 }
 
-// Satisfy os.FileInfo interface requirements.
+// Satisfy fs.FileInfo interface requirements.
 func (dfi *FileInfo) Name() string {
 	return dfi.name
 }
@@ -35,6 +36,6 @@ func (dfi *FileInfo) IsDir() bool {
 	return dfi.isDir
 }
 
-func (dfi *FileInfo) Sys() interface{} {
+func (dfi *FileInfo) Sys() any {
 	return nil
 }

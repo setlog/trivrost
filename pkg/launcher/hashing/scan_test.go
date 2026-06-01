@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -31,20 +31,48 @@ func TestMustHashRelatively(t *testing.T) {
 	}
 }
 
-func dummyListDirectory(dirPath string) ([]os.FileInfo, error) {
+func dummyListDirectory(dirPath string) ([]fs.DirEntry, error) {
 	switch dirPath {
 	case "x":
-		return []os.FileInfo{dummy.NewFileInfo("foo", true), dummy.NewFileInfo("fuu", true), dummy.NewFileInfo("foo", false)}, nil
+		return []fs.DirEntry{newDirEntry("foo", true), newDirEntry("fuu", true), newDirEntry("foo", false)}, nil
 	case filepath.FromSlash("x/foo"):
-		return []os.FileInfo{dummy.NewFileInfo("bar", false)}, nil
+		return []fs.DirEntry{newDirEntry("bar", false)}, nil
 	case filepath.FromSlash("x/fuu"):
-		return []os.FileInfo{dummy.NewFileInfo("moo", true), dummy.NewFileInfo("baaar", false)}, nil
+		return []fs.DirEntry{newDirEntry("moo", true), newDirEntry("baaar", false)}, nil
 	case filepath.FromSlash("x/fuu/moo"):
-		return []os.FileInfo{dummy.NewFileInfo("meow", true)}, nil
+		return []fs.DirEntry{newDirEntry("meow", true)}, nil
 	case filepath.FromSlash("x/fuu/moo/meow"):
-		return []os.FileInfo{dummy.NewFileInfo("bla", false)}, nil
+		return []fs.DirEntry{newDirEntry("bla", false)}, nil
 	}
-	return []os.FileInfo{}, fmt.Errorf("Could not find the specified directory \"%s\"", dirPath)
+	return []fs.DirEntry{}, fmt.Errorf("Could not find the specified directory \"%s\"", dirPath)
+}
+
+func newDirEntry(name string, isDir bool) fs.DirEntry {
+	return dirEntry{name: name, isDir: isDir}
+}
+
+type dirEntry struct {
+	name  string
+	isDir bool
+}
+
+func (de dirEntry) Name() string {
+	return de.name
+}
+
+func (de dirEntry) IsDir() bool {
+	return de.isDir
+}
+
+func (de dirEntry) Type() fs.FileMode {
+	if de.isDir {
+		return fs.ModeDir
+	}
+	return 0
+}
+
+func (de dirEntry) Info() (fs.FileInfo, error) {
+	return dummy.NewFileInfo(de.name, de.isDir), nil
 }
 
 func dummyReadFile(filePath string) (io.ReadCloser, error) {
@@ -61,7 +89,7 @@ func dummyReadFile(filePath string) (io.ReadCloser, error) {
 	return nil, fmt.Errorf("File not found")
 }
 
-func dummyStatFile(filePath string) (os.FileInfo, error) {
+func dummyStatFile(filePath string) (fs.FileInfo, error) {
 	switch filePath {
 	case filepath.FromSlash("x"):
 		return dummy.NewFileInfo("x", true), nil

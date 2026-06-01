@@ -2,7 +2,7 @@ package system
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -42,17 +42,17 @@ func IsDir(path string) bool {
 
 // Recursively moves all content of fromDirectory into toDirectory, overwriting existing files when encountered.
 func MustMoveFiles(fromDirectory, toDirectory string) {
-	infos, err := ioutil.ReadDir(fromDirectory)
+	entries, err := os.ReadDir(fromDirectory)
 	if err != nil {
 		if os.IsNotExist(err) {
 			panic(&FileSystemError{fmt.Sprintf("Cannot move content of directory \"%s\" into \"%s\", because the former does not exist", fromDirectory, toDirectory), err})
 		}
 		panic(&FileSystemError{fmt.Sprintf("Could not read content of directory \"%s\" to move it into \"%s\"", fromDirectory, toDirectory), err})
 	}
-	for _, info := range infos {
-		sourcePath := filepath.Join(fromDirectory, info.Name())
-		destPath := filepath.Join(toDirectory, info.Name())
-		if info.IsDir() {
+	for _, entry := range entries {
+		sourcePath := filepath.Join(fromDirectory, entry.Name())
+		destPath := filepath.Join(toDirectory, entry.Name())
+		if entry.IsDir() {
 			MustMoveFiles(sourcePath, destPath)
 		} else {
 			err = os.MkdirAll(toDirectory, 0700)
@@ -83,23 +83,17 @@ func MustPutFile(localFilePath string, bytes []byte) {
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not create nested directory structure \"%s\" to put file \"%s\"", dir, localFilePath), err})
 	}
-	file, err := os.OpenFile(localFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0744)
-	if err != nil {
-		panic(&FileSystemError{fmt.Sprintf("Could not open file \"%s\" for writing", localFilePath), err})
-	}
-	defer file.Close()
-
 	log.WithFields(log.Fields{
 		"localFilePath": localFilePath, "dir": dir, "length": len(bytes)}).Debug("Writing file.")
 
-	_, err = file.Write(bytes)
+	err = os.WriteFile(localFilePath, bytes, 0744)
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not write file \"%s\"", localFilePath), err})
 	}
 }
 
 func MustReadFile(filePath string) []byte {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not read file \"%s\"", filePath), err})
 	}
@@ -107,7 +101,7 @@ func MustReadFile(filePath string) []byte {
 }
 
 func MustCopyFile(from, to string) {
-	data, err := ioutil.ReadFile(from)
+	data, err := os.ReadFile(from)
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not read file \"%s\"", from), err})
 	}
@@ -116,7 +110,7 @@ func MustCopyFile(from, to string) {
 		panic(&FileSystemError{fmt.Sprintf("Could not stat file \"%s\"", from), err})
 	}
 	log.Debugf(`Copying "%s" to "%s" with mode %s.`, from, to, strconv.FormatInt(int64(info.Mode()), 8))
-	err = ioutil.WriteFile(to, data, info.Mode())
+	err = os.WriteFile(to, data, info.Mode())
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not write file \"%s\"", to), err})
 	}
@@ -145,7 +139,7 @@ func MustCopyAll(src, dst string) {
 	mustCopyAll(src, dst, srcInfo.IsDir(), srcInfo.Mode())
 }
 
-func mustPrepareFileSystemOperation(src, dst string) (srcInfo, dstInfo os.FileInfo) {
+func mustPrepareFileSystemOperation(src, dst string) (srcInfo, dstInfo fs.FileInfo) {
 	srcInfo, err := os.Stat(src)
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf(`Could not prepare file system operation from "%s" to "%s": Stat() failed on source`, src, dst), err})
@@ -181,12 +175,16 @@ func mustCopyAll(src, dst string, srcIsDir bool, mode os.FileMode) {
 }
 
 func mustCopyDir(src, dst string) {
-	contentInfos, err := ioutil.ReadDir(src)
+	entries, err := os.ReadDir(src)
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf(`Could not copy "%s" to "%s": ReadDir() failed`, src, dst), err})
 	}
-	for _, contentInfo := range contentInfos {
-		mustCopyAll(filepath.Join(src, contentInfo.Name()), filepath.Join(dst, contentInfo.Name()), contentInfo.IsDir(), contentInfo.Mode())
+	for _, entry := range entries {
+		contentInfo, err := entry.Info()
+		if err != nil {
+			panic(&FileSystemError{fmt.Sprintf(`Could not copy "%s" to "%s": DirEntry.Info() failed`, src, dst), err})
+		}
+		mustCopyAll(filepath.Join(src, entry.Name()), filepath.Join(dst, entry.Name()), contentInfo.IsDir(), contentInfo.Mode())
 	}
 }
 
@@ -198,19 +196,19 @@ func MustRemoveFile(filePath string) {
 }
 
 func MustRecursivelyRemoveEmptyFolders(folder string) bool {
-	infos, err := ioutil.ReadDir(folder)
+	entries, err := os.ReadDir(folder)
 	if err != nil {
 		panic(&FileSystemError{fmt.Sprintf("Could not read content of directory \"%s\"", folder), err})
 	}
 	removeCount := 0
-	for _, info := range infos {
-		if info.IsDir() {
-			if MustRecursivelyRemoveEmptyFolders(filepath.Join(folder, info.Name())) {
+	for _, entry := range entries {
+		if entry.IsDir() {
+			if MustRecursivelyRemoveEmptyFolders(filepath.Join(folder, entry.Name())) {
 				removeCount++
 			}
 		}
 	}
-	if removeCount == len(infos) {
+	if removeCount == len(entries) {
 		err = os.Remove(folder)
 		if err != nil {
 			panic(&FileSystemError{fmt.Sprintf("Could not remove empty directory \"%s\"", folder), err})
@@ -264,14 +262,14 @@ func IsEmpty(filePath string) bool {
 	if !info.IsDir() {
 		return info.Size() == 0
 	}
-	infos, err := ioutil.ReadDir(filePath)
+	entries, err := os.ReadDir(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return true
 		}
 		panic(&FileSystemError{fmt.Sprintf("Could not check if file or folder \"%s\" is empty", filePath), err})
 	}
-	return len(infos) == 0
+	return len(entries) == 0
 }
 
 func TryRemove(filePath string) {

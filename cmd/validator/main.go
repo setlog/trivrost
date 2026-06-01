@@ -187,7 +187,7 @@ func getBundleURL(bundleName string, deploymentConfig *config.DeploymentConfig) 
 	return ""
 }
 
-func fatalf(formatMessage string, args ...interface{}) {
+func fatalf(formatMessage string, args ...any) {
 	fmt.Printf("\033[0;91mFatal: "+formatMessage+"\033[0m\n", args...)
 	os.Exit(1)
 }

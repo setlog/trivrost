@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
@@ -38,14 +37,14 @@ func parseFlags() {
 }
 
 func mustReaderForFile(filePath string) io.Reader {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fatalf("Could not read file \"%s\": %v", filePath, err)
 	}
 	return bytes.NewReader(data)
 }
 
-func fatalf(formatMessage string, args ...interface{}) {
+func fatalf(formatMessage string, args ...any) {
 	fmt.Printf(formatMessage+"\n", args...)
 	os.Exit(1)
 }

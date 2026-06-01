@@ -5,13 +5,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/setlog/trivrost/pkg/misc"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
+	"github.com/setlog/trivrost/pkg/misc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,18 +19,18 @@ func fopen(filePath string) (io.ReadCloser, error) {
 	return os.Open(filePath)
 }
 
-func stat(filePath string) (os.FileInfo, error) {
+func stat(filePath string) (fs.FileInfo, error) {
 	return os.Stat(filePath)
 }
 
 func MustHash(ctx context.Context, hashFilePath string) config.FileInfoMap {
 	log.Infof("Hash \"%s\".", hashFilePath)
-	return mustHashRelatively(ctx, ioutil.ReadDir, fopen, stat, hashFilePath)
+	return mustHashRelatively(ctx, os.ReadDir, fopen, stat, hashFilePath)
 }
 
-type readDirFunc func(dirPath string) ([]os.FileInfo, error)
+type readDirFunc func(dirPath string) ([]fs.DirEntry, error)
 type readFileFunc func(filePath string) (io.ReadCloser, error)
-type statFunc func(filePath string) (os.FileInfo, error)
+type statFunc func(filePath string) (fs.FileInfo, error)
 
 func mustHashRelatively(ctx context.Context, readDir readDirFunc, readFile readFileFunc, stat statFunc, hashFilePath string) config.FileInfoMap {
 	info, err := stat(hashFilePath)
@@ -62,11 +62,11 @@ func mustHashRelatively(ctx context.Context, readDir readDirFunc, readFile readF
 
 func mustHashDir(ctx context.Context, readDir readDirFunc, readFile readFileFunc, stat statFunc, hashFilePath string) config.FileInfoMap {
 	fm := make(config.FileInfoMap)
-	for _, info := range mustReadDir(readDir, hashFilePath) {
-		if info.IsDir() {
-			fm.Join(mustHashDir(ctx, readDir, readFile, stat, filepath.Join(hashFilePath, info.Name())))
+	for _, entry := range mustReadDir(readDir, hashFilePath) {
+		if entry.IsDir() {
+			fm.Join(mustHashDir(ctx, readDir, readFile, stat, filepath.Join(hashFilePath, entry.Name())))
 		} else {
-			filePath := filepath.Join(hashFilePath, info.Name())
+			filePath := filepath.Join(hashFilePath, entry.Name())
 			sha, size, err := calculateSha256(ctx, filePath, readFile)
 			if err != nil {
 				panic(fmt.Errorf("failed hashing file \"%s\": %w", hashFilePath, err))
@@ -77,15 +77,15 @@ func mustHashDir(ctx context.Context, readDir readDirFunc, readFile readFileFunc
 	return fm
 }
 
-func mustReadDir(readDir readDirFunc, directoryPath string) []os.FileInfo {
-	infos, err := readDir(directoryPath)
+func mustReadDir(readDir readDirFunc, directoryPath string) []fs.DirEntry {
+	entries, err := readDir(directoryPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
 		}
 		panic(fmt.Errorf("Could not list directory \"%s\": %w", directoryPath, err))
 	}
-	return infos
+	return entries
 }
 
 func CalculateSha256(ctx context.Context, filePath string) (sha string, n int64, err error) {

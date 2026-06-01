@@ -125,7 +125,7 @@ func BitRateToByteDuration(bitRate int64) time.Duration {
 
 func createWorkerIdChannel(maxWorkers int) chan int {
 	workerIds := make(chan int, maxWorkers)
-	for i := 0; i < maxWorkers; i++ {
+	for i := range maxWorkers {
 		workerIds <- i
 	}
 	return workerIds
@@ -141,14 +141,4 @@ func parseTotalLengthFromContentRangeHeader(contentRange string) int64 {
 		return -1
 	}
 	return i
-}
-
-func stringStringMapKeys(m map[string]string) []string {
-	s := make([]string, len(m))
-	i := 0
-	for k := range m {
-		s[i] = k
-		i++
-	}
-	return s
 }

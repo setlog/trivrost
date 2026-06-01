@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -51,7 +50,7 @@ func (u *Updater) makeBundleUpdateConfigFromBundle(bundleConfig config.BundleCon
 }
 
 func (u *Updater) removeUnknownBundles() {
-	fileInfos, err := ioutil.ReadDir(u.userBundlesFolderPath)
+	fileInfos, err := os.ReadDir(u.userBundlesFolderPath)
 	if err != nil && !os.IsNotExist(err) {
 		panic(err)
 	}

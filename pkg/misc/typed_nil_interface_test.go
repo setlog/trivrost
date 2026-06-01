@@ -10,10 +10,10 @@ func TestIsNil(t *testing.T) {
 	var value int32 = 42
 	var pointer *int32 = &value
 	var nilPointer *int32 = nil
-	var typedInterfaceValue interface{} = value
-	var typedInterfacePointer interface{} = pointer
-	var typedNilInterface interface{} = nilPointer
-	var untypedNilInterface interface{} = nil
+	var typedInterfaceValue any = value
+	var typedInterfacePointer any = pointer
+	var typedNilInterface any = nilPointer
+	var untypedNilInterface any = nil
 	if misc.IsNil(value) {
 		t.Fatal("IsNil() on value was true.")
 	}

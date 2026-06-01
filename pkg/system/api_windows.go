@@ -31,8 +31,8 @@ func mustDetectArchitecture() {
 func removeEnv(envs []string, name string) []string {
 	for i := 0; i < len(envs); i++ {
 		env := envs[i]
-		kv := strings.SplitN(env, "=", 2)
-		if len(kv) == 2 && strings.EqualFold(kv[0], name) {
+		key, _, ok := strings.Cut(env, "=")
+		if ok && strings.EqualFold(key, name) {
 			envs = append(envs[:i], envs[i+1:]...)
 			i--
 		}

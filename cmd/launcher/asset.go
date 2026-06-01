@@ -1,4 +1,4 @@
-// +build ignore
+//go:build ignore
 
 // Modified version of https://github.com/tv42/becky
 
@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"go/build"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -70,7 +69,7 @@ func main() {
 
 		variable := *flagVar
 		if variable == "" {
-			variable = strings.SplitN(base, ".", 2)[0]
+			variable, _, _ = strings.Cut(base, ".")
 		}
 
 		wrap := *flagWrap
@@ -113,7 +112,7 @@ func process(filename, pkg, variable, wrap string) error {
 		src = srcFile
 	}
 
-	tmp, err := ioutil.TempFile(filepath.Dir(filename), ".tmp.asset-")
+	tmp, err := os.CreateTemp(filepath.Dir(filename), ".tmp.asset-")
 	if err != nil {
 		return err
 	}

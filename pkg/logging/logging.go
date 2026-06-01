@@ -3,7 +3,7 @@ package logging
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -86,14 +86,22 @@ func GetLogFilePath() string {
 
 func DeleteOldLogFiles() {
 	maxLogFileAge := time.Hour * 24 * 20
-	infos, err := ioutil.ReadDir(folderPath)
+	entries, err := os.ReadDir(folderPath)
 	now := time.Now()
 	if err != nil {
 		log.Errorf("Could not read contents of log directory \"%s\": %v", folderPath, err)
 	} else {
-		for _, info := range infos {
-			if isLogFileName(info.Name()) && info.ModTime().Add(maxLogFileAge).Before(now) {
-				deleteLogFilePath := filepath.Join(folderPath, info.Name())
+		for _, entry := range entries {
+			if !isLogFileName(entry.Name()) {
+				continue
+			}
+			info, err := entry.Info()
+			if err != nil {
+				log.Errorf("Could not stat log file \"%s\": %v", filepath.Join(folderPath, entry.Name()), err)
+				continue
+			}
+			if info.ModTime().Add(maxLogFileAge).Before(now) {
+				deleteLogFilePath := filepath.Join(folderPath, entry.Name())
 				err = os.Remove(deleteLogFilePath)
 				if err != nil {
 					log.Errorf("Could not remove old log file \"%s\": %v", deleteLogFilePath, err)
@@ -128,21 +136,21 @@ func getLogFileName(logIndex int, logInstance int) (string, int) {
 	if logIndex != -1 {
 		return concatenateLogFileNameArtifacts(logIndex, logInstance, descriptor), logIndex
 	}
-	infos, err := ioutil.ReadDir(folderPath)
+	entries, err := os.ReadDir(folderPath)
 	if err != nil {
 		log.WithFields(log.Fields{"err": err, "folderPath": folderPath}).Warning("Could not read directory contents.")
 		return concatenateLogFileNameArtifacts(0, logInstance, descriptor), 0
 	}
-	useIndex := getNextIndex(infos)
+	useIndex := getNextIndex(entries)
 	return concatenateLogFileNameArtifacts(useIndex, logInstance, descriptor), useIndex
 }
 
-func getNextIndex(infos []os.FileInfo) int {
-	latestIndex := getLatestIndex(infos)
+func getNextIndex(entries []fs.DirEntry) int {
+	latestIndex := getLatestIndex(entries)
 	if latestIndex < maxIndex {
 		return (latestIndex + 1) % (maxIndex + 1)
 	}
-	firstAvailableIndex := getFirstAvailableIndex(infos)
+	firstAvailableIndex := getFirstAvailableIndex(entries)
 	if firstAvailableIndex > maxIndex {
 		log.Warnf("No free log index left.")
 		return maxIndex
@@ -150,9 +158,9 @@ func getNextIndex(infos []os.FileInfo) int {
 	return firstAvailableIndex
 }
 
-func getLatestIndex(infos []os.FileInfo) int {
-	for i := len(infos) - 1; i >= 0; i-- {
-		name := infos[i].Name()
+func getLatestIndex(entries []fs.DirEntry) int {
+	for i := len(entries) - 1; i >= 0; i-- {
+		name := entries[i].Name()
 		if isLogFileName(name) {
 			infoIndex, err := strconv.Atoi(name[:digitCount])
 			if err == nil {
@@ -163,10 +171,10 @@ func getLatestIndex(infos []os.FileInfo) int {
 	return -1
 }
 
-func getFirstAvailableIndex(infos []os.FileInfo) int {
+func getFirstAvailableIndex(entries []fs.DirEntry) int {
 	firstAvailableIndex := 0
-	for _, info := range infos {
-		name := info.Name()
+	for _, entry := range entries {
+		name := entry.Name()
 		if isLogFileName(name) {
 			infoIndex, err := strconv.Atoi(name[:digitCount])
 			if err == nil {

@@ -6,7 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net/http"
 	"os"
@@ -77,7 +77,7 @@ func (db *RiggedReader) Close() error {
 
 func (de *DummyEnvironment) TestDownload(t *testing.T, fromUrl string) {
 	dl := NewDownload(context.Background(), fromUrl)
-	data, err := ioutil.ReadAll(dl)
+	data, err := io.ReadAll(dl)
 	if err != nil {
 		t.Fatalf("Download \"%s\" failed unexpectedly: %v", fromUrl, err)
 	}
@@ -94,7 +94,7 @@ func (de *DummyEnvironment) TestDownloadCancel(t *testing.T, fromUrl string, can
 		t.Fatalf("Download \"%s\" could not deliver %d bytes: %v", fromUrl, cancelAfter, err)
 	}
 	cancelFunc()
-	data, err := ioutil.ReadAll(dl)
+	data, err := io.ReadAll(dl)
 	if err != context.Canceled {
 		t.Fatalf("Download \"%s\" did not fail with context.Canceled after %d bytes. Remainder: %d. Error: %v", fromUrl, cancelAfter, len(data), err)
 	}
@@ -102,7 +102,7 @@ func (de *DummyEnvironment) TestDownloadCancel(t *testing.T, fromUrl string, can
 
 func (de *DummyEnvironment) TestDownloadFailure(t *testing.T, fromUrl string) {
 	dl := NewDownload(context.Background(), fromUrl)
-	_, err := ioutil.ReadAll(dl)
+	_, err := io.ReadAll(dl)
 	if err == nil {
 		t.Fatalf("Download \"%s\" succeeded unexpectedly", fromUrl)
 	}
@@ -157,7 +157,7 @@ func arbitraryData(length int) []byte {
 }
 
 func TestUpdateFile(t *testing.T) {
-	d, err := ioutil.TempDir(".", "test-")
+	d, err := os.MkdirTemp(".", "test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,7 +174,7 @@ func TestUpdateFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove("testfile.txt")
-	diskData, err := ioutil.ReadFile("testfile.txt")
+	diskData, err := os.ReadFile("testfile.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
