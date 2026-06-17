@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/setlog/trivrost/pkg/launcher/config"
 	"github.com/setlog/trivrost/pkg/launcher/hashing"
+	"github.com/setlog/trivrost/pkg/misc"
 	"github.com/sirupsen/logrus"
 )
 
@@ -40,7 +40,7 @@ func main() {
 		log.Println("  -absent file1,file2,...   Comma-separated list of disk files to treat as absent. Escape with ',,'.")
 		log.Fatal("Wrong number of arguments for hasher. Stopping.")
 	}
-	absentFilePaths := stringSplitDoubleSepEscapable(absentFilePathsString, ',')
+	absentFilePaths := misc.StringSplitDoubleSepEscapable(absentFilePathsString, ',')
 
 	uniqueBundleName := flag.Arg(0)
 	pathToHash := flag.Arg(1)
@@ -50,30 +50,6 @@ func main() {
 	} else {
 		mustHashDirectory(uniqueBundleName, pathToHash, bundleFilePath, overwrite)
 	}
-}
-
-func stringSplitDoubleSepEscapable(str string, sep rune) (res []string) {
-	var ss strings.Builder
-	checkTerminate := false
-	for _, r := range str {
-		if r == sep {
-			checkTerminate = !checkTerminate
-			if checkTerminate {
-				continue
-			}
-		} else if checkTerminate {
-			if ss.Len() > 0 {
-				res = append(res, ss.String())
-			}
-			ss.Reset()
-			checkTerminate = false
-		}
-		ss.WriteRune(r)
-	}
-	if ss.Len() > 0 {
-		res = append(res, ss.String())
-	}
-	return res
 }
 
 func mustVerifyDirectory(uniqueBundleName, pathToHash, bundleFilePath string, absentFilePaths []string) {
