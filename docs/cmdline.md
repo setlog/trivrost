@@ -19,7 +19,7 @@ Hasher is a utility which generates [bundle info files](walkthrough.md#Bundle-in
 
 It can also be used to verify an existing bundle info file:  
 `hasher -verify path/to/bundle`  
-Argument `-absent` takes a comma-separated list of disk files to treat as being absent.
+Argument `-absent` takes a comma-separated list of disk files to treat as being absent. Commas in file names can be passed using the `,,` escape sequence.
 
 ## bundown
 Bundown is a utility which can download bundles for a desired OS/Arch combination.
