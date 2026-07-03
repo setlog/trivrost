@@ -1,6 +1,7 @@
 package misc_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/setlog/trivrost/pkg/misc"
@@ -118,6 +119,28 @@ func TestSplitTrailing(t *testing.T) {
 		lead, trail := misc.SplitTrailing(test.text, test.trailSet)
 		if lead != test.expectedLead || trail != test.expectedTrail {
 			t.Errorf("Test #%d: misc.SplitTrailing(%v, %v) return %v, %v. Expected: %v, %v", i+1, test.text, test.trailSet, lead, trail, test.expectedLead, test.expectedTrail)
+		}
+	}
+}
+
+func TestStringSplitDoubleSepEscapable(t *testing.T) {
+	tests := []struct {
+		s        string
+		sep      rune
+		expected []string
+	}{
+		{"", ',', nil},
+		{",", ',', nil},
+		{",,", ',', []string{","}},
+		{",,,", ',', []string{","}},
+		{",,,,", ',', []string{",,"}},
+		{"hit,hat", ',', []string{"hit", "hat"}},
+		{"can't,do,,,,,that", ',', []string{"can't", "do,,", "that"}},
+	}
+	for i, test := range tests {
+		result := misc.StringSplitDoubleSepEscapable(test.s, test.sep)
+		if !reflect.DeepEqual(result, test.expected) {
+			t.Errorf("Test #%d: misc.StringSplitDoubleSepEscapable(%#q, %#q) returned %#v. Expected  %#v.", i+1, test.s, test.sep, result, test.expected)
 		}
 	}
 }

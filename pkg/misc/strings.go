@@ -143,3 +143,27 @@ func TryRemoveLines(s string, from, to int) string {
 	}
 	return result
 }
+
+func StringSplitDoubleSepEscapable(str string, sep rune) (res []string) {
+	var ss strings.Builder
+	checkTerminate := false
+	for _, r := range str {
+		if r == sep {
+			checkTerminate = !checkTerminate
+			if checkTerminate {
+				continue
+			}
+		} else if checkTerminate {
+			if ss.Len() > 0 {
+				res = append(res, ss.String())
+			}
+			ss.Reset()
+			checkTerminate = false
+		}
+		ss.WriteRune(r)
+	}
+	if ss.Len() > 0 {
+		res = append(res, ss.String())
+	}
+	return res
+}
