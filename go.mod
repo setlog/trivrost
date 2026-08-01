@@ -7,7 +7,7 @@ require (
 	github.com/gofrs/flock v0.13.0
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.23.2
-	github.com/shirou/gopsutil/v4 v4.26.6
+	github.com/shirou/gopsutil/v4 v4.26.7
 	github.com/sirupsen/logrus v1.9.4
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.57.0
@@ -17,7 +17,7 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/ebitengine/purego v0.10.0 // indirect
+	github.com/ebitengine/purego v0.10.2 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
