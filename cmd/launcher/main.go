@@ -47,6 +47,8 @@ func init() {
 	// On MacOS, only the first thread created by the OS is allowed to be the main GUI thread.
 	// Also, on Windows, OLE code needs to run on the main thread, which we rely on when creating shortcuts.
 	runtime.LockOSThread() // This call must be in init().
+
+	postInit()
 }
 
 func main() {
