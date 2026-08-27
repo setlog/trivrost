@@ -4,7 +4,7 @@ require (
 	git.sr.ht/~tslocum/preallocate v0.1.2
 	github.com/andlabs/ui v0.0.0-20200610043537-70a69d6ae31e
 	github.com/go-ole/go-ole v1.3.0
-	github.com/gofrs/flock v0.13.0
+	github.com/gofrs/flock v0.13.1
 	github.com/mattn/go-ieproxy v0.0.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/shirou/gopsutil/v4 v4.26.7
