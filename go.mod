@@ -34,6 +34,6 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-go 1.26.0
+go 1.27.0
 
 replace git.sr.ht/~tslocum/preallocate => github.com/smallnest/preallocate v0.1.1

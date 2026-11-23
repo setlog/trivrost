@@ -16,7 +16,7 @@ jobs:
       - name: Run CI
         uses: ./.github/actions/run-tests
         with:
-          go-version: "1.26"
+          go-version: "1.27"
       - name: Build and push Docker image
         shell: bash
         run: |
