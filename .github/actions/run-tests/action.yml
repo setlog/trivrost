@@ -14,15 +14,12 @@ runs:
       with:
         go-version: ${{ inputs.go-version }}
 
-    - name: Install libgtk-3-dev
+    - name: Install GTK and UPX (Linux)
       if: runner.os == 'Linux'
       shell: bash
-      run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev
-
-    - name: Install UPX (Linux)
-      if: runner.os == 'Linux'
-      shell: bash
-      run: sudo apt-get update -y && sudo apt-get install -y upx-ucl
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y libgtk-3-dev upx-ucl
 
     - name: Install UPX (Windows)
       if: runner.os == 'Windows'
