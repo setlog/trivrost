@@ -59,8 +59,7 @@ func hasCodeLocationHint(logMessage string) bool {
 }
 
 func getCodeLocationHint(entry *log.Entry) string {
-	if entry.HasCaller() {
-		caller := entry.Caller
+	if caller := entry.Caller; caller != nil {
 		// caller.Function is of the form "gitlab.example.com/project/package/subpackage/subpackage2.CalledFunction".
 		// The last part can be "subpackage2.CalledFunction.func1.1" or such for anonymous functions. The path always uses forward slashes.
 		// caller.File is of the form "/home/user/[...]/project/package/subpackage/subpackage2/file_containing_called_function.go",
